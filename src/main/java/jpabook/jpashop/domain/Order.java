@@ -12,6 +12,14 @@ import java.util.List;
 @Getter
 public class Order {
 
+    protected Order(){}
+
+    public Order(Member member) {
+        this.member = member;
+        status = OrderStatus.ORDER;
+        delivery = new Delivery(member.getAddress());
+    }
+
     @Id @GeneratedValue
     @Column(name = "order_id")
     private Long id;
