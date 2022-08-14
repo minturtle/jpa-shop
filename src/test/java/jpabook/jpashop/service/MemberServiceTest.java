@@ -66,6 +66,7 @@ class MemberServiceTest {
         Optional<Member> member = Optional.of(member1);
         given(memberRepository.findByName("김민석")).willReturn(member);
         //when
+
         ThrowableAssert.ThrowingCallable throwableFunc = ()->{memberService
                 .signIn("김민석", "구미시", "대학로 61", "금오공과대학교");};
         //then

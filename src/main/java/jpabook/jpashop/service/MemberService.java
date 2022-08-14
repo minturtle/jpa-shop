@@ -16,7 +16,6 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-
     public Member signIn(String name, String city, String street, String zipcode) throws IllegalStateException{
         checkIsDuplicatedUsername(name); //유저의 이름이 중복되는지 확인한다.
         Member member = new Member(name, city, street, zipcode);
@@ -25,6 +24,7 @@ public class MemberService {
         return member;
     }
 
+    @Transactional(readOnly = true)
     public List<Member> getMemberList(){
         return memberRepository.findAll();
     }
