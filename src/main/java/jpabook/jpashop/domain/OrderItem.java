@@ -9,6 +9,20 @@ import javax.persistence.*;
 @Getter
 public class OrderItem {
 
+
+    protected OrderItem() {
+    }
+
+    public OrderItem(Item item, int count, int orderPrice) {
+        this.item = item;
+        this.count = count;
+        this.orderPrice = orderPrice;
+    }
+
+    public void cancel(){
+        this.item.addStock(count);
+    }
+
     @Id @GeneratedValue
     @Column(name = "order_item_id")
     private Long id;
@@ -23,4 +37,6 @@ public class OrderItem {
 
     private int count;
     private int orderPrice;
+
+
 }

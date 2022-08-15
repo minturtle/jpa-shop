@@ -14,10 +14,18 @@ public class Order {
 
     protected Order(){}
 
-    public Order(Member member) {
+    public Order(Member member, List<OrderItem> orderItems) {
         this.member = member;
-        status = OrderStatus.ORDER;
-        delivery = new Delivery(member.getAddress());
+        this.orderItems.addAll(orderItems);
+        this.status = OrderStatus.ORDER;
+        this.delivery = new Delivery(member.getAddress());
+        this.orderedTime = LocalDateTime.now();
+    }
+
+    public void cancel(){
+        this.status = OrderStatus.CANCEL;
+        orderItems.forEach(OrderItem::cancel);
+
     }
 
     @Id @GeneratedValue
