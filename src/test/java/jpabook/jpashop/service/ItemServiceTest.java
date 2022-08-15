@@ -7,6 +7,7 @@ import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.item.Movie;
 import org.assertj.core.api.ThrowableAssert;
+import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -68,8 +70,8 @@ class ItemServiceTest {
     void t3() throws Exception {
         //given
 
-        given(itemRepository.findByName("어벤져스")).willReturn(movie);
-        given(itemRepository.findByName("어린 왕자")).willReturn(book);
+        given(itemRepository.findByName("어벤져스")).willReturn(Optional.of(movie));
+        given(itemRepository.findByName("어린 왕자")).willReturn(Optional.of(book));
 
         //when
         Movie findMovie = itemService.findByName("어벤져스", Movie.class);
@@ -83,7 +85,7 @@ class ItemServiceTest {
     @DisplayName("이름 조회, 잘못된 클래스 입력")
     void t4() throws Exception {
         //given
-        given(itemRepository.findByName("어벤져스")).willReturn(movie);
+        given(itemRepository.findByName("어벤져스")).willReturn(Optional.of(movie));
 
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스", Member.class);
@@ -96,7 +98,7 @@ class ItemServiceTest {
     @DisplayName("이름 조회, 상품을 찾을 수 없음")
     void t5() throws Exception {
         //given
-        given(itemRepository.findByName("어벤져스")).willReturn(null);
+        given(itemRepository.findByName("어벤져스")).willReturn(Optional.ofNullable(null));
 
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스", Movie.class);
@@ -152,5 +154,19 @@ class ItemServiceTest {
         assertThat(movie.getStockQuantity()).isEqualTo(40);
         assertThat(((Movie)movie).getDirector()).isEqualTo("김민석2");
         assertThat(((Movie)movie).getActor()).isEqualTo("김민석3");
+    }
+
+    @Test
+    @DisplayName("3개의 객체 저장 후 findAll로 값 반환받기")
+    void t9() throws Exception {
+        //given
+        given(itemRepository.findAll()).willReturn(List.of(book, album, movie));
+        //when
+        List<Item> findItems = itemService.findAll();
+        //then
+        assertThat(findItems).contains(book, Index.atIndex(0));
+        assertThat(findItems).contains(album, Index.atIndex(1));
+        assertThat(findItems).contains(movie, Index.atIndex(2));
+        assertThat(findItems.size()).isEqualTo(3);
     }
 }

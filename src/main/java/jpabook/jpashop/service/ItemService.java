@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.List;
 
 @Service
 @Transactional
@@ -20,7 +20,7 @@ public class ItemService {
     }
 
     public <T> T findByName(String name, Class<T> c) throws IllegalArgumentException{
-        Item findItem = itemRepository.findByName(name);
+        Item findItem = itemRepository.findByName(name).orElseThrow(()->new IllegalArgumentException("해당되는 상품을 찾을 수 없습니다."));
         validateArguments(c, findItem);
         return (T)findItem;
     }
@@ -31,10 +31,12 @@ public class ItemService {
         return findItem.getId();
     }
 
+
+    public List<Item> findAll(){
+        return itemRepository.findAll();
+    }
+
     private <T> void validateArguments(Class<T> c, Item findItem)throws IllegalArgumentException {
-        if(findItem == null){
-            throw new IllegalArgumentException("해당되는 상품을 찾을 수 없습니다.");
-        }
         if(!findItem.getClass().equals(c)) {
             throw new IllegalArgumentException("찾은 상품과 같은 타입이 아닙니다.");
         }

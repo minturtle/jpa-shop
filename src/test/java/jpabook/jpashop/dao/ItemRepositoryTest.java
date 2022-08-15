@@ -4,11 +4,14 @@ import jpabook.jpashop.domain.item.Album;
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.item.Movie;
+import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -45,9 +48,7 @@ class ItemRepositoryTest {
     void t2() throws Exception {
         //given
         //when
-        itemRepository.save(book);
-        itemRepository.save(movie);
-        itemRepository.save(album);
+        saveAll();
         //then
 
         assertThat(book).isEqualTo(itemRepository.findById(book.getId()).get());
@@ -63,7 +64,7 @@ class ItemRepositoryTest {
         Item findBook = itemRepository.findById(this.book.getId()).get();
 
         //when
-        findBook.setName("심청전");
+        findBook.update(new Book("심청전", 15000, 30, "김민석2", "11234"));
         //then
         Item findItem2 = itemRepository.findById(this.book.getId()).get();
 
@@ -78,9 +79,30 @@ class ItemRepositoryTest {
         //given
         itemRepository.save(album);
         //when
-        Item findItem = itemRepository.findByName("김민석 정규 앨범 7집");
+        Item findItem = itemRepository.findByName("김민석 정규 앨범 7집").get();
         //then
         assertThat(findItem).isEqualTo(album);
 
+    }
+
+    @Test
+    @DisplayName("3개의 객체 저장하고 리스트로 반환받기")
+    void t5() throws Exception {
+        //given
+        saveAll();
+        //when
+        List<Item> findItems = itemRepository.findAll();
+        //then
+        assertThat(findItems).contains(book, Index.atIndex(0));
+        assertThat(findItems).contains(movie, Index.atIndex(1));
+        assertThat(findItems).contains(album, Index.atIndex(2));
+        assertThat(findItems.size()).isEqualTo(3);
+    }
+
+
+    private void saveAll() {
+        itemRepository.save(book);
+        itemRepository.save(movie);
+        itemRepository.save(album);
     }
 }

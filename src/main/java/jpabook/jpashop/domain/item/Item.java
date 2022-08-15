@@ -26,18 +26,6 @@ public abstract class Item {
     private String name;
 
 
-    public void setStockQuantity(int stockQuantity) {
-        this.stockQuantity = stockQuantity;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     protected abstract void updateInheritedValues(Item item);
 
     public void update(Item item){
@@ -46,6 +34,17 @@ public abstract class Item {
         this.price = item.getPrice();
         updateInheritedValues(item);
     }
+
+
+    public void addStock(int quantity){
+        this.stockQuantity += quantity;
+    }
+
+    public void removeStock(int quantity)throws IllegalArgumentException{
+        checkIsOrderQuantityBiggerThanStock(quantity); //주문양이 재고보다 많으면 예외발생
+        this.stockQuantity -= quantity;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -57,5 +56,10 @@ public abstract class Item {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+
+    private void checkIsOrderQuantityBiggerThanStock(int quantity) {
+        if(stockQuantity < quantity) throw new IllegalArgumentException("주문한 수량이 남은 물건의 수량보다 많습니다.");
     }
 }
