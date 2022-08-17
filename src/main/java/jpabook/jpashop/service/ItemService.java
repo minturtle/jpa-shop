@@ -22,7 +22,7 @@ public class ItemService {
 
     public <T> T findByName(String name, Class<T> c) throws IllegalArgumentException, EntityNotFoundException {
         Item findItem = itemRepository.findByName(name); //throwable EntityNotFoundException
-        validateArguments(c, findItem);
+        validateArguments(c, findItem); //찾은 상품과 argument로 입력받은 클래스가 같은 타입인지 확인
         return (T)findItem;
     }
 

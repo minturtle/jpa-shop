@@ -13,10 +13,10 @@ public class OrderItem {
     protected OrderItem() {
     }
 
-    public OrderItem(Item item, int count, int orderPrice) {
+    public OrderItem(Item item, int count) {
         this.item = item;
         this.count = count;
-        this.orderPrice = orderPrice;
+        this.orderPrice = item.getPrice() * count;
     }
 
     public void cancel(){

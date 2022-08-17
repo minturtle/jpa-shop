@@ -9,7 +9,7 @@ import java.util.List;
 
 
 @RequiredArgsConstructor
-public abstract class Repository<T>{
+public abstract class EntityManagerRepository<T>{
 
     private final EntityManager em;
     private final Class<T> clazz;
@@ -19,6 +19,7 @@ public abstract class Repository<T>{
     }
 
     public T findByName(String name){
+
         try{
             T entity = em.createQuery(getSelectByNameQlStirng(), clazz)
                     .setParameter("name", name).getSingleResult();
@@ -44,7 +45,6 @@ public abstract class Repository<T>{
     private String getSelectQlString(){
         return String.format("select m from %s m", clazz.getName());
     }
-
 
     public List<T> findAll(){
         return em.createQuery(getSelectQlString(), clazz).getResultList();

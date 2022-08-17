@@ -8,12 +8,10 @@ import javax.persistence.EntityManager;
 
 
 @Repository
-public class MemberRepository extends jpabook.jpashop.dao.Repository<Member>{
-
+public class MemberRepository extends EntityManagerRepository<Member> {
 
     public MemberRepository(EntityManager em){
         super(em, Member.class);
-
     }
 
 }

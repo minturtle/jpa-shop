@@ -5,9 +5,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 
-
 @Repository
-public class ItemRepository extends jpabook.jpashop.dao.Repository<Item>{
+public class ItemRepository extends EntityManagerRepository<Item> {
 
     public ItemRepository(EntityManager em) {
         super(em, Item.class);

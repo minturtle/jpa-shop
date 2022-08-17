@@ -32,7 +32,7 @@ public class MemberService {
 
     private void checkIsDuplicatedUsername(String name) throws IllegalStateException{
         try {
-            Member findMember = memberRepository.findByName(name); //findMember 값이 있으면 안됨. 없으면 예외발생해서 정상 리턴
+            memberRepository.findByName(name); //findMember 값이 있으면 안됨. 없으면 예외발생해서 정상 리턴
         }catch (EntityNotFoundException e){ return;}
 
         throw new IllegalArgumentException("이미 존재하는 이름입니다."); //findMember 값이 있는 경우
