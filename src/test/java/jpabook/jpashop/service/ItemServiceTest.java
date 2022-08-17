@@ -16,9 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
@@ -69,13 +68,13 @@ class ItemServiceTest {
     @DisplayName("저장한 item 객체 이름으로 조회")
     void t3() throws Exception {
         //given
-
-        given(itemRepository.findByName("어벤져스")).willReturn(Optional.of(movie));
-        given(itemRepository.findByName("어린 왕자")).willReturn(Optional.of(book));
+        given(itemRepository.findByName("어벤져스")).willReturn(movie);
+        given(itemRepository.findByName("어린 왕자")).willReturn(book);
 
         //when
         Movie findMovie = itemService.findByName("어벤져스", Movie.class);
         Book findBook = itemService.findByName("어린 왕자", Book.class);
+
         //then
         assertThat(movie).isEqualTo(findMovie);
         assertThat(book).isEqualTo(findBook);
@@ -85,7 +84,7 @@ class ItemServiceTest {
     @DisplayName("이름 조회, 잘못된 클래스 입력")
     void t4() throws Exception {
         //given
-        given(itemRepository.findByName("어벤져스")).willReturn(Optional.of(movie));
+        given(itemRepository.findByName("어벤져스")).willReturn(movie);
 
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스", Member.class);
@@ -98,14 +97,13 @@ class ItemServiceTest {
     @DisplayName("이름 조회, 상품을 찾을 수 없음")
     void t5() throws Exception {
         //given
-        given(itemRepository.findByName("어벤져스")).willReturn(Optional.ofNullable(null));
+        given(itemRepository.findByName("어벤져스")).willThrow(new EntityNotFoundException());
 
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스", Movie.class);
         //then
 
-        assertThatThrownBy(throwableFunc).isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당되는 상품을 찾을 수 없습니다.");
+        assertThatThrownBy(throwableFunc).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -113,7 +111,7 @@ class ItemServiceTest {
     void t6() throws Exception {
         //given
         Book modifiedBook = new Book("어린 왕자2", 30000, 50, "김민석2", "112233");
-        given(itemRepository.findById(this.book.getId())).willReturn(Optional.of(this.book));
+        given(itemRepository.findById(this.book.getId())).willReturn(book);
         //when
         itemService.updateItem(this.book.getId(), modifiedBook);
         //then
@@ -129,7 +127,7 @@ class ItemServiceTest {
     void t7() throws Exception {
         //given
         Album modifiedAlbum = new Album("김민석 정규 앨범 8집", 30000, 50, "김민석2", "김민석 데뷔 25주년 기념");
-        given(itemRepository.findById(album.getId())).willReturn(Optional.of(album));
+        given(itemRepository.findById(album.getId())).willReturn(album);
         //when
         itemService.updateItem(album.getId(), modifiedAlbum);
         //then
@@ -145,7 +143,7 @@ class ItemServiceTest {
     void t8() throws Exception {
         //given
         Movie modifiedMovie = new Movie(40, 13000, "어벤져스2", "김민석2", "김민석3");
-        given(itemRepository.findById(movie.getId())).willReturn(Optional.of(movie));
+        given(itemRepository.findById(movie.getId())).willReturn(movie);
         //when
         itemService.updateItem(movie.getId(), modifiedMovie);
         //then

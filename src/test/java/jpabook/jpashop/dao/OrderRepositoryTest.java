@@ -61,7 +61,7 @@ class OrderRepositoryTest {
     void t2() throws Exception {
         //given
 
-        given(itemRepository.findById(item1.getId())).willReturn(Optional.ofNullable(item1));
+        given(itemRepository.findById(item1.getId())).willReturn(item1);
 
         order = new Order(member,List.of(orderItemFactory.CreateOrderItem(item1.getId(), 5)));
 

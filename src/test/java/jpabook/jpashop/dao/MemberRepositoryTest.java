@@ -1,6 +1,7 @@
 package jpabook.jpashop.dao;
 
 import jpabook.jpashop.domain.Member;
+import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -49,8 +51,18 @@ class MemberRepositoryTest {
         //when
         memberRepository.save(member1);
         //then
-        Member findMember = memberRepository.findById(this.member1.getId()).orElseThrow(RuntimeException::new);
+        Member findMember = memberRepository.findById(member1.getId());
         assertThat(findMember).isEqualTo(member1);
+    }
+
+    @Test
+    @DisplayName("member id로 조회 찾을 수 없는 경우")
+    void t5() throws Exception {
+        //given
+        //when
+        ThrowableAssert.ThrowingCallable throwableFunc = ()->memberRepository.findById(523L);
+        //then
+        assertThatThrownBy(throwableFunc).isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
@@ -60,13 +72,25 @@ class MemberRepositoryTest {
         //when
         memberRepository.save(member1);
         //then
-        Member findMember = memberRepository.findByName("김민석").orElseThrow(RuntimeException::new);
+        Member findMember = memberRepository.findByName("김민석");
+
         assertThat(findMember).isEqualTo(member1);
     }
 
     @Test
-    @DisplayName("회원 조회, 3개의 회원 저장 후 3개의 값이 모두 있는지 확인")
+    @DisplayName("member 이름으로 조회 찾을수 없는 경우")
     void t4() throws Exception {
+        //given
+
+        ThrowableAssert.ThrowingCallable throwableFunc = ()->memberRepository.findByName("아무개");
+        //then
+        assertThatThrownBy(throwableFunc).isInstanceOf(EntityNotFoundException.class);
+    }
+
+
+    @Test
+    @DisplayName("회원 조회, 3개의 회원 저장 후 3개의 값이 모두 있는지 확인")
+    void t6() throws Exception {
         //given
         saveAllMembers();
         //when

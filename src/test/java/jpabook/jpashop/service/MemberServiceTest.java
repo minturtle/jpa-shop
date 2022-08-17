@@ -63,8 +63,7 @@ class MemberServiceTest {
     @DisplayName("회원가입, 이미 존재하는 name인 경우")
     void t3() throws Exception {
         //given
-        Optional<Member> member = Optional.of(member1);
-        given(memberRepository.findByName("김민석")).willReturn(member);
+        given(memberRepository.findByName("김민석")).willReturn(member1);
         //when
 
         ThrowableAssert.ThrowingCallable throwableFunc = ()->{memberService

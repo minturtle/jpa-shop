@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service
@@ -19,14 +20,14 @@ public class ItemService {
         return item;
     }
 
-    public <T> T findByName(String name, Class<T> c) throws IllegalArgumentException{
-        Item findItem = itemRepository.findByName(name).orElseThrow(()->new IllegalArgumentException("해당되는 상품을 찾을 수 없습니다."));
+    public <T> T findByName(String name, Class<T> c) throws IllegalArgumentException, EntityNotFoundException {
+        Item findItem = itemRepository.findByName(name); //throwable EntityNotFoundException
         validateArguments(c, findItem);
         return (T)findItem;
     }
 
-    public Long updateItem(Long id, Item modifiedItem)throws IllegalArgumentException{
-        Item findItem = itemRepository.findById(id).orElseThrow(()->new IllegalArgumentException("상품을 찾을 수 없습니다."));
+    public Long updateItem(Long id, Item modifiedItem)throws IllegalArgumentException, EntityNotFoundException{
+        Item findItem = itemRepository.findById(id); //throwable EntityNotFoundException
         findItem.update(modifiedItem);
         return findItem.getId();
     }

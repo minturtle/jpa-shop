@@ -67,7 +67,7 @@ class OrderServiceTest {
     @DisplayName("주문 하기")
     void t2() throws Exception {
         //given
-        given(itemRepository.findById(item1.getId())).willReturn(Optional.ofNullable(item1));
+        given(itemRepository.findById(item1.getId())).willReturn(item1);
         orderItems.add(orderItemFactory.CreateOrderItem(item1.getId(), 5));
         //when
         Order order = orderService.order(member, orderItems);
@@ -81,7 +81,7 @@ class OrderServiceTest {
     @DisplayName("주문하기, 상품 재고보다 많은 주문")
     void t3() throws Exception {
         //given
-        given(itemRepository.findById(item1.getId())).willReturn(Optional.ofNullable(item1));
+        given(itemRepository.findById(item1.getId())).willReturn(item1);
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->{
             orderItems.add(orderItemFactory.CreateOrderItem(item1.getId(), 50));
@@ -95,7 +95,7 @@ class OrderServiceTest {
     @DisplayName("주문 취소하기")
     void t4() throws Exception {
         //given
-        given(itemRepository.findById(item1.getId())).willReturn(Optional.ofNullable(item1));
+        given(itemRepository.findById(item1.getId())).willReturn(item1);
         orderItems.add(orderItemFactory.CreateOrderItem(item1.getId(), 5));
         Order order = orderService.order(member, orderItems);
 

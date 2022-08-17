@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,9 +31,11 @@ public class MemberService {
     }
 
     private void checkIsDuplicatedUsername(String name) throws IllegalStateException{
-        Optional<Member> findMember = memberRepository.findByName(name);
-        if(findMember.isPresent()){
-            throw new IllegalStateException("이미 존재하는 이름입니다.");
-        }
+        try {
+            Member findMember = memberRepository.findByName(name); //findMember 값이 있으면 안됨. 없으면 예외발생해서 정상 리턴
+        }catch (EntityNotFoundException e){ return;}
+
+        throw new IllegalArgumentException("이미 존재하는 이름입니다."); //findMember 값이 있는 경우
+
     }
 }
