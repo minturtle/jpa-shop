@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public abstract class EntityManagerRepository<T>{
 
-    private final EntityManager em;
+    protected final EntityManager em;
     private final Class<T> clazz;
 
     public void save(T entity){
@@ -21,9 +21,8 @@ public abstract class EntityManagerRepository<T>{
     public T findByName(String name){
 
         try{
-            T entity = em.createQuery(getSelectByNameQlStirng(), clazz)
+            T entity = em.createQuery(getSelectQlStringWhere("name"), clazz)
                     .setParameter("name", name).getSingleResult();
-            checkIsEntityNull(entity);
             return entity;
 
         }catch (NoResultException e){
@@ -32,25 +31,19 @@ public abstract class EntityManagerRepository<T>{
     }
 
     public T findById(Long id) throws EntityNotFoundException{
-        T entity = em.find(clazz, id);
-        checkIsEntityNull(entity);
-
-        return entity;
-    }
-
-    private String getSelectByNameQlStirng() {
-        return  getSelectQlString() + " where m.name =:name";
-    }
-
-    private String getSelectQlString(){
-        return String.format("select m from %s m", clazz.getName());
+        return em.find(clazz, id);
     }
 
     public List<T> findAll(){
         return em.createQuery(getSelectQlString(), clazz).getResultList();
     }
 
-    private void checkIsEntityNull(Object entity) {
-        if (entity == null) throw new EntityNotFoundException();
+    protected String getSelectQlString(){
+        return String.format("select m from %s m", clazz.getSimpleName());
     }
+    protected String getSelectQlStringWhere(String field){
+        return String.format("select m from %s m where m.%s =:%s", clazz.getSimpleName(), field, field);
+    }
+
+
 }

@@ -30,9 +30,9 @@ class MemberRepositoryTest {
 
     @BeforeEach
     void setUp(){
-        member1 = new Member("김민석", "경북 구미시", "대학로 61","금오공과 대학교");
-        member2 = new Member("김민석1", "대구광역시", "대학로 1","경북대학교");
-        member3 = new Member("김민석2", "서울특별시", "대학로 2", "서울대학교");
+        member1 = Member.createMember("김민석", "root11", "1122", "경북 구미시", "대학로 61","금오공과 대학교");
+        member2 = Member.createMember("김민석1", "root12", "1122","대구광역시", "대학로 1","경북대학교");
+        member3 = Member.createMember("김민석2","root13", "1122" ,"서울특별시", "대학로 2", "서울대학교");
     }
 
     @Test
@@ -102,6 +102,26 @@ class MemberRepositoryTest {
 
     }
 
+    @Test
+    @DisplayName("userId로 회원 조회하기")
+    void t7() throws Exception {
+        //given
+        saveAllMembers();
+        //when
+        Member findMember = memberRepository.findByUserId(member1.getUserId());
+        //then
+        assertThat(findMember).isEqualTo(member1);
+    }
+
+    @Test
+    @DisplayName("없는 userId 조회하기")
+    void t8() throws Exception {
+        //given
+        //when
+        ThrowableAssert.ThrowingCallable func = ()->memberRepository.findByUserId("aaafsaf223234");
+        //then
+        assertThatThrownBy(func).isInstanceOf(EntityNotFoundException.class);
+    }
     private void saveAllMembers() {
         memberRepository.save(member1);
         memberRepository.save(member2);
