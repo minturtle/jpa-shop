@@ -18,8 +18,10 @@ public class MemberDto {
 
 
 
-    public Member toMember(){
-        return Member.createMember(username, userId, password, address.getCity(), address.getStreet(), address.getZipcode(), true);
+    public Member toMember(boolean isPasswordEncrypted){
+
+        return Member.createMember(username, userId, password, address.getCity(), address.getStreet(), address.getZipcode(),
+                isPasswordEncrypted);
     }
 
     private String userId;
@@ -41,21 +43,25 @@ public class MemberDto {
             return this;
         }
         public MemberDtoBuilder address(String city, String street, String zipcode){
-            this.address = new Address(city,street,zipcode);
+            this.city = city;
+            this.street = street;
+            this.zipcode = zipcode;
             return this;
         }
 
         public MemberDtoBuilder address(Address address){
-            this.address = address;
+            address(address.getCity(), address.getStreet(), address.getZipcode());
             return this;
         }
         public MemberDto build(){
-            return new MemberDto(userId, password, username, address.getCity(), address.getStreet(), address.getZipcode());
+            return new MemberDto(userId, password, username, city,street,zipcode);
         }
         private String userId = "";
         private String password = "";
         private String username = "";
-        private Address address;
+        private String city = "";
+        private String street = "";
+        private String zipcode = "";
 
     }
 }

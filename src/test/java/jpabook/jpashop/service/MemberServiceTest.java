@@ -44,9 +44,9 @@ class MemberServiceTest {
         registerDto2 = new MemberDto( "root12", "1122","김민석1", "경북 구미시", "대학로 61","금오공과 대학교");
         registerDto3 = new MemberDto("root13", "1122","김민석2" ,"대구광역시", "대학로 1","경북대학교");
 
-        member1 = Member.createMember("김민석", "root11", "1122","경북 구미시", "대학로 61","금오공과 대학교",true);
-        member2 = Member.createMember("김민석1","root12", "1122", "대구광역시", "대학로 1","경북대학교", true);
-        member3 = Member.createMember("김민석2","root13", "1122", "서울특별시", "대학로 2", "서울대학교", true);
+        member1 = Member.createMember("김민석", "root11", "1122","경북 구미시", "대학로 61","금오공과 대학교",false);
+        member2 = Member.createMember("김민석1","root12", "1122", "대구광역시", "대학로 1","경북대학교", false);
+        member3 = Member.createMember("김민석2","root13", "1122", "서울특별시", "대학로 2", "서울대학교", false);
     }
 
     @Test
@@ -159,5 +159,46 @@ class MemberServiceTest {
         //then
         assertThat(memberDetail.getUsername()).isEqualTo(member1.getName());
         assertThat(memberDetail.getAddress()).isEqualTo(member1.getAddress());
+    }
+
+    @Test
+    @DisplayName("유저의 주소 변경")
+    void t10() throws Exception {
+        //given
+        given(memberRepository.findByUserId(member1.getUserId())).willReturn(member1);
+        MemberDto dto = new MemberDto.MemberDtoBuilder()
+                .userIdAndPassword(member1.getUserId(), "1122")
+                .address("부산 광역시", "부산대학교", "기숙사 205호").build();
+        //when
+        memberService.updateAddress(dto);
+        //then
+        assertThat(member1.getAddress()).isEqualTo(new Address("부산 광역시", "부산대학교", "기숙사 205호"));
+    }
+
+    @Test
+    @DisplayName("유저의 비밀번호 변경")
+    void t11() throws Exception {
+        //given
+        given(memberRepository.findByUserId(member1.getUserId())).willReturn(member1);
+        MemberDto dto = new MemberDto.MemberDtoBuilder()
+                .userIdAndPassword(member1.getUserId(), "1122").build();
+        //when
+        memberService.updatePassword(dto, "12345");
+        //then
+        assertThat(member1.getPassword()).isEqualTo(Encryptor.encrypt("12345"));
+    }
+
+    @Test
+    @DisplayName("유저의 비밀번호 변경, 조건에 맞지않음")
+    void t12() throws Exception {
+        //given
+        MemberDto dto = new MemberDto.MemberDtoBuilder()
+                .userIdAndPassword(member1.getUserId(), "1122").build();
+        //when
+        //then
+
+        assertThatThrownBy(()->memberService.updatePassword(dto, "12"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("비밀번호는 4글자 이상이여야 합니다.");
     }
 }

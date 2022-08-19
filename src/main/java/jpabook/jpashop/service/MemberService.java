@@ -23,10 +23,11 @@ public class MemberService {
     public Member signIn(MemberDto registerDto) throws RegisterFailed{
         try {
             validRegisterForm(registerDto); //회원가입이 가능한 입력인지 검증
-            Member member = registerDto.toMember(); //Member 객체가 만들어 질때 비밀번호는 암호화된다.
+            Member member = registerDto.toMember(false); //Member 객체가 만들어 질때 비밀번호는 암호화된다.
             memberRepository.save(member);
 
             return member;
+
         }catch (IllegalStateException e){
             throw new RegisterFailed(e.getMessage() , e);
         }
@@ -42,6 +43,7 @@ public class MemberService {
         }catch (EntityNotFoundException e){ throw new LoginFailed();}
     }
 
+    @Transactional(readOnly = true)
     public MemberDto getMemberDetail(String userId) throws EntityNotFoundException{
         Member findMember = memberRepository.findByUserId(userId);
 
@@ -51,7 +53,17 @@ public class MemberService {
                 .build();
     }
 
+    public void updateAddress(MemberDto memberDto) throws LoginFailed{
+        Member findMember = login(memberDto);
+        findMember.setAddress(memberDto.getAddress());
+    }
 
+    public void updatePassword(MemberDto memberDto, String modifiedPassword) throws IllegalStateException{
+        checkIsPasswordUsable(modifiedPassword); //throwable IllegalStateException
+
+        Member findMember = login(memberDto);
+        findMember.setPassword(modifiedPassword, false);
+    }
 
     @Transactional(readOnly = true)
     public List<Member> getMemberList(){
@@ -90,7 +102,7 @@ public class MemberService {
         }
     }
 
-    private void checkIsPasswordUsable(String password){
+    private void checkIsPasswordUsable(String password)throws IllegalStateException{
         if(password.length() < 4) throw new IllegalStateException("비밀번호는 4글자 이상이여야 합니다.");
     }
 
