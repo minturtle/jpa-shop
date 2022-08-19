@@ -16,8 +16,10 @@ public class MemberDto {
         this.address = new Address(city, street, zipcode);
     }
 
+
+
     public Member toMember(){
-        return Member.createMember(username, userId, password, address.getCity(), address.getStreet(), address.getZipcode());
+        return Member.createMember(username, userId, password, address.getCity(), address.getStreet(), address.getZipcode(), true);
     }
 
     private String userId;
@@ -25,4 +27,36 @@ public class MemberDto {
     private String username;
     private Address address;
 
+
+    public static class MemberDtoBuilder{
+
+        public MemberDtoBuilder userIdAndPassword(String userId, String password){
+            this.userId = userId;
+            this.password = password;
+            return this;
+        }
+
+        public MemberDtoBuilder username(String username){
+            this.username = username;
+            return this;
+        }
+        public MemberDtoBuilder address(String city, String street, String zipcode){
+            this.address = new Address(city,street,zipcode);
+            return this;
+        }
+
+        public MemberDtoBuilder address(Address address){
+            this.address = address;
+            return this;
+        }
+        public MemberDto build(){
+            return new MemberDto(userId, password, username, address.getCity(), address.getStreet(), address.getZipcode());
+        }
+        private String userId = "";
+        private String password = "";
+        private String username = "";
+        private Address address;
+
+    }
 }
+

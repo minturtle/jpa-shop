@@ -15,10 +15,10 @@ public class MemberRepository extends EntityManagerRepository<Member> {
         super(em, Member.class);
     }
 
-    public Member findByUserId(String name)throws EntityNotFoundException{
+    public Member findByUserId(String userId)throws EntityNotFoundException{
         try{
             Member entity = em.createQuery(getSelectQlStringWhere("userId"), Member.class)
-                    .setParameter("userId", name).getSingleResult();
+                    .setParameter("userId", userId).getSingleResult();
             return entity;
         }catch (NoResultException e){
             throw new EntityNotFoundException();

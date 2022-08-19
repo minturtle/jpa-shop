@@ -4,6 +4,8 @@ import jpabook.jpashop.dao.MemberRepository;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.dto.MemberDto;
+
+import jpabook.jpashop.util.Encryptor;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,9 +44,9 @@ class MemberServiceTest {
         registerDto2 = new MemberDto( "root12", "1122","김민석1", "경북 구미시", "대학로 61","금오공과 대학교");
         registerDto3 = new MemberDto("root13", "1122","김민석2" ,"대구광역시", "대학로 1","경북대학교");
 
-        member1 = Member.createMember("김민석", "root11", "1122","경북 구미시", "대학로 61","금오공과 대학교");
-        member2 = Member.createMember("김민석1","root12", "1122", "대구광역시", "대학로 1","경북대학교");
-        member3 = Member.createMember("김민석2","root13", "1122", "서울특별시", "대학로 2", "서울대학교");
+        member1 = Member.createMember("김민석", "root11", "1122","경북 구미시", "대학로 61","금오공과 대학교",true);
+        member2 = Member.createMember("김민석1","root12", "1122", "대구광역시", "대학로 1","경북대학교", true);
+        member3 = Member.createMember("김민석2","root13", "1122", "서울특별시", "대학로 2", "서울대학교", true);
     }
 
     @Test
@@ -73,23 +75,46 @@ class MemberServiceTest {
     void t3() throws Exception {
         //given
         given(memberRepository.findByUserId(registerDto1.getUserId())).willReturn(member1);
-        //when
 
+        //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->memberService
                 .signIn(registerDto1);
         //then
-        assertThatThrownBy(throwableFunc).isInstanceOf(IllegalStateException.class)
+        assertThatThrownBy(throwableFunc).isInstanceOf(RegisterFailed.class)
                 .hasMessage("이미 존재하는 ID입니다.");
     }
 
+    @Test
+    @DisplayName("회원가입, 비밀번호가 4글자 미만인 경우")
+    void t6() throws Exception {
+        //given
+        registerDto1.setPassword("222");
+        //when
+        ThrowableAssert.ThrowingCallable throwableFunc = ()->memberService.signIn(registerDto1);
+        //then
+        assertThatThrownBy(throwableFunc).isInstanceOf(RegisterFailed.class)
+                .hasMessage("비밀번호는 4글자 이상이여야 합니다.");
+    }
+
+    @Test
+    @DisplayName("회원가입, DB에 저장된 객체의 비밀번호가 암호화됐는지 확인")
+    void t7() throws Exception {
+        //given
+        //when
+        Member registeredMember = memberService.signIn(registerDto1);
+        //then
+        assertThat(registeredMember.getPassword()).isEqualTo(Encryptor.encrypt("1122"));
+    }
     @Test
     @DisplayName("회원 조회,이미 저장된 3개의 멤버 조회 후 반환")
     void t4() throws Exception {
         //given
         List<Member> members = List.of(member1, member2, member3);
         given(memberRepository.findAll()).willReturn(members);
+
         //when
         final List<Member> findMemberList = memberService.getMemberList();
+
         //then
         assertThat(findMemberList).contains(member1, Index.atIndex(0));
         assertThat(findMemberList).contains(member2, Index.atIndex(1));
@@ -110,7 +135,7 @@ class MemberServiceTest {
 
     @Test
     @DisplayName("로그인 실패")
-    void t6() throws Exception {
+    void t8() throws Exception {
         //given
         given(memberRepository.findByUserId(registerDto1.getUserId()))
                 .willThrow(new EntityNotFoundException()); //아이디 찾기 실패
@@ -122,5 +147,17 @@ class MemberServiceTest {
         //then
         assertThatThrownBy(()->memberService.login(registerDto1)).isInstanceOf(LoginFailed.class);
         assertThatThrownBy(()->memberService.login(registerDto2)).isInstanceOf(LoginFailed.class);
+    }
+
+    @Test
+    @DisplayName("유저의 상세정보 조회")
+    void t9() throws Exception {
+        //given
+        given(memberRepository.findByUserId(member1.getUserId())).willReturn(member1);
+        //when
+        MemberDto memberDetail = memberService.getMemberDetail(member1.getUserId());
+        //then
+        assertThat(memberDetail.getUsername()).isEqualTo(member1.getName());
+        assertThat(memberDetail.getAddress()).isEqualTo(member1.getAddress());
     }
 }

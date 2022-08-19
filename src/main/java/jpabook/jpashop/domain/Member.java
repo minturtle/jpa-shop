@@ -1,23 +1,23 @@
 package jpabook.jpashop.domain;
 
+import jpabook.jpashop.util.Encryptor;
 import lombok.Getter;
 
 import javax.persistence.*;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+
 
 @Getter @Entity
 public class Member {
     protected Member() {
     }
 
-    public static Member createMember(String name, String userId, String password, String city, String street, String zipcode) {
+    public static Member createMember(String name, String userId, String password, String city, String street, String zipcode, boolean isEncrypt) {
         Member member = new Member();
 
         member.name = name;
         member.userId = userId;
-        member.password = SHA256Encrypt(password);
+        if(isEncrypt) member.password = Encryptor.encrypt(password);
+        else member.password = password;
         member.address = new Address(city, street, zipcode);
 
         return member;
@@ -36,18 +36,8 @@ public class Member {
     private Address address;
 
 
-    private static String SHA256Encrypt(String pw){
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(pw.getBytes());
-            return String.format("%064x", new BigInteger(1, md.digest()));
-        }catch (NoSuchAlgorithmException e){}
-        throw new FailEncrypt();
-    }
 
     public boolean comparePassword(String finePassword){
-        return this.password.equals(SHA256Encrypt(finePassword));
+        return this.password.equals(Encryptor.encrypt(finePassword));
     }
 }
-
-class FailEncrypt extends RuntimeException{}
