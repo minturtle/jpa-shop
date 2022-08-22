@@ -19,7 +19,7 @@ public class Movie extends Item {
 
 
     @Override
-    protected void updateInheritedValues(Item item) {
+    protected void updateInheritedFields(Item item) {
         if(!(item instanceof Movie)) return;
         this.director = ((Movie)item).getDirector();
         this.actor = ((Movie)item).getActor();

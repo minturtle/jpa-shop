@@ -20,10 +20,9 @@ public class ItemService {
         return item;
     }
 
-    public <T> T findByName(String name, Class<T> c) throws IllegalArgumentException, EntityNotFoundException {
+    public Item findByName(String name) throws IllegalArgumentException, EntityNotFoundException {
         Item findItem = itemRepository.findByName(name); //throwable EntityNotFoundException
-        validateArguments(c, findItem); //찾은 상품과 argument로 입력받은 클래스가 같은 타입인지 확인
-        return (T)findItem;
+        return findItem;
     }
 
     public Long updateItem(Long id, Item modifiedItem)throws IllegalArgumentException, EntityNotFoundException{
@@ -32,14 +31,9 @@ public class ItemService {
         return findItem.getId();
     }
 
-
     public List<Item> findAll(){
         return itemRepository.findAll();
     }
 
-    private <T> void validateArguments(Class<T> c, Item findItem)throws IllegalArgumentException {
-        if(!findItem.getClass().equals(c)) {
-            throw new IllegalArgumentException("찾은 상품과 같은 타입이 아닙니다.");
-        }
-    }
+
 }

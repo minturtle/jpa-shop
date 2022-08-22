@@ -25,14 +25,11 @@ public abstract class Item {
     private int price;
     private String name;
 
-
-    protected abstract void updateInheritedValues(Item item);
-
     public void update(Item item){
         this.name = item.getName();
         this.stockQuantity = item.getStockQuantity();
         this.price = item.getPrice();
-        updateInheritedValues(item);
+        updateInheritedFields(item);
     }
 
 
@@ -58,6 +55,7 @@ public abstract class Item {
         return Objects.hash(id);
     }
 
+    protected abstract void updateInheritedFields(Item item);
 
     private void checkIsOrderQuantityBiggerThanStock(int quantity) {
         if(stockQuantity < quantity) throw new IllegalArgumentException("주문한 수량이 남은 물건의 수량보다 많습니다.");

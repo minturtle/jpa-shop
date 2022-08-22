@@ -19,7 +19,7 @@ public class Album extends Item{
     }
 
     @Override
-    protected void updateInheritedValues(Item item) {
+    protected void updateInheritedFields(Item item) {
         if(!(item instanceof Album)) return;
         this.artist = ((Album)item).getArtist();
         this.etc = ((Album)item).getEtc();

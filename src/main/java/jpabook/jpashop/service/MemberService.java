@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,25 +19,26 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public Member signIn(MemberDto registerDto) throws RegisterFailed{
+    public void register(MemberDto registerDto) throws RegisterFailed{
         try {
             validRegisterForm(registerDto); //회원가입이 가능한 입력인지 검증
             Member member = registerDto.toMember(false); //Member 객체가 만들어 질때 비밀번호는 암호화된다.
             memberRepository.save(member);
-
-            return member;
 
         }catch (IllegalStateException e){
             throw new RegisterFailed(e.getMessage() , e);
         }
     }
 
-    public Member login(MemberDto loginDto) throws LoginFailed{
+    public MemberDto login(MemberDto loginDto) throws LoginFailed{
         try {
 
             Member findMember = memberRepository.findByUserId(loginDto.getUserId()); //throwable EntityNotFound
             checkIsPasswordCorrect(findMember, loginDto.getPassword()); //throwable LoginFailed
-            return findMember;
+
+            return new MemberDto.MemberDtoBuilder()
+                    .userIdAndPassword(findMember.getUserId(), findMember.getPassword())
+                    .username(findMember.getName()).build();
 
         }catch (EntityNotFoundException e){ throw new LoginFailed();}
     }
@@ -54,20 +54,15 @@ public class MemberService {
     }
 
     public void updateAddress(MemberDto memberDto) throws LoginFailed{
-        Member findMember = login(memberDto);
+         Member findMember = memberRepository.findByUserId(memberDto.getUserId());
         findMember.setAddress(memberDto.getAddress());
     }
 
     public void updatePassword(MemberDto memberDto, String modifiedPassword) throws IllegalStateException{
         checkIsPasswordUsable(modifiedPassword); //throwable IllegalStateException
 
-        Member findMember = login(memberDto);
+        Member findMember = memberRepository.findByUserId(memberDto.getUserId());
         findMember.setPassword(modifiedPassword, false);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Member> getMemberList(){
-        return memberRepository.findAll();
     }
 
     @Transactional(readOnly = true)

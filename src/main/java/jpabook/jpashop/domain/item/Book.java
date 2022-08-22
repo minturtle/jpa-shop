@@ -21,7 +21,7 @@ public class Book extends Item{
     private String isbn;
 
     @Override
-    protected void updateInheritedValues(Item item) {
+    protected void updateInheritedFields(Item item) {
         if(!(item instanceof Book)) return;
         this.author = ((Book)item).getAuthor();
         this.isbn = ((Book)item).getIsbn();

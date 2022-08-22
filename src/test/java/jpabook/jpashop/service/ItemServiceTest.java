@@ -9,6 +9,7 @@ import jpabook.jpashop.domain.item.Movie;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,8 +73,8 @@ class ItemServiceTest {
         given(itemRepository.findByName("어린 왕자")).willReturn(book);
 
         //when
-        Movie findMovie = itemService.findByName("어벤져스", Movie.class);
-        Book findBook = itemService.findByName("어린 왕자", Book.class);
+        Item findMovie = itemService.findByName("어벤져스");
+        Item findBook = itemService.findByName("어린 왕자");
 
         //then
         assertThat(movie).isEqualTo(findMovie);
@@ -81,13 +82,14 @@ class ItemServiceTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("이름 조회, 잘못된 클래스 입력")
     void t4() throws Exception {
         //given
         given(itemRepository.findByName("어벤져스")).willReturn(movie);
 
         //when
-        ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스", Member.class);
+        ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스");
         //then
         assertThatThrownBy(throwableFunc).isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("찾은 상품과 같은 타입이 아닙니다.");
@@ -100,7 +102,7 @@ class ItemServiceTest {
         given(itemRepository.findByName("어벤져스")).willThrow(new EntityNotFoundException());
 
         //when
-        ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스", Movie.class);
+        ThrowableAssert.ThrowingCallable throwableFunc = ()->itemService.findByName("어벤져스");
         //then
 
         assertThatThrownBy(throwableFunc).isInstanceOf(EntityNotFoundException.class);
