@@ -22,6 +22,7 @@ public class OrderItem {
     public void cancel(){
         this.item.addStock(count);
     }
+    public void removeStock(int count){this.item.removeStock(count);}
 
     @Id @GeneratedValue
     @Column(name = "order_item_id")

@@ -1,13 +1,16 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.ItemRepository;
+import jpabook.jpashop.dao.MemberRepository;
 import jpabook.jpashop.dao.OrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
+import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.domain.item.Album;
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +21,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -35,6 +41,9 @@ class OrderServiceTest {
 
     @Mock
     private ItemRepository itemRepository;
+
+    @Mock
+    private MemberRepository memberRepository;
 
     private Member member;
     private OrderItemListDto orderItemListDto;
@@ -64,12 +73,14 @@ class OrderServiceTest {
     void t2() throws Exception {
         //given
         given(itemRepository.findById(item1.getId())).willReturn(item1);
+        given(memberRepository.findByUserId(member.getUserId())).willReturn(member);
+
         orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 5))); //5개의 item1 주문
         //when
-        Order order = orderService.order(member, orderItemListDto);
+        final OrderDto orderDto = orderService.order(member.getUserId(), orderItemListDto);
         //then
-        assertThat(order.getMember()).isEqualTo(member);
-        assertThat(order.getStatus()).isEqualTo(OrderStatus.ORDER);
+        assertThat(orderDto.getMember()).isEqualTo(member);
+        assertThat(orderDto.getStatus()).isEqualTo(OrderStatus.ORDER);
         assertThat(item1.getStockQuantity()).isEqualTo(25);
     }
 
@@ -78,10 +89,11 @@ class OrderServiceTest {
     void t3() throws Exception {
         //given
         given(itemRepository.findById(item1.getId())).willReturn(item1);
+        given(memberRepository.findByUserId(member.getUserId())).willReturn(member);
         orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 500)));
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->{
-            orderService.order(member, orderItemListDto);
+            orderService.order(member.getUserId(), orderItemListDto);
         };
         //then
         assertThatThrownBy(throwableFunc).isInstanceOf(IllegalArgumentException.class)
@@ -92,14 +104,37 @@ class OrderServiceTest {
     @DisplayName("주문 취소하기")
     void t4() throws Exception {
         //given
-        given(itemRepository.findById(item1.getId())).willReturn(item1);
-        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 5)));
-        Order order = orderService.order(member, orderItemListDto);
 
-        given(orderRepository.findById(order.getId())).willReturn(order);
+        given(itemRepository.findById(item1.getId())).willReturn(item1);
+        given(memberRepository.findByUserId(member.getUserId())).willReturn(member);
+        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 5)));
+        Order order = new Order(member, createOrderItemList(orderItemListDto));
+
+
+        OrderDto orderDto = orderService.order(member.getUserId(), orderItemListDto);
+        given(orderRepository.findById(orderDto.getId())).willReturn(order);
+
         //when
-        orderService.cancel(order.getId());
+        orderService.cancel(orderDto.getId());
+
         //then
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCEL);
+        assertThat(item1.getStockQuantity()).isEqualTo(30);
+    }
+
+    private List<OrderItem> createOrderItemList(OrderItemListDto orderItemDtos) {
+        List<OrderItem> orderItems = new ArrayList<>(orderItemDtos.size());
+        Iterator<OrderItemListDto.OrderItemDto> iterator = orderItemDtos.iterator();
+
+        while(iterator.hasNext()){
+            OrderItem orderItem = dtoToOrderItem(iterator.next());
+            orderItems.add(orderItem);
+        }
+        return orderItems;
+    }
+
+    private OrderItem dtoToOrderItem(OrderItemListDto.OrderItemDto orderItemDto) throws EntityNotFoundException, IllegalArgumentException{
+        Item findItem = itemRepository.findById(orderItemDto.getItemId());//throwable EntityNotFound;
+        return new OrderItem(findItem, orderItemDto.getCount());
     }
 }

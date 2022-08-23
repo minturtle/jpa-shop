@@ -25,7 +25,6 @@ public class Order {
     public void cancel(){
         this.status = OrderStatus.CANCEL;
         orderItems.forEach(OrderItem::cancel);
-
     }
 
     @Id @GeneratedValue
