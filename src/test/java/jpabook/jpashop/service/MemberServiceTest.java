@@ -7,7 +7,7 @@ import jpabook.jpashop.dto.MemberDto;
 
 import jpabook.jpashop.util.Encryptor;
 import org.assertj.core.api.ThrowableAssert;
-import org.assertj.core.data.Index;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
@@ -117,7 +116,6 @@ class MemberServiceTest {
         //then
         assertThat(findDto.getUserId()).isEqualTo(member1.getUserId());
         assertThat(findDto.getPassword()).isEqualTo(member1.getPassword());
-        assertThat(findDto.getUsername()).isEqualTo(member1.getName());
     }
 
     @Test
@@ -132,8 +130,10 @@ class MemberServiceTest {
         registerDto2.setPassword("asasfa2q3213sad");
         //when
         //then
-        assertThatThrownBy(()->memberService.login(registerDto1)).isInstanceOf(LoginFailed.class);
-        assertThatThrownBy(()->memberService.login(registerDto2)).isInstanceOf(LoginFailed.class);
+        assertThatThrownBy(()->memberService.login(registerDto1)).isInstanceOf(LoginFailed.class)
+                .hasMessage("유저 정보를 찾을 수 없습니다.");
+        assertThatThrownBy(()->memberService.login(registerDto2)).isInstanceOf(LoginFailed.class)
+                .hasMessage("잘못된 비밀번호 입니다.");
     }
 
     @Test

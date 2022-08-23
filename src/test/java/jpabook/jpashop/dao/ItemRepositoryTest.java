@@ -34,7 +34,7 @@ class ItemRepositoryTest {
     void setup(){
         book = new Book("어린 왕자", 15000, 30, "김민석", "11234");
         album = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
-        movie = new Movie(30, 19000, "어벤져스", "김민석", "김민석");
+        movie = new Movie("어벤져스", 30, 19000, "김민석", "김민석");
     }
 
     @Test
@@ -58,22 +58,6 @@ class ItemRepositoryTest {
         assertThat(album).isEqualTo(itemRepository.findById(album.getId()));
     }
 
-    @Test
-    @DisplayName("book 객체 update하기")
-    void t3() throws Exception {
-        //given
-        itemRepository.save(book);
-        Item findBook = itemRepository.findById(this.book.getId());
-
-        //when
-        findBook.update(new Book("심청전", 15000, 30, "김민석2", "11234"));
-        //then
-        Item findItem2 = itemRepository.findById(this.book.getId());
-
-        assertThat(findItem2.getName()).isEqualTo("심청전");
-        assertThat(findItem2.getPrice()).isEqualTo(15000);
-        assertThat(findItem2.getStockQuantity()).isEqualTo(30);
-    }
 
     @Test
     @DisplayName("이름으로 저장한 item 조회하기")

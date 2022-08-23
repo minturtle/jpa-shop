@@ -1,5 +1,6 @@
 package jpabook.jpashop.domain.item;
 
+import jpabook.jpashop.dto.ItemDto;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -25,7 +26,7 @@ public abstract class Item {
     private int price;
     private String name;
 
-    public void update(Item item){
+    public void update(ItemDto item){
         this.name = item.getName();
         this.stockQuantity = item.getStockQuantity();
         this.price = item.getPrice();
@@ -55,7 +56,7 @@ public abstract class Item {
         return Objects.hash(id);
     }
 
-    protected abstract void updateInheritedFields(Item item);
+    protected abstract void updateInheritedFields(ItemDto item);
 
     private void checkIsOrderQuantityBiggerThanStock(int quantity) {
         if(stockQuantity < quantity) throw new IllegalArgumentException("주문한 수량이 남은 물건의 수량보다 많습니다.");

@@ -1,5 +1,6 @@
 package jpabook.jpashop.domain.item;
 
+import jpabook.jpashop.dto.ItemDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,10 +20,10 @@ public class Album extends Item{
     }
 
     @Override
-    protected void updateInheritedFields(Item item) {
-        if(!(item instanceof Album)) return;
-        this.artist = ((Album)item).getArtist();
-        this.etc = ((Album)item).getEtc();
+    protected void updateInheritedFields(ItemDto item) {
+        if(item.getItemType() != Album.class) return;
+        this.artist = item.getArtist();
+        this.etc = item.getEtc();
     }
 
     private String artist;

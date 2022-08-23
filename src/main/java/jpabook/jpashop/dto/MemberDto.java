@@ -17,13 +17,6 @@ public class MemberDto {
     }
 
 
-
-    public Member toMember(boolean isPasswordEncrypted){
-
-        return Member.createMember(username, userId, password, address.getCity(), address.getStreet(), address.getZipcode(),
-                isPasswordEncrypted);
-    }
-
     private String userId;
     private String password;
     private String username;

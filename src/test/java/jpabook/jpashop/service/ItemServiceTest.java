@@ -1,11 +1,11 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.ItemRepository;
-import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.item.Album;
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.item.Movie;
+import jpabook.jpashop.dto.ItemDto;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,12 +36,31 @@ class ItemServiceTest {
     private Item album;
     private Item movie;
 
+    private ItemDto bookDto;
+    private ItemDto albumDto;
+    private ItemDto movieDto;
+
+
     @BeforeEach
     void setup(){
         book = new Book("어린 왕자", 15000, 30, "김민석", "11234");
         album = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
-        movie = new Movie(30, 19000, "어벤져스", "김민석", "김민석");
+        movie = new Movie("어벤져스", 30, 19000, "김민석", "김민석");
 
+        bookDto = new ItemDto.ItemDtoBuilder()
+                .putItemField("어린 왕자", 15000, 30)
+                .setItemType(Book.class)
+                .putInheritedFields(book).build();
+
+        albumDto = new ItemDto.ItemDtoBuilder()
+                .putItemField("김민석 정규 앨범 7집", 50000, 10)
+                .setItemType(Album.class)
+                .putInheritedFields(album).build();
+
+        movieDto = new ItemDto.ItemDtoBuilder()
+                .putItemField("어벤져스", 19000, 30)
+                .setItemType(Movie.class)
+                .putInheritedFields(movie).build();
     }
 
     @Test
@@ -59,9 +78,8 @@ class ItemServiceTest {
     void t2() throws Exception {
         //given
         //when
-        Item item = itemService.save(book);
+        itemService.save(book);
         //then
-        assertThat(item).isEqualTo(book);
     }
 
 
@@ -73,12 +91,17 @@ class ItemServiceTest {
         given(itemRepository.findByName("어린 왕자")).willReturn(book);
 
         //when
-        Item findMovie = itemService.findByName("어벤져스");
-        Item findBook = itemService.findByName("어린 왕자");
+        final ItemDto findMovie = itemService.findByName("어벤져스");
+        final ItemDto findBook = itemService.findByName("어린 왕자");
 
         //then
-        assertThat(movie).isEqualTo(findMovie);
-        assertThat(book).isEqualTo(findBook);
+        assertThat(findMovie.getName()).isEqualTo("어벤져스");
+        assertThat(findMovie.getActor()).isEqualTo("김민석");
+        assertThat(findMovie.getDirector()).isEqualTo("김민석");
+
+        assertThat(findBook.getName()).isEqualTo("어린 왕자");
+        assertThat(findBook.getAuthor()).isEqualTo("김민석");
+        assertThat(findBook.getIsbn()).isEqualTo("11234");
     }
 
     @Test
@@ -112,10 +135,16 @@ class ItemServiceTest {
     @DisplayName("상품(책) 값 업데이트")
     void t6() throws Exception {
         //given
-        Book modifiedBook = new Book("어린 왕자2", 30000, 50, "김민석2", "112233");
         given(itemRepository.findById(this.book.getId())).willReturn(book);
         //when
-        itemService.updateItem(this.book.getId(), modifiedBook);
+
+        bookDto.setName("어린 왕자2");
+        bookDto.setStockQuantity(50);
+        bookDto.setPrice(30000);
+        bookDto.setAuthor("김민석2");
+        bookDto.setIsbn("112233");
+
+        itemService.updateItem(this.book.getId(), bookDto);
         //then
         assertThat(book.getName()).isEqualTo("어린 왕자2");
         assertThat(book.getStockQuantity()).isEqualTo(50);
@@ -128,10 +157,16 @@ class ItemServiceTest {
     @DisplayName("상품(앨범) 값 업데이트")
     void t7() throws Exception {
         //given
-        Album modifiedAlbum = new Album("김민석 정규 앨범 8집", 30000, 50, "김민석2", "김민석 데뷔 25주년 기념");
         given(itemRepository.findById(album.getId())).willReturn(album);
+
         //when
-        itemService.updateItem(album.getId(), modifiedAlbum);
+        albumDto.setName("김민석 정규 앨범 8집");
+        albumDto.setStockQuantity(50);
+        albumDto.setPrice(30000);
+        albumDto.setArtist("김민석2");
+        albumDto.setEtc("김민석 데뷔 25주년 기념");
+
+        itemService.updateItem(album.getId(), albumDto);
         //then
         assertThat(album.getName()).isEqualTo("김민석 정규 앨범 8집");
         assertThat(album.getPrice()).isEqualTo(30000);
@@ -144,10 +179,15 @@ class ItemServiceTest {
     @DisplayName("상품(영화)값 업데이트")
     void t8() throws Exception {
         //given
-        Movie modifiedMovie = new Movie(40, 13000, "어벤져스2", "김민석2", "김민석3");
+        movieDto.setName("어벤져스2");
+        movieDto.setStockQuantity(40);
+        movieDto.setPrice(13000);
+        movieDto.setDirector("김민석2");
+        movieDto.setActor("김민석3");
+
         given(itemRepository.findById(movie.getId())).willReturn(movie);
         //when
-        itemService.updateItem(movie.getId(), modifiedMovie);
+        itemService.updateItem(movie.getId(), movieDto);
         //then
         assertThat(movie.getName()).isEqualTo("어벤져스2");
         assertThat(movie.getPrice()).isEqualTo(13000);
@@ -162,11 +202,11 @@ class ItemServiceTest {
         //given
         given(itemRepository.findAll()).willReturn(List.of(book, album, movie));
         //when
-        List<Item> findItems = itemService.findAll();
+        List<ItemDto> findItems = itemService.findAll();
         //then
-        assertThat(findItems).contains(book, Index.atIndex(0));
-        assertThat(findItems).contains(album, Index.atIndex(1));
-        assertThat(findItems).contains(movie, Index.atIndex(2));
+        assertThat(findItems).contains(bookDto, Index.atIndex(0));
+        assertThat(findItems).contains(albumDto, Index.atIndex(1));
+        assertThat(findItems).contains(movieDto, Index.atIndex(2));
         assertThat(findItems.size()).isEqualTo(3);
     }
 }

@@ -22,7 +22,12 @@ public class MemberService {
     public void register(MemberDto registerDto) throws RegisterFailed{
         try {
             validRegisterForm(registerDto); //회원가입이 가능한 입력인지 검증
-            Member member = registerDto.toMember(false); //Member 객체가 만들어 질때 비밀번호는 암호화된다.
+
+            //Member 객체가 만들어 질때 비밀번호는 암호화된다.
+            Member member = Member.createMember(registerDto.getUsername(), registerDto.getUserId()
+                    , registerDto.getPassword(), registerDto.getAddress().getCity()
+                    ,registerDto.getAddress().getStreet(),registerDto.getAddress().getZipcode(), false);
+
             memberRepository.save(member);
 
         }catch (IllegalStateException e){
@@ -38,9 +43,10 @@ public class MemberService {
 
             return new MemberDto.MemberDtoBuilder()
                     .userIdAndPassword(findMember.getUserId(), findMember.getPassword())
-                    .username(findMember.getName()).build();
+                    .build();
 
-        }catch (EntityNotFoundException e){ throw new LoginFailed();}
+        }catch (EntityNotFoundException e){
+            throw new LoginFailed("유저 정보를 찾을 수 없습니다.", e);}
     }
 
     @Transactional(readOnly = true)
@@ -80,7 +86,7 @@ public class MemberService {
     }
 
     private void checkIsPasswordCorrect(Member findMember, String finePassword) throws LoginFailed{
-        if(!findMember.comparePassword(finePassword)) throw new LoginFailed();
+        if(!findMember.comparePassword(finePassword)) throw new LoginFailed("잘못된 비밀번호 입니다.");
     }
 
     private void validRegisterForm(MemberDto dto) throws IllegalStateException{
@@ -107,7 +113,15 @@ public class MemberService {
     }
 }
 
-class LoginFailed extends RuntimeException{}
+class LoginFailed extends RuntimeException{
+    public LoginFailed(String message) {
+        super(message);
+    }
+
+    public LoginFailed(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
 
 class RegisterFailed extends RuntimeException{
     public RegisterFailed() {

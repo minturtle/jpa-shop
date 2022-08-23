@@ -1,5 +1,6 @@
 package jpabook.jpashop.domain.item;
 
+import jpabook.jpashop.dto.ItemDto;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,10 +22,10 @@ public class Book extends Item{
     private String isbn;
 
     @Override
-    protected void updateInheritedFields(Item item) {
-        if(!(item instanceof Book)) return;
-        this.author = ((Book)item).getAuthor();
-        this.isbn = ((Book)item).getIsbn();
+    protected void updateInheritedFields(ItemDto item) {
+        if(item.getItemType() != Book.class) return;
+        this.author = item.getAuthor();
+        this.isbn = item.getIsbn();
     }
 
 
