@@ -1,5 +1,6 @@
 package jpabook.jpashop.dao;
 
+import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
 import jpabook.jpashop.domain.Member;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.data.Index;

@@ -1,6 +1,6 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.dao.ItemRepository;
+import jpabook.jpashop.dao.em.EntityManagerItemRepository;
 import jpabook.jpashop.domain.item.Album;
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
@@ -27,7 +27,7 @@ import static org.mockito.BDDMockito.given;
 class ItemServiceTest {
 
     @Mock
-    private ItemRepository itemRepository;
+    private EntityManagerItemRepository itemRepository;
 
     @InjectMocks
     private ItemService itemService;

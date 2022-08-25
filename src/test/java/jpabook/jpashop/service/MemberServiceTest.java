@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.MemberRepository;
+import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.dto.MemberDto;
@@ -140,9 +141,9 @@ class MemberServiceTest {
     @DisplayName("유저의 상세정보 조회")
     void t9() throws Exception {
         //given
-        given(memberRepository.findByUserId(member1.getUserId())).willReturn(member1);
+        given(memberRepository.findById(member1.getId())).willReturn(member1);
         //when
-        MemberDto memberDetail = memberService.getMemberDetail(member1.getUserId());
+        MemberDto memberDetail = memberService.getMemberDetail(member1.getId());
         //then
         assertThat(memberDetail.getUsername()).isEqualTo(member1.getName());
         assertThat(memberDetail.getAddress()).isEqualTo(member1.getAddress());

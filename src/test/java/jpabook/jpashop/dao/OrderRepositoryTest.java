@@ -1,5 +1,7 @@
 package jpabook.jpashop.dao;
 
+import jpabook.jpashop.dao.em.EntityManagerItemRepository;
+import jpabook.jpashop.dao.em.OrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 
@@ -21,6 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 
 @DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Repository.class))
@@ -30,18 +33,26 @@ class OrderRepositoryTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private ItemRepository itemRepository;
+    private EntityManagerItemRepository itemRepository;
 
-    private Member member;
-    private Order order;
+    private Member member1;
+    private Member member2;
+    private Order order1;
+    private Order order2;
     private Item item1;
     private Item item2;
 
     @BeforeEach
     void setUp(){
-        member =  Member.createMember("김민석", "root11", "1111", "경북 구미시", "대학로 61","금오공과 대학교",false);
+        member1 =  Member.createMember("김민석", "root11", "1111", "경북 구미시", "대학로 61","금오공과 대학교",false);
+        member2 = Member.createMember("test", "aa", "bbcc", "a", "b", "c", false);
         item1 = new Book("어린 왕자", 15000, 30, "김민석", "11234");
         item2 = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
+
+
+        order1 = new Order(member1,List.of(new OrderItem(item1, 5)));
+        order2 = new Order(member1, List.of(new OrderItem(item1, 5), new OrderItem(item2, 3)));
+
     }
 
     @Test
@@ -60,15 +71,29 @@ class OrderRepositoryTest {
 
         given(itemRepository.findById(item1.getId())).willReturn(item1);
         item1.removeStock(5);
-        order = new Order(member,List.of(new OrderItem(item1, 5)));
 
         //when
-        orderRepository.save(order);
-        Order findOrder = orderRepository.findById(this.order.getId());
+        orderRepository.save(order1);
+        Order findOrder = orderRepository.findById(this.order1.getId());
         //then
-        assertThat(findOrder).isEqualTo(order);
-        assertThat(findOrder.getMember()).isEqualTo(member);
-        assertThat(findOrder.getDelivery().getAddress()).isEqualTo(member.getAddress());
+        assertThat(findOrder).isEqualTo(order1);
+        assertThat(findOrder.getMember()).isEqualTo(member1);
+        assertThat(findOrder.getDelivery().getAddress()).isEqualTo(member1.getAddress());
     }
 
+    @Test
+    @DisplayName("order 멤버로 조회")
+    void t3() throws Exception {
+        //given
+        Order mockOrder = new Order(member2, List.of(new OrderItem(item1, 3)));
+
+        orderRepository.save(order1);
+        orderRepository.save(order2);
+        orderRepository.save(mockOrder);
+
+        //when
+        final List<Order> orders = orderRepository.findByMember(this.member1);
+        //then
+        assertThat(orders).contains(order1, order2).doesNotContain(mockOrder);
+    }
 }

@@ -1,4 +1,4 @@
-package jpabook.jpashop.dao;
+package jpabook.jpashop.dao.em;
 
 import lombok.RequiredArgsConstructor;
 

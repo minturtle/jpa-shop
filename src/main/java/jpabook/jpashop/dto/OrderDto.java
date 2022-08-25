@@ -11,6 +11,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @Getter @Setter
@@ -42,4 +43,16 @@ public class OrderDto {
     private Delivery delivery;
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderDto orderDto = (OrderDto) o;
+        return Objects.equals(id, orderDto.id) && Objects.equals(member, orderDto.member) && Objects.equals(orderedTime, orderDto.orderedTime) && status == orderDto.status && Objects.equals(orderItems, orderDto.orderItems) && Objects.equals(delivery, orderDto.delivery);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, member, orderedTime, status, orderItems, delivery);
+    }
 }

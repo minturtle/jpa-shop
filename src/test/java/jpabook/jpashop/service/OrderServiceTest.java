@@ -1,8 +1,8 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.dao.ItemRepository;
-import jpabook.jpashop.dao.MemberRepository;
-import jpabook.jpashop.dao.OrderRepository;
+import jpabook.jpashop.dao.em.EntityManagerItemRepository;
+import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
+import jpabook.jpashop.dao.em.OrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
@@ -21,10 +21,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
@@ -40,10 +38,10 @@ class OrderServiceTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private ItemRepository itemRepository;
+    private EntityManagerItemRepository itemRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private EntityManagerMemberRepository memberRepository;
 
     private Member member;
     private OrderItemListDto orderItemListDto;
@@ -73,11 +71,11 @@ class OrderServiceTest {
     void t2() throws Exception {
         //given
         given(itemRepository.findById(item1.getId())).willReturn(item1);
-        given(memberRepository.findByUserId(member.getUserId())).willReturn(member);
+        given(memberRepository.findById(member.getId())).willReturn(member);
 
         orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 5))); //5개의 item1 주문
         //when
-        final OrderDto orderDto = orderService.order(member.getUserId(), orderItemListDto);
+        final OrderDto orderDto = orderService.order(member.getId(), orderItemListDto);
         //then
         assertThat(orderDto.getMember()).isEqualTo(member);
         assertThat(orderDto.getStatus()).isEqualTo(OrderStatus.ORDER);
@@ -89,11 +87,11 @@ class OrderServiceTest {
     void t3() throws Exception {
         //given
         given(itemRepository.findById(item1.getId())).willReturn(item1);
-        given(memberRepository.findByUserId(member.getUserId())).willReturn(member);
+        given(memberRepository.findById(member.getId())).willReturn(member);
         orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 500)));
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->{
-            orderService.order(member.getUserId(), orderItemListDto);
+            orderService.order(member.getId(), orderItemListDto);
         };
         //then
         assertThatThrownBy(throwableFunc).isInstanceOf(IllegalArgumentException.class)
@@ -106,12 +104,11 @@ class OrderServiceTest {
         //given
 
         given(itemRepository.findById(item1.getId())).willReturn(item1);
-        given(memberRepository.findByUserId(member.getUserId())).willReturn(member);
+        given(memberRepository.findById(member.getId())).willReturn(member);
+
+        Order order = new Order(member, getOrderItems(5, item1));
         orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 5)));
-        Order order = new Order(member, createOrderItemList(orderItemListDto));
-
-
-        OrderDto orderDto = orderService.order(member.getUserId(), orderItemListDto);
+        OrderDto orderDto = orderService.order(member.getId(), orderItemListDto);
         given(orderRepository.findById(orderDto.getId())).willReturn(order);
 
         //when
@@ -122,19 +119,40 @@ class OrderServiceTest {
         assertThat(item1.getStockQuantity()).isEqualTo(30);
     }
 
-    private List<OrderItem> createOrderItemList(OrderItemListDto orderItemDtos) {
-        List<OrderItem> orderItems = new ArrayList<>(orderItemDtos.size());
-        Iterator<OrderItemListDto.OrderItemDto> iterator = orderItemDtos.iterator();
-
-        while(iterator.hasNext()){
-            OrderItem orderItem = dtoToOrderItem(iterator.next());
-            orderItems.add(orderItem);
-        }
-        return orderItems;
+    @Test
+    @DisplayName("주문 id로 조회하기")
+    void t5() throws Exception {
+        //given
+        Order order = new Order(member, getOrderItems(5, item1));
+        given(orderRepository.findById(order.getId())).willReturn(order);
+        //when
+        OrderDto findOrderDto = orderService.findById(order.getId());
+        //then
+        assertThat(findOrderDto.getMember()).isEqualTo(member);
+        assertThat(findOrderDto.getOrderItems()).contains(new OrderItem(item1, 5));
     }
 
-    private OrderItem dtoToOrderItem(OrderItemListDto.OrderItemDto orderItemDto) throws EntityNotFoundException, IllegalArgumentException{
-        Item findItem = itemRepository.findById(orderItemDto.getItemId());//throwable EntityNotFound;
-        return new OrderItem(findItem, orderItemDto.getCount());
+    @Test
+    @DisplayName("주문 유저로 조회하기")
+    void t6() throws Exception {
+        //given
+        Order order1 = new Order(member, getOrderItems(5, item1));
+        Order order2 = new Order(member, getOrderItems(4, item1, item2));
+
+        given(memberRepository.findById(member.getId())).willReturn(member);
+        given(orderRepository.findByMember(member)).willReturn(List.of(order1, order2));
+        //when
+        final List<OrderDto> ordersByUser = orderService.findByUser(member.getId());
+        //then
+        assertThat(ordersByUser.size()).isEqualTo(2);
     }
+
+
+    private List<OrderItem> getOrderItems(int count, Item ... items) {
+        return Arrays.stream(items).map(item -> new OrderItem(item, count)).collect(Collectors.toList());
+
+    }
+
+
+
 }

@@ -1,16 +1,14 @@
 package jpabook.jpashop.dao;
 
 import jpabook.jpashop.domain.item.Item;
-import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
+import java.util.List;
 
-@Repository
-public class ItemRepository extends EntityManagerRepository<Item> {
+public interface ItemRepository {
 
-    public ItemRepository(EntityManager em) {
-        super(em, Item.class);
-    }
+    void save(Item item);
+    Item findByName(String name);
+    Item findById(Long id);
+    List<Item> findAll();
+
 }
-
-

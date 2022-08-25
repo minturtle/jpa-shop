@@ -1,8 +1,8 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.dao.ItemRepository;
-import jpabook.jpashop.dao.MemberRepository;
-import jpabook.jpashop.dao.OrderRepository;
+import jpabook.jpashop.dao.em.EntityManagerItemRepository;
+import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
+import jpabook.jpashop.dao.em.OrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
@@ -10,24 +10,24 @@ import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final ItemRepository itemRepository;
-    private final MemberRepository memberRepository;
+    private final EntityManagerItemRepository itemRepository;
+    private final EntityManagerMemberRepository memberRepository;
 
-    public OrderDto order(String userId, OrderItemListDto orderItemDtos){
-        Member member = memberRepository.findByUserId(userId);
+    public OrderDto order(Long userId, OrderItemListDto orderItemDtos){
+        Member member = memberRepository.findById(userId);
 
         List<OrderItem> orderItems = createOrderItemList(orderItemDtos);
         removeStockInList(orderItems);
@@ -41,16 +41,23 @@ public class OrderService {
         return orderDto;
     }
 
-    @NotNull
-    private OrderDto createOrderDto(Order order) {
-        OrderDto orderDto = new OrderDto(order.getId(), order.getMember(), order.getOrderedTime(), order.getStatus()
-                , order.getOrderItems(), order.getDelivery());
-        return orderDto;
-    }
 
     public void cancel(Long orderId) throws EntityNotFoundException{
         Order order = orderRepository.findById(orderId);
         order.cancel();
+    }
+
+    public OrderDto findById(Long orderId){
+        Order order = orderRepository.findById(orderId);
+        return createOrderDto(order);
+    }
+
+    public List<OrderDto> findByUser(Long memberId){
+        Member member = memberRepository.findById(memberId);
+
+        List<Order> ordersByMember = orderRepository.findByMember(member);
+
+        return ordersByMember.stream().map(this::createOrderDto).collect(Collectors.toList());
     }
 
 
@@ -73,5 +80,9 @@ public class OrderService {
         orderItems.forEach(oi->oi.removeStock(oi.getCount()));
     }
 
-
+    private OrderDto createOrderDto(Order order) {
+        OrderDto orderDto = new OrderDto(order.getId(), order.getMember(), order.getOrderedTime(), order.getStatus()
+                , order.getOrderItems(), order.getDelivery());
+        return orderDto;
+    }
 }

@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.MemberRepository;
+import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.dto.MemberDto;
@@ -50,8 +51,8 @@ public class MemberService {
     }
 
     @Transactional(readOnly = true)
-    public MemberDto getMemberDetail(String userId) throws EntityNotFoundException{
-        Member findMember = memberRepository.findByUserId(userId);
+    public MemberDto getMemberDetail(Long id) throws EntityNotFoundException{
+        Member findMember = memberRepository.findById(id);
 
         return new MemberDto.MemberDtoBuilder()
                 .username(findMember.getName())

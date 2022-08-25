@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.ItemRepository;
+import jpabook.jpashop.dao.em.EntityManagerItemRepository;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.ItemDto;
 import lombok.RequiredArgsConstructor;

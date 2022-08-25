@@ -4,6 +4,7 @@ import jpabook.jpashop.domain.item.Item;
 import lombok.Getter;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -39,5 +40,16 @@ public class OrderItem {
     private int count;
     private int orderPrice;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderItem orderItem = (OrderItem) o;
+        return count == orderItem.count && orderPrice == orderItem.orderPrice && Objects.equals(id, orderItem.id) && Objects.equals(order, orderItem.order) && Objects.equals(item, orderItem.item);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, order, item, count, orderPrice);
+    }
 }
