@@ -2,7 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.em.EntityManagerItemRepository;
 import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
-import jpabook.jpashop.dao.em.OrderRepository;
+import jpabook.jpashop.dao.em.EntityManagerOrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
@@ -35,7 +35,7 @@ class OrderServiceTest {
     private  OrderService orderService;
 
     @Mock
-    private OrderRepository orderRepository;
+    private EntityManagerOrderRepository orderRepository;
 
     @Mock
     private EntityManagerItemRepository itemRepository;

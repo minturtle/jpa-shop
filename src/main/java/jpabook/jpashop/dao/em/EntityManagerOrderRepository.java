@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class OrderRepository extends EntityManagerRepository<Order> {
-    public OrderRepository(EntityManager em) {
+public class EntityManagerOrderRepository extends EntityManagerRepository<Order> {
+    public EntityManagerOrderRepository(EntityManager em) {
         super(em, Order.class);
     }
 

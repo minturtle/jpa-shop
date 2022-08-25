@@ -4,7 +4,7 @@ import lombok.Getter;
 
 import javax.persistence.*;
 
-@Entity
+@Embeddable
 @Getter
 public class Delivery {
 
@@ -14,10 +14,6 @@ public class Delivery {
         this.address = address;
         status = DeliveryStatus.READY;
     }
-
-    @Id @GeneratedValue
-    @Column(name = "delivery_id")
-    private Long id;
 
     @Embedded
     private Address address;

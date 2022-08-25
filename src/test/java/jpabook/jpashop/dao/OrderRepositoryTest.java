@@ -1,7 +1,7 @@
 package jpabook.jpashop.dao;
 
 import jpabook.jpashop.dao.em.EntityManagerItemRepository;
-import jpabook.jpashop.dao.em.OrderRepository;
+import jpabook.jpashop.dao.em.EntityManagerOrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 
@@ -32,8 +32,11 @@ class OrderRepositoryTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
     @Mock
-    private EntityManagerItemRepository itemRepository;
+    private ItemRepository itemRepository;
 
     private Member member1;
     private Member member2;
@@ -53,6 +56,9 @@ class OrderRepositoryTest {
         order1 = new Order(member1,List.of(new OrderItem(item1, 5)));
         order2 = new Order(member1, List.of(new OrderItem(item1, 5), new OrderItem(item2, 3)));
 
+
+        memberRepository.save(member1);
+        memberRepository.save(member2);
     }
 
     @Test

@@ -39,12 +39,12 @@ public class Order {
     private LocalDateTime orderedTime;
 
     @Enumerated(value = EnumType.STRING)
+    @Column(name="order_status")
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order")
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "delivery_id")
+    @Embedded
     private Delivery delivery;
 }

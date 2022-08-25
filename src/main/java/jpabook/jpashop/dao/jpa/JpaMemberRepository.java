@@ -15,7 +15,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JpaMemberRepository implements MemberRepository {
 
-    private final InnerJpaRepository repository;
+    private final InnerMemberJpaRepository repository;
 
     @Override
     public void save(Member member) {
@@ -46,7 +46,7 @@ public class JpaMemberRepository implements MemberRepository {
 }
 
 @Component
-interface InnerJpaRepository extends JpaRepository<Member , Long>{
+interface InnerMemberJpaRepository extends JpaRepository<Member , Long>{
 
     Optional<Member> findByUserId(String userId);
     Optional<Member> findByName(String name);
