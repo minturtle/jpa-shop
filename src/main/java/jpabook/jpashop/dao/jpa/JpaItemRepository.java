@@ -4,6 +4,9 @@ import jpabook.jpashop.dao.ItemRepository;
 import jpabook.jpashop.domain.item.Item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
@@ -36,8 +39,13 @@ public class JpaItemRepository implements ItemRepository {
     }
 
     @Override
+    public List<Item> findAll(Pageable pageable){
+        return repository.findAll(pageable).toList();
+    }
+
+    @Override
     public List<Item> findAll() {
-        return repository.findAll();
+        return findAll(PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id")));
     }
 
 }

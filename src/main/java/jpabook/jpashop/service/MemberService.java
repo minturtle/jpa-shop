@@ -32,7 +32,6 @@ public class MemberService {
             Member member = Member.createMember(registerDto.getUsername(), registerDto.getUserId()
                     , registerDto.getPassword(), registerDto.getAddress().getCity()
                     ,registerDto.getAddress().getStreet(),registerDto.getAddress().getZipcode());
-
             member.encryptPassword();
 
             memberRepository.save(member);
@@ -55,7 +54,12 @@ public class MemberService {
             throw new LoginFailed("유저 정보를 찾을 수 없습니다.", e);}
     }
 
-
+    /*
+    * 사용자 마이페이지에 필요한 정보들을 제공
+    *
+    * @param id : User Entity의 Id값
+    * @return : 유저의 이름, 주소 정보가 담긴 Dto
+    * */
     @Transactional(readOnly = true)
     public MemberDto getMemberDetail(Long id) throws EntityNotFoundException{
         Member findMember = memberRepository.findById(id);
@@ -66,11 +70,25 @@ public class MemberService {
                 .build();
     }
 
-    public void updateAddress(Long id, Address address) throws LoginFailed{
+
+    /*
+    * 사용자 주소변경
+    *
+    * @param id : User Entity의 Id값
+    * @param address : 바뀐 주소 정보가 담겨있음.
+    * */
+    public void updateAddress(Long id, Address modifiedAddress) throws LoginFailed{
          Member findMember = memberRepository.findById(id);
-            findMember.setAddress(address);
+            findMember.setAddress(modifiedAddress);
     }
 
+
+    /*
+    * 사용자 비밀번호 변경, 비밀번호가 바꿀 수 있는지 검증 한 후 암호화 한 후 바뀜.
+    *
+    * @param id : User Entity의 id값
+    * @param modifiedPassword : 바꾸려는 비밀번호 값
+    * */
     public void updatePassword(Long id, String modifiedPassword) throws IllegalStateException{
         checkIsPasswordUsable(modifiedPassword); //throwable IllegalStateException
 

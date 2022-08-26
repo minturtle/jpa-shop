@@ -4,6 +4,7 @@ import jpabook.jpashop.domain.item.Album;
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.domain.item.Movie;
+import jpabook.jpashop.service.ItemService;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.data.Index;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityNotFoundException;
@@ -35,6 +38,7 @@ class ItemRepositoryTest {
         book = new Book("어린 왕자", 15000, 30, "김민석", "11234");
         album = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
         movie = new Movie("어벤져스", 30, 19000, "김민석", "김민석");
+
     }
 
     @Test
@@ -95,6 +99,51 @@ class ItemRepositoryTest {
         assertThat(findItems.size()).isEqualTo(3);
     }
 
+    @Test
+    @DisplayName("3개의 객체 저장하고 최신순으로 조회하기")
+    void t7() throws Exception {
+        //given
+        saveAll();
+        //when
+        List<Item> findItems = itemRepository
+                .findAll(PageRequest.of(0, 10, Sort.by("id").descending()));
+        //then
+        assertThat(findItems).contains(book, Index.atIndex(2));
+        assertThat(findItems).contains(movie, Index.atIndex(1));
+        assertThat(findItems).contains(album, Index.atIndex(0));
+        assertThat(findItems.size()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("3개의 객체 저장하고 이름순으로 조회하기")
+    void t8() throws Exception {
+        //given
+        saveAll();
+        //when
+        List<Item> findItems = itemRepository
+                .findAll(PageRequest.of(0, 10, Sort.by("name").ascending()));
+        //then
+        assertThat(findItems).contains(book, Index.atIndex(1));
+        assertThat(findItems).contains(movie, Index.atIndex(2));
+        assertThat(findItems).contains(album, Index.atIndex(0));
+        assertThat(findItems.size()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("3개의 객체 저장하고 가격순으로 정렬하기")
+    void t9() throws Exception {
+        //given
+        saveAll();
+        //when
+        List<Item> findItems = itemRepository
+                .findAll(PageRequest.of(0, 10, Sort.by("price").ascending()));
+        //then
+        assertThat(findItems).contains(book, Index.atIndex(0));
+        assertThat(findItems).contains(movie, Index.atIndex(1));
+        assertThat(findItems).contains(album, Index.atIndex(2));
+        assertThat(findItems.size()).isEqualTo(3);
+
+    }
 
     private void saveAll() {
         itemRepository.save(book);

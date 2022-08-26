@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
@@ -197,16 +199,32 @@ class ItemServiceTest {
     }
 
     @Test
-    @DisplayName("3개의 객체 저장 후 findAll로 값 반환받기")
+    @DisplayName("3개의 객체 저장 후 findAll로 값 반환받기-최신순")
     void t9() throws Exception {
         //given
-        given(itemRepository.findAll()).willReturn(List.of(book, album, movie));
+        given(itemRepository.findAll(PageRequest.of(1, 10, getSortByType(ItemService.SortType.최신순))))
+                .willReturn(List.of(book, album, movie));
         //when
-        List<ItemDto> findItems = itemService.findAll();
+        List<ItemDto> findItems = itemService.findAll(1,  ItemService.SortType.최신순);
         //then
         assertThat(findItems).contains(bookDto, Index.atIndex(0));
         assertThat(findItems).contains(albumDto, Index.atIndex(1));
         assertThat(findItems).contains(movieDto, Index.atIndex(2));
         assertThat(findItems.size()).isEqualTo(3);
+    }
+
+    private Sort getSortByType(ItemService.SortType sortType) {
+        Sort sort;
+
+        if(sortType.equals(ItemService.SortType.가격순)){
+            sort = Sort.by("price").ascending();
+        }
+        else if(sortType.equals(ItemService.SortType.이름순)){
+            sort = Sort.by("name").ascending();
+        }
+        else{
+            sort = Sort.by("id").descending();
+        }
+        return sort;
     }
 }
