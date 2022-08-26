@@ -1,6 +1,5 @@
 package jpabook.jpashop.dao;
 
-import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
 import jpabook.jpashop.domain.Member;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.data.Index;
@@ -31,9 +30,9 @@ class MemberRepositoryTest {
 
     @BeforeEach
     void setUp(){
-        member1 = Member.createMember("김민석", "root11", "1122", "경북 구미시", "대학로 61","금오공과 대학교",false);
-        member2 = Member.createMember("김민석1", "root12", "1122","대구광역시", "대학로 1","경북대학교",false);
-        member3 = Member.createMember("김민석2","root13", "1122" ,"서울특별시", "대학로 2", "서울대학교", false);
+        member1 = Member.createMember("김민석", "root11", "1122", "경북 구미시", "대학로 61","금오공과 대학교");
+        member2 = Member.createMember("김민석1", "root12", "1122","대구광역시", "대학로 1","경북대학교");
+        member3 = Member.createMember("김민석2","root13", "1122" ,"서울특별시", "대학로 2", "서울대학교");
     }
 
     @Test

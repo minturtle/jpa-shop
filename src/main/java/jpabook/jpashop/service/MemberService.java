@@ -1,7 +1,6 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.MemberRepository;
-import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.dto.MemberDto;
@@ -20,14 +19,21 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+
+    /*
+    * 사용자의 회원가입 폼을 입력받아, 검증 후 회원가입을 진행
+    *
+    * @param registerDto : 회원가입 폼의 입력 값들(빈 값이 있어선 안됨.)
+    * */
     public void register(MemberDto registerDto) throws RegisterFailed{
         try {
             validRegisterForm(registerDto); //회원가입이 가능한 입력인지 검증
 
-            //Member 객체가 만들어 질때 비밀번호는 암호화된다.
             Member member = Member.createMember(registerDto.getUsername(), registerDto.getUserId()
                     , registerDto.getPassword(), registerDto.getAddress().getCity()
-                    ,registerDto.getAddress().getStreet(),registerDto.getAddress().getZipcode(), false);
+                    ,registerDto.getAddress().getStreet(),registerDto.getAddress().getZipcode());
+
+            member.encryptPassword();
 
             memberRepository.save(member);
 
@@ -36,19 +42,19 @@ public class MemberService {
         }
     }
 
-    public MemberDto login(MemberDto loginDto) throws LoginFailed{
+
+    public Long login(MemberDto loginDto) throws LoginFailed{
         try {
 
             Member findMember = memberRepository.findByUserId(loginDto.getUserId()); //throwable EntityNotFound
             checkIsPasswordCorrect(findMember, loginDto.getPassword()); //throwable LoginFailed
 
-            return new MemberDto.MemberDtoBuilder()
-                    .userIdAndPassword(findMember.getUserId(), findMember.getPassword())
-                    .build();
+            return findMember.getId();
 
         }catch (EntityNotFoundException e){
             throw new LoginFailed("유저 정보를 찾을 수 없습니다.", e);}
     }
+
 
     @Transactional(readOnly = true)
     public MemberDto getMemberDetail(Long id) throws EntityNotFoundException{
@@ -60,16 +66,17 @@ public class MemberService {
                 .build();
     }
 
-    public void updateAddress(MemberDto memberDto) throws LoginFailed{
-         Member findMember = memberRepository.findByUserId(memberDto.getUserId());
-        findMember.setAddress(memberDto.getAddress());
+    public void updateAddress(Long id, Address address) throws LoginFailed{
+         Member findMember = memberRepository.findById(id);
+            findMember.setAddress(address);
     }
 
-    public void updatePassword(MemberDto memberDto, String modifiedPassword) throws IllegalStateException{
+    public void updatePassword(Long id, String modifiedPassword) throws IllegalStateException{
         checkIsPasswordUsable(modifiedPassword); //throwable IllegalStateException
 
-        Member findMember = memberRepository.findByUserId(memberDto.getUserId());
-        findMember.setPassword(modifiedPassword, false);
+        Member findMember = memberRepository.findById(id);
+        findMember.setPassword(modifiedPassword);
+        findMember.encryptPassword();
     }
 
     @Transactional(readOnly = true)

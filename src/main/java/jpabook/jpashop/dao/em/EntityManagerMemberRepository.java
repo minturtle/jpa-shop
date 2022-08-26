@@ -1,15 +1,14 @@
 package jpabook.jpashop.dao.em;
 
-import jpabook.jpashop.dao.em.EntityManagerRepository;
+import jpabook.jpashop.dao.MemberRepository;
 import jpabook.jpashop.domain.Member;
-import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.NoResultException;
 
 
-public class EntityManagerMemberRepository extends EntityManagerRepository<Member> implements jpabook.jpashop.dao.MemberRepository {
+public class EntityManagerMemberRepository extends EntityManagerRepository<Member> implements MemberRepository {
 
     public EntityManagerMemberRepository(EntityManager em){
         super(em, Member.class);

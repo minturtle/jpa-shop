@@ -9,14 +9,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MemberDto {
 
-    public MemberDto(String userId, String password, String username, String city, String street, String zipcode) {
+    public MemberDto(Long id, String userId, String password, String username, String city, String street, String zipcode) {
+        this.id = id;
         this.userId = userId;
         this.password = password;
         this.username = username;
         this.address = new Address(city, street, zipcode);
     }
 
-
+    private Long id;
     private String userId;
     private String password;
     private String username;
@@ -46,9 +47,16 @@ public class MemberDto {
             address(address.getCity(), address.getStreet(), address.getZipcode());
             return this;
         }
-        public MemberDto build(){
-            return new MemberDto(userId, password, username, city,street,zipcode);
+
+        public MemberDtoBuilder id(Long id){
+            this.id = id;
+            return this;
         }
+
+        public MemberDto build(){
+            return new MemberDto(id, userId, password, username, city,street,zipcode);
+        }
+        private Long id;
         private String userId = "";
         private String password = "";
         private String username = "";

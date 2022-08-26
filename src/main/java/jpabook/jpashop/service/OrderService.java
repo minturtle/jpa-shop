@@ -1,8 +1,8 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.dao.em.EntityManagerItemRepository;
-import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
-import jpabook.jpashop.dao.em.EntityManagerOrderRepository;
+import jpabook.jpashop.dao.ItemRepository;
+import jpabook.jpashop.dao.MemberRepository;
+import jpabook.jpashop.dao.OrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderService {
 
-    private final EntityManagerOrderRepository orderRepository;
-    private final EntityManagerItemRepository itemRepository;
-    private final EntityManagerMemberRepository memberRepository;
+    private final OrderRepository orderRepository;
+    private final ItemRepository itemRepository;
+    private final MemberRepository memberRepository;
 
     public OrderDto order(Long userId, OrderItemListDto orderItemDtos){
         Member member = memberRepository.findById(userId);

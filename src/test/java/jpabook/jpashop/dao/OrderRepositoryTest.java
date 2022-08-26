@@ -1,7 +1,5 @@
 package jpabook.jpashop.dao;
 
-import jpabook.jpashop.dao.em.EntityManagerItemRepository;
-import jpabook.jpashop.dao.em.EntityManagerOrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 
@@ -9,6 +7,7 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.item.Album;
 import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.util.Encryptor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,8 +46,8 @@ class OrderRepositoryTest {
 
     @BeforeEach
     void setUp(){
-        member1 =  Member.createMember("김민석", "root11", "1111", "경북 구미시", "대학로 61","금오공과 대학교",false);
-        member2 = Member.createMember("test", "aa", "bbcc", "a", "b", "c", false);
+        member1 =  Member.createMember("김민석", "root11", Encryptor.encrypt("1111"), "경북 구미시", "대학로 61","금오공과 대학교");
+        member2 = Member.createMember("test", "aa", Encryptor.encrypt("bbcc"), "a", "b", "c");
         item1 = new Book("어린 왕자", 15000, 30, "김민석", "11234");
         item2 = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
 

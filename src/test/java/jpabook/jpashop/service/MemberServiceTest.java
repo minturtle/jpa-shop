@@ -1,7 +1,6 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.dao.MemberRepository;
-import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.dto.MemberDto;
@@ -41,13 +40,13 @@ class MemberServiceTest {
 
     @BeforeEach
     void setup(){
-        registerDto1 = new MemberDto("root11", "1122", "김민석", "구미시", "대학로 61", "금오공과대학교");
-        registerDto2 = new MemberDto( "root12", "1122","김민석1", "경북 구미시", "대학로 61","금오공과 대학교");
-        registerDto3 = new MemberDto("root13", "1122","김민석2" ,"대구광역시", "대학로 1","경북대학교");
+        registerDto1 = new MemberDto(1L,"root11", "1122", "김민석", "구미시", "대학로 61", "금오공과대학교");
+        registerDto2 = new MemberDto(2L,"root12", "1122","김민석1", "경북 구미시", "대학로 61","금오공과 대학교");
+        registerDto3 = new MemberDto(3L, "root13", "1122","김민석2" ,"대구광역시", "대학로 1","경북대학교");
 
-        member1 = Member.createMember("김민석", "root11", "1122","경북 구미시", "대학로 61","금오공과 대학교",false);
-        member2 = Member.createMember("김민석1","root12", "1122", "대구광역시", "대학로 1","경북대학교", false);
-        member3 = Member.createMember("김민석2","root13", "1122", "서울특별시", "대학로 2", "서울대학교", false);
+        member1 = Member.createMember("김민석", "root11", Encryptor.encrypt("1122"),"경북 구미시", "대학로 61","금오공과 대학교");
+        member2 = Member.createMember("김민석1","root12", Encryptor.encrypt("1122"), "대구광역시", "대학로 1","경북대학교");
+        member3 = Member.createMember("김민석2","root13", Encryptor.encrypt("1122"), "서울특별시", "대학로 2", "서울대학교");
     }
 
     @Test
@@ -113,10 +112,9 @@ class MemberServiceTest {
         //given
         given(memberRepository.findByUserId(registerDto1.getUserId())).willReturn(member1);
         //when
-        MemberDto findDto = memberService.login(registerDto1);
+        final Long memberId = memberService.login(registerDto1);
         //then
-        assertThat(findDto.getUserId()).isEqualTo(member1.getUserId());
-        assertThat(findDto.getPassword()).isEqualTo(member1.getPassword());
+        assertThat(memberId).isEqualTo(member1.getId());
     }
 
     @Test
@@ -153,25 +151,22 @@ class MemberServiceTest {
     @DisplayName("유저의 주소 변경")
     void t10() throws Exception {
         //given
-        given(memberRepository.findByUserId(member1.getUserId())).willReturn(member1);
-        MemberDto dto = new MemberDto.MemberDtoBuilder()
-                .userIdAndPassword(member1.getUserId(), "1122")
-                .address("부산 광역시", "부산대학교", "기숙사 205호").build();
+        given(memberRepository.findById(member1.getId())).willReturn(member1);
+
+        Address address = new Address("부산 광역시", "부산대학교", "기숙사 205호");
         //when
-        memberService.updateAddress(dto);
+        memberService.updateAddress(member1.getId(), address);
         //then
-        assertThat(member1.getAddress()).isEqualTo(new Address("부산 광역시", "부산대학교", "기숙사 205호"));
+        assertThat(member1.getAddress()).isEqualTo(address);
     }
 
     @Test
     @DisplayName("유저의 비밀번호 변경")
     void t11() throws Exception {
         //given
-        given(memberRepository.findByUserId(member1.getUserId())).willReturn(member1);
-        MemberDto dto = new MemberDto.MemberDtoBuilder()
-                .userIdAndPassword(member1.getUserId(), "1122").build();
+        given(memberRepository.findById(member1.getId())).willReturn(member1);
         //when
-        memberService.updatePassword(dto, "12345");
+        memberService.updatePassword(member1.getId(), "12345");
         //then
         assertThat(member1.getPassword()).isEqualTo(Encryptor.encrypt("12345"));
     }
@@ -180,12 +175,10 @@ class MemberServiceTest {
     @DisplayName("유저의 비밀번호 변경, 조건에 맞지않음")
     void t12() throws Exception {
         //given
-        MemberDto dto = new MemberDto.MemberDtoBuilder()
-                .userIdAndPassword(member1.getUserId(), "1122").build();
         //when
         //then
 
-        assertThatThrownBy(()->memberService.updatePassword(dto, "12"))
+        assertThatThrownBy(()->memberService.updatePassword(member1.getId(), "12"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("비밀번호는 4글자 이상이여야 합니다.");
     }
