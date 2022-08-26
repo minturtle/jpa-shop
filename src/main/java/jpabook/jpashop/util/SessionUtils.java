@@ -6,7 +6,12 @@ public class SessionUtils {
 
     private static String USER_KEY = "userId";
 
-    public static String getUserFromSession(HttpSession session){
-        return (String)session.getAttribute(USER_KEY);
+
+    public static void putUserToSession(HttpSession session, Long id){
+        session.setAttribute(USER_KEY, id);
     }
+    public static Long getUserFromSession(HttpSession session){
+        return (Long)session.getAttribute(USER_KEY);
+    }
+
 }

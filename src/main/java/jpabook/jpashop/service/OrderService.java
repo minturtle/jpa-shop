@@ -42,6 +42,11 @@ public class OrderService {
     }
 
 
+    /*
+    * 주문을 취소함
+    *
+    * @param : Order Entity의 id값
+    * */
     public void cancel(Long orderId) throws EntityNotFoundException{
         Order order = orderRepository.findById(orderId);
         order.cancel();
@@ -52,7 +57,14 @@ public class OrderService {
         return createOrderDto(order);
     }
 
-    public List<OrderDto> findByUser(Long memberId){
+
+    /*
+    * 유저의 주문 내역 리스트를 불러옴
+    *
+    * @param : Member Entity의 Id값
+    * @return : 유저의 Order 리스트
+    * */
+    public List<OrderDto> findByUser(Long memberId) throws EntityNotFoundException{
         Member member = memberRepository.findById(memberId);
 
         List<Order> ordersByMember = orderRepository.findByMember(member);
