@@ -25,7 +25,14 @@ public class OrderItemListDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class OrderItemDto{
+
+
         private Long itemId;
+        private String itemName;
+        private int unitPrice;
         private int count;
+
+
+
     }
 }

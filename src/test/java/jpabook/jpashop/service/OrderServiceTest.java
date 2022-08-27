@@ -1,8 +1,9 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.dao.em.EntityManagerItemRepository;
-import jpabook.jpashop.dao.em.EntityManagerMemberRepository;
-import jpabook.jpashop.dao.em.EntityManagerOrderRepository;
+import jpabook.jpashop.dao.ItemRepository;
+import jpabook.jpashop.dao.MemberRepository;
+import jpabook.jpashop.dao.OrderRepository;
+
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;
@@ -12,6 +13,7 @@ import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
+import jpabook.jpashop.dto.OrderPreviewDto;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,13 +38,13 @@ class OrderServiceTest {
     private  OrderService orderService;
 
     @Mock
-    private EntityManagerOrderRepository orderRepository;
+    private OrderRepository orderRepository;
 
     @Mock
-    private EntityManagerItemRepository itemRepository;
+    private ItemRepository itemRepository;
 
     @Mock
-    private EntityManagerMemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     private Member member;
     private OrderItemListDto orderItemListDto;
@@ -73,7 +76,7 @@ class OrderServiceTest {
         given(itemRepository.findById(item1.getId())).willReturn(item1);
         given(memberRepository.findById(member.getId())).willReturn(member);
 
-        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 5))); //5개의 item1 주문
+        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(),item1.getName(),item1.getPrice(), 5))); //5개의 item1 주문
         //when
         final OrderDto orderDto = orderService.order(member.getId(), orderItemListDto);
         //then
@@ -88,7 +91,7 @@ class OrderServiceTest {
         //given
         given(itemRepository.findById(item1.getId())).willReturn(item1);
         given(memberRepository.findById(member.getId())).willReturn(member);
-        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 500)));
+        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), item1.getName(), item1.getPrice(), 500)));
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->{
             orderService.order(member.getId(), orderItemListDto);
@@ -107,7 +110,7 @@ class OrderServiceTest {
         given(memberRepository.findById(member.getId())).willReturn(member);
 
         Order order = new Order(member, getOrderItems(5, item1));
-        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(), 5)));
+        orderItemListDto.setItems(List.of(new OrderItemListDto.OrderItemDto(item1.getId(),item1.getName(), item1.getPrice(), 5)));
         OrderDto orderDto = orderService.order(member.getId(), orderItemListDto);
         given(orderRepository.findById(orderDto.getId())).willReturn(order);
 
@@ -129,7 +132,7 @@ class OrderServiceTest {
         OrderDto findOrderDto = orderService.findById(order.getId());
         //then
         assertThat(findOrderDto.getMember()).isEqualTo(member);
-        assertThat(findOrderDto.getOrderItems()).contains(new OrderItem(item1, 5));
+        assertThat(findOrderDto.getOrderItems().get(0).getItemName()).isEqualTo("어린 왕자");
     }
 
     @Test
@@ -147,12 +150,27 @@ class OrderServiceTest {
         assertThat(ordersByUser.size()).isEqualTo(2);
     }
 
+    @Test
+    @DisplayName("주문 preview 로 변경하기")
+    void t7() throws Exception {
+        //given
+        final OrderDto orderDto = new OrderDto(11L, member, LocalDateTime.now(), OrderStatus.ORDER,
+                getOrderItems(2, item1, item2).stream().map(this::orderItemToDto).collect(Collectors.toList()), null);
+        //when
+        final OrderPreviewDto prevDto = orderService.createOrderPreviewDto(orderDto);
+        //then
+        assertThat(prevDto.getTitle()).isEqualTo("어린 왕자 외 1건");
+        assertThat(prevDto.getTotalPrice()).isEqualTo(130000);
+    }
+
 
     private List<OrderItem> getOrderItems(int count, Item ... items) {
         return Arrays.stream(items).map(item -> new OrderItem(item, count)).collect(Collectors.toList());
 
     }
 
-
+    private OrderItemListDto.OrderItemDto orderItemToDto(OrderItem orderItem){
+        return new OrderItemListDto.OrderItemDto(orderItem.getItem().getId(), orderItem.getItem().getName(), orderItem.getItem().getPrice(),orderItem.getCount());
+    }
 
 }

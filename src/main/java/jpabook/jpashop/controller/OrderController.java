@@ -3,13 +3,18 @@ package jpabook.jpashop.controller;
 
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
+import jpabook.jpashop.dto.OrderPreviewDto;
 import jpabook.jpashop.service.OrderService;
 import jpabook.jpashop.util.SessionUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,18 +25,32 @@ public class OrderController {
 
 
     @PostMapping("")
-    public String doOrder(@RequestBody OrderItemListDto listDto, HttpSession session){
+    public void doOrder(@RequestBody OrderItemListDto listDto, HttpSession session, HttpServletResponse res) throws IOException {
 
         Long memberId = SessionUtils.getUserFromSession(session);
         orderService.order(memberId , listDto);
 
-        return "redirect:/";
+        res.sendRedirect("/");
     }
 
     @GetMapping("/orders")
-    public List<OrderDto> getOrderbyMember(HttpSession session){
-        final Long memberId = SessionUtils.getUserFromSession(session);
-        return orderService.findByUser(memberId);
+    public List<OrderPreviewDto> getOrderbyMember(HttpSession session){
+
+        Long memberId = SessionUtils.getUserFromSession(session);
+        List<OrderDto> orderDtos = orderService.findByUser(memberId);
+
+        return orderDtos.stream().map(orderService::createOrderPreviewDto).collect(Collectors.toList());
     }
 
+    @GetMapping("/detail")
+    public OrderDto getOrderDetail(@RequestParam(name="id") Long orderId){
+        return orderService.findById(orderId);
+    }
+
+    @PostMapping("/cancel")
+    public void cancelOrder(@RequestParam(name="id") Long orderId, HttpServletResponse res) throws IOException {
+        orderService.cancel(orderId);
+
+        res.sendRedirect("/");
+    }
 }

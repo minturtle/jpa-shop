@@ -1,9 +1,8 @@
 package jpabook.jpashop.dto;
 
-import jdk.jfr.Timestamp;
 import jpabook.jpashop.domain.Delivery;
 import jpabook.jpashop.domain.Member;
-import jpabook.jpashop.domain.OrderItem;
+
 import jpabook.jpashop.domain.OrderStatus;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,7 +20,7 @@ public class OrderDto {
     public OrderDto() {
     }
 
-    public OrderDto(Long id, Member member, LocalDateTime orderedTime, OrderStatus status, List<OrderItem> orderItems, Delivery delivery) {
+    public OrderDto(Long id, Member member, LocalDateTime orderedTime, OrderStatus status, List<OrderItemListDto.OrderItemDto> orderItems, Delivery delivery) {
         this.id = id;
         this.member = member;
         this.orderedTime = orderedTime;
@@ -38,7 +37,7 @@ public class OrderDto {
 
     private OrderStatus status;
 
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderItemListDto.OrderItemDto> orderItems = new ArrayList<>();
 
     private Delivery delivery;
 

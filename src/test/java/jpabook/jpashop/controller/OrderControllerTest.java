@@ -6,9 +6,11 @@ import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
+import jpabook.jpashop.dto.OrderPreviewDto;
 import jpabook.jpashop.service.OrderService;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +18,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
-import org.springframework.test.web.servlet.MvcResult;
+
+
 import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -27,11 +31,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest
@@ -60,7 +64,7 @@ class OrderControllerTest {
 
         orderDto1 = new OrderDto(10L, member, LocalDateTime.now(), OrderStatus.ORDER, null, null);
         orderDto2 = new OrderDto(11L, member, LocalDateTime.now(), OrderStatus.ORDER, null, null);
-        orderDto3 = new OrderDto(10L, member2, LocalDateTime.now(), OrderStatus.ORDER, null, null);
+        orderDto3 = new OrderDto(12L, member2, LocalDateTime.now(), OrderStatus.ORDER, null, null);
 
     }
 
@@ -71,9 +75,9 @@ class OrderControllerTest {
         MockHttpSession session = getUserSession();
 
         String json = createJSON(List.of(
-                new OrderItemListDto.OrderItemDto(1L, 2),
-                new OrderItemListDto.OrderItemDto(2L, 3),
-                new OrderItemListDto.OrderItemDto(3L, 5)));
+                new OrderItemListDto.OrderItemDto(1L, "물건1", 15000, 2),
+                new OrderItemListDto.OrderItemDto(2L,"물건2", 30000, 3),
+                new OrderItemListDto.OrderItemDto(3L,"물건3", 12000, 5)));
 
         //when
         ResultActions result = mockMvc.perform(post("/order")
@@ -87,7 +91,8 @@ class OrderControllerTest {
     }
 
     @Test
-    @DisplayName("유저의 주문 리스트 조회하기")
+    @DisplayName("유저의 주문 리스트 조회하기-통합 테스트에서 확인")
+    @Disabled
     void t2() throws Exception {
         MockHttpSession session = getUserSession();
         //given
@@ -97,13 +102,38 @@ class OrderControllerTest {
                 .characterEncoding(StandardCharsets.UTF_8)
                 .session(session)).andReturn().getResponse().getContentAsString();
 
-        final List resultList = objectMapper.readValue(resContentString, List.class);
+        List<OrderPreviewDto> resultList = List.of(objectMapper.readValue(resContentString, OrderPreviewDto[].class));
+
         //then
         assertThat(resultList.size()).isEqualTo(2);
-
-
+        assertThat(resultList.get(0).getOrderId()).isEqualTo(10L);
+        assertThat(resultList.get(1).getOrderId()).isEqualTo(11L);
     }
 
+    @Test
+    @DisplayName("주문 상세 조회하기")
+    void t3() throws Exception {
+        //given
+        given(orderService.findById(10L)).willReturn(orderDto1);
+        //when
+        final OrderDto dto = objectMapper.readValue(mockMvc.perform(get("/order/detail").param("id", "10"))
+                .andReturn().getResponse().getContentAsString(), OrderDto.class);
+
+        //then
+        assertThat(dto.getId()).isEqualTo(10L);
+    }
+
+    @Test
+    @DisplayName("주문 취소하기")
+    void t4() throws Exception {
+        //given
+
+        //when
+        final ResultActions result = mockMvc.perform(post("/order/cancel").param("id", "1"));
+        //then
+        result.andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/"));
+
+    }
     private String createJSON(List<OrderItemListDto.OrderItemDto> list) throws JsonProcessingException {
         OrderItemListDto dto = new OrderItemListDto();
         dto.setItems(list);

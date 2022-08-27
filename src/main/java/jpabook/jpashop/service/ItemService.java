@@ -4,7 +4,7 @@ import jpabook.jpashop.dao.ItemRepository;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.ItemDto;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;

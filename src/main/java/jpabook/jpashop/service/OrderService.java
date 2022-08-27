@@ -9,6 +9,7 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
+import jpabook.jpashop.dto.OrderPreviewDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -73,6 +74,19 @@ public class OrderService {
     }
 
 
+    public OrderPreviewDto createOrderPreviewDto(OrderDto orderDto){
+        StringBuilder sb = new StringBuilder(orderDto.getOrderItems().get(0).getItemName());
+        if(orderDto.getOrderItems().size() != 1){
+            sb.append(" 외 ")
+                .append(orderDto.getOrderItems().size() - 1)
+                .append("건");
+        }
+
+        return new OrderPreviewDto(orderDto.getId(),sb.toString(), getTotalPrice(orderDto));
+    }
+
+
+
     private List<OrderItem> createOrderItemList(OrderItemListDto orderItemDtos) {
         List<OrderItem> orderItems = new ArrayList<>(orderItemDtos.size());
         Iterator<OrderItemListDto.OrderItemDto> iterator = orderItemDtos.iterator();
@@ -94,7 +108,18 @@ public class OrderService {
 
     private OrderDto createOrderDto(Order order) {
         OrderDto orderDto = new OrderDto(order.getId(), order.getMember(), order.getOrderedTime(), order.getStatus()
-                , order.getOrderItems(), order.getDelivery());
+                , createOrderItemDtoList(order.getOrderItems()), order.getDelivery());
         return orderDto;
     }
+
+    private List<OrderItemListDto.OrderItemDto> createOrderItemDtoList(List<OrderItem> orderItems){
+        return orderItems.stream()
+                .map(oi->new OrderItemListDto.OrderItemDto(oi.getItem().getId(), oi.getItem().getName(),
+                        oi.getItem().getPrice(), oi.getCount())).collect(Collectors.toList());
+    }
+
+    private int getTotalPrice(OrderDto orderDto) {
+        return orderDto.getOrderItems().stream().mapToInt(oi->{return oi.getCount() * oi.getUnitPrice();}).sum();
+    }
+
 }
