@@ -3,11 +3,9 @@ package jpabook.jpashop.controller;
 
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
-import jpabook.jpashop.dto.OrderPreviewDto;
 import jpabook.jpashop.service.OrderService;
 import jpabook.jpashop.util.SessionUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -23,7 +21,6 @@ public class OrderController {
 
     private final OrderService orderService;
 
-
     @PostMapping("")
     public void doOrder(@RequestBody OrderItemListDto listDto, HttpSession session, HttpServletResponse res) throws IOException {
 
@@ -34,7 +31,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders")
-    public List<OrderPreviewDto> getOrderbyMember(HttpSession session){
+    public List<OrderDto.OrderPreviewDto> getOrderbyMember(HttpSession session){
 
         Long memberId = SessionUtils.getUserFromSession(session);
         List<OrderDto> orderDtos = orderService.findByUser(memberId);

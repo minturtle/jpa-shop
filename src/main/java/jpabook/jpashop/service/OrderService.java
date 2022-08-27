@@ -9,7 +9,6 @@ import jpabook.jpashop.domain.OrderItem;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
-import jpabook.jpashop.dto.OrderPreviewDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +73,7 @@ public class OrderService {
     }
 
 
-    public OrderPreviewDto createOrderPreviewDto(OrderDto orderDto){
+    public OrderDto.OrderPreviewDto createOrderPreviewDto(OrderDto orderDto){
         StringBuilder sb = new StringBuilder(orderDto.getOrderItems().get(0).getItemName());
         if(orderDto.getOrderItems().size() != 1){
             sb.append(" 외 ")
@@ -82,7 +81,7 @@ public class OrderService {
                 .append("건");
         }
 
-        return new OrderPreviewDto(orderDto.getId(),sb.toString(), getTotalPrice(orderDto));
+        return new OrderDto.OrderPreviewDto(orderDto.getId(),sb.toString(), getTotalPrice(orderDto));
     }
 
 

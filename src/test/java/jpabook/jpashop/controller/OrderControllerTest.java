@@ -6,7 +6,6 @@ import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
-import jpabook.jpashop.dto.OrderPreviewDto;
 import jpabook.jpashop.service.OrderService;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +22,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
 
-
 import org.springframework.test.web.servlet.ResultActions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -38,7 +36,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@WebMvcTest
+@WebMvcTest(controllers = OrderController.class)
 @AutoConfigureMockMvc
 class OrderControllerTest {
 
@@ -102,7 +100,7 @@ class OrderControllerTest {
                 .characterEncoding(StandardCharsets.UTF_8)
                 .session(session)).andReturn().getResponse().getContentAsString();
 
-        List<OrderPreviewDto> resultList = List.of(objectMapper.readValue(resContentString, OrderPreviewDto[].class));
+        List<OrderDto.OrderPreviewDto> resultList = List.of(objectMapper.readValue(resContentString, OrderDto.OrderPreviewDto[].class));
 
         //then
         assertThat(resultList.size()).isEqualTo(2);

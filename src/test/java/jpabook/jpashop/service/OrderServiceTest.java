@@ -13,7 +13,6 @@ import jpabook.jpashop.domain.item.Book;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
-import jpabook.jpashop.dto.OrderPreviewDto;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -157,7 +156,7 @@ class OrderServiceTest {
         final OrderDto orderDto = new OrderDto(11L, member, LocalDateTime.now(), OrderStatus.ORDER,
                 getOrderItems(2, item1, item2).stream().map(this::orderItemToDto).collect(Collectors.toList()), null);
         //when
-        final OrderPreviewDto prevDto = orderService.createOrderPreviewDto(orderDto);
+        final OrderDto.OrderPreviewDto prevDto = orderService.createOrderPreviewDto(orderDto);
         //then
         assertThat(prevDto.getTitle()).isEqualTo("어린 왕자 외 1건");
         assertThat(prevDto.getTotalPrice()).isEqualTo(130000);

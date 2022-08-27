@@ -4,7 +4,9 @@ import jpabook.jpashop.domain.Delivery;
 import jpabook.jpashop.domain.Member;
 
 import jpabook.jpashop.domain.OrderStatus;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -53,5 +55,20 @@ public class OrderDto {
     @Override
     public int hashCode() {
         return Objects.hash(id, member, orderedTime, status, orderItems, delivery);
+    }
+
+
+
+    @Getter @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class OrderPreviewDto {
+
+        private Long orderId;
+
+        private String title;
+
+        private int totalPrice;
+
     }
 }

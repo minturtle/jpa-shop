@@ -3,6 +3,7 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.dao.ItemRepository;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.ItemDto;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.PageRequest;
@@ -83,8 +84,10 @@ public class ItemService {
         return sort;
     }
 
-
+    @AllArgsConstructor
     public static enum SortType{
-        이름순, 가격순, 최신순
+        이름순("name"), 가격순("price"), 최신순("date");
+
+        private String orderString;
     }
 }
