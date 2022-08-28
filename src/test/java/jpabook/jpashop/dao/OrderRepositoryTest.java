@@ -48,8 +48,8 @@ class OrderRepositoryTest {
     void setUp(){
         member1 =  Member.createMember("김민석", "root11", Encryptor.encrypt("1111"), "경북 구미시", "대학로 61","금오공과 대학교");
         member2 = Member.createMember("test", "aa", Encryptor.encrypt("bbcc"), "a", "b", "c");
-        item1 = new Book("어린 왕자", 15000, 30, "김민석", "11234");
-        item2 = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
+        item1 = new Book("어린 왕자", 15000, "어린왕자 책", 30, "김민석", "11234");
+        item2 = new Album("김민석 정규 앨범 7집", 50000, "앨범",10, "김민석", "김민석 데뷔 20주년 기념");
 
 
         order1 = new Order(member1,List.of(new OrderItem(item1, 5)));

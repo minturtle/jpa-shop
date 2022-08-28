@@ -12,8 +12,8 @@ public class Movie extends Item {
 
     protected Movie(){}
 
-    public Movie(String name, int stockQuantity, int price, String director, String actor) {
-        super(stockQuantity, price, name);
+    public Movie(String name, int price, String description, int stockQuantity, String director, String actor) {
+        super(name, price, description, stockQuantity);
         this.director = director;
         this.actor = actor;
     }

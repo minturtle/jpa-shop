@@ -12,8 +12,8 @@ public class Book extends Item{
 
     protected Book(){}
 
-    public Book(String name, int price, int stockQuantity, String author, String isbn) {
-        super(stockQuantity, price, name);
+    public Book(String name, int price, String description, int stockQuantity, String author, String isbn) {
+        super(name, price, description, stockQuantity);
         this.author = author;
         this.isbn = isbn;
     }

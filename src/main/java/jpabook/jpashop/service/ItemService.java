@@ -28,6 +28,12 @@ public class ItemService {
     }
 
 
+    public ItemDto findById(Long id) throws EntityNotFoundException{
+        Item findItem = itemRepository.findById(id);
+
+        return createItemDto(findItem);
+    }
+
     public ItemDto findByName(String name) throws EntityNotFoundException {
         Item findItem = itemRepository.findByName(name); //throwable EntityNotFoundException
 

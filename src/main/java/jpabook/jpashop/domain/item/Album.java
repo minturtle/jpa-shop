@@ -13,8 +13,8 @@ public class Album extends Item{
     protected Album(){}
 
 
-    public Album(String name, int price, int stockQuantity, String artist, String etc) {
-        super(stockQuantity, price, name);
+    public Album(String name, int price, String description, int stockQuantity, String artist, String etc) {
+        super(name, price, description, stockQuantity);
         this.artist = artist;
         this.etc = etc;
     }

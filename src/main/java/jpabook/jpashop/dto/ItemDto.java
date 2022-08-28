@@ -1,9 +1,9 @@
 package jpabook.jpashop.dto;
 
 import jpabook.jpashop.domain.item.*;
-import lombok.AllArgsConstructor;
+
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
 import lombok.Setter;
 
 import java.util.Objects;
@@ -18,6 +18,7 @@ public class ItemDto {
 
     private String name;
     private int price;
+    private String description;
     private int stockQuantity;
 
     //album
@@ -64,6 +65,12 @@ public class ItemDto {
             this.id = id;
             return this;
         }
+
+        public ItemDtoBuilder setDescription(String description){
+            this.description = description;
+            return this;
+        }
+
 
         public ItemDtoBuilder putInheritedFields(Item findItem){
             if(itemType.equals(Album.class)){
@@ -119,6 +126,7 @@ public class ItemDto {
             itemDto.id = id;
             itemDto.name = name;
             itemDto.price = price;
+            itemDto.description = description;
             itemDto.stockQuantity = stockQuantity;
         }
 
@@ -126,6 +134,7 @@ public class ItemDto {
         private Long id;
         private String name;
         private int price;
+        private String description;
         private int stockQuantity;
 
         //album
@@ -143,27 +152,6 @@ public class ItemDto {
     }
 
 
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class ItemPreviewDto{
-        private Long id;
-        private String itemName;
-        private int price;
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            ItemPreviewDto that = (ItemPreviewDto) o;
-            return Objects.equals(id, that.id);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(id);
-        }
-    }
 
 }
 class CheckItemType extends RuntimeException{

@@ -15,6 +15,7 @@ public class EntityManagerItemRepository extends EntityManagerRepository<Item> i
         super(em, Item.class);
     }
 
+
     @Override
     public List<Item> findAll(Pageable pageable) {
         final List<Item> all = findAll();

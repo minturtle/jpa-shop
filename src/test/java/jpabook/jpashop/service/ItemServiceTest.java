@@ -45,9 +45,9 @@ class ItemServiceTest {
 
     @BeforeEach
     void setup(){
-        book = new Book("어린 왕자", 15000, 30, "김민석", "11234");
-        album = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
-        movie = new Movie("어벤져스", 30, 19000, "김민석", "김민석");
+        book = new Book("어린 왕자", 15000, "어린왕자 책", 30, "김민석", "11234");
+        album = new Album("김민석 정규 앨범 7집", 50000, "앨범",10, "김민석", "김민석 데뷔 20주년 기념");
+        movie = new Movie("어벤져스", 19000,"양화", 30, "김민석", "김민석");
 
         bookDto = new ItemDto.ItemDtoBuilder()
                 .putItemField("어린 왕자", 15000, 30)
@@ -211,6 +211,17 @@ class ItemServiceTest {
         assertThat(findItems).contains(albumDto, Index.atIndex(1));
         assertThat(findItems).contains(movieDto, Index.atIndex(2));
         assertThat(findItems.size()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("아이템 ID로 조회하기")
+    void t10() throws Exception {
+        //given
+        given(itemRepository.findById(book.getId())).willReturn(book);
+        //when
+        final ItemDto findItemDto = itemService.findById(book.getId());
+        //then
+        assertThat(findItemDto.getId()).isEqualTo(book.getId());
     }
 
     private Sort getSortByType(ItemService.SortType sortType) {

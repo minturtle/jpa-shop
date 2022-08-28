@@ -35,9 +35,9 @@ class ItemRepositoryTest {
 
     @BeforeEach
     void setup(){
-        book = new Book("어린 왕자", 15000, 30, "김민석", "11234");
-        album = new Album("김민석 정규 앨범 7집", 50000, 10, "김민석", "김민석 데뷔 20주년 기념");
-        movie = new Movie("어벤져스", 30, 19000, "김민석", "김민석");
+        book = new Book("어린 왕자", 15000, "어린왕자 책", 30, "김민석", "11234");
+        album = new Album("김민석 정규 앨범 7집", 50000,"앨범", 10, "김민석", "김민석 데뷔 20주년 기념");
+        movie = new Movie("어벤져스", 19000, "영화",30, "김민석", "김민석");
 
     }
 

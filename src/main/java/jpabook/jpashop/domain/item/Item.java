@@ -12,10 +12,11 @@ import java.util.Objects;
 public abstract class Item {
     protected Item(){}
 
-    public Item(int stockQuantity, int price, String name) {
+    public Item(String name, int price, String description, int stockQuantity) {
         this.stockQuantity = stockQuantity;
         this.price = price;
         this.name = name;
+        this.description = description;
     }
 
     @Id @GeneratedValue
@@ -25,11 +26,13 @@ public abstract class Item {
     private int stockQuantity;
     private int price;
     private String name;
+    private String description;
 
     public void update(ItemDto item){
         this.name = item.getName();
         this.stockQuantity = item.getStockQuantity();
         this.price = item.getPrice();
+        this.description = description;
         updateInheritedFields(item);
     }
 
