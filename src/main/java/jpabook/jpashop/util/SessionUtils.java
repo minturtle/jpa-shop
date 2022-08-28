@@ -14,4 +14,7 @@ public class SessionUtils {
         return (Long)session.getAttribute(USER_KEY);
     }
 
+    public static void logout(HttpSession session){
+        session.removeAttribute(USER_KEY);
+    }
 }

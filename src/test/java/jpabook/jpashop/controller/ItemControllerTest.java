@@ -2,6 +2,7 @@ package jpabook.jpashop.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jpabook.jpashop.controller.response.ErrorResponse;
 import jpabook.jpashop.domain.item.Item;
 import jpabook.jpashop.dto.ItemDto;
 import jpabook.jpashop.service.ItemService;

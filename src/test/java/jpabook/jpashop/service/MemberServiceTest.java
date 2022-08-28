@@ -79,7 +79,7 @@ class MemberServiceTest {
         ThrowableAssert.ThrowingCallable throwableFunc = ()->memberService
                 .register(registerDto1);
         //then
-        assertThatThrownBy(throwableFunc).isInstanceOf(RegisterFailed.class)
+        assertThatThrownBy(throwableFunc).isInstanceOf(MemberService.RegisterFailed.class)
                 .hasMessage("이미 존재하는 ID입니다.");
     }
 
@@ -91,7 +91,7 @@ class MemberServiceTest {
         //when
         ThrowableAssert.ThrowingCallable throwableFunc = ()->memberService.register(registerDto1);
         //then
-        assertThatThrownBy(throwableFunc).isInstanceOf(RegisterFailed.class)
+        assertThatThrownBy(throwableFunc).isInstanceOf(MemberService.RegisterFailed.class)
                 .hasMessage("비밀번호는 4글자 이상이여야 합니다.");
     }
 
@@ -129,9 +129,9 @@ class MemberServiceTest {
         registerDto2.setPassword("asasfa2q3213sad");
         //when
         //then
-        assertThatThrownBy(()->memberService.login(registerDto1)).isInstanceOf(LoginFailed.class)
+        assertThatThrownBy(()->memberService.login(registerDto1)).isInstanceOf(MemberService.LoginFailed.class)
                 .hasMessage("유저 정보를 찾을 수 없습니다.");
-        assertThatThrownBy(()->memberService.login(registerDto2)).isInstanceOf(LoginFailed.class)
+        assertThatThrownBy(()->memberService.login(registerDto2)).isInstanceOf(MemberService.LoginFailed.class)
                 .hasMessage("잘못된 비밀번호 입니다.");
     }
 
@@ -181,5 +181,15 @@ class MemberServiceTest {
         assertThatThrownBy(()->memberService.updatePassword(member1.getId(), "12"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("비밀번호는 4글자 이상이여야 합니다.");
+    }
+
+    @Test
+    @DisplayName("유저의 이름 변경")
+    void t13() throws Exception {
+        given(memberRepository.findById(member1.getId())).willReturn(member1);
+        //when
+        memberService.updateName(member1.getId(), "김김민석");
+        //then
+        assertThat(member1.getName()).isEqualTo("김김민석");
     }
 }

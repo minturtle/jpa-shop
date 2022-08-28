@@ -34,4 +34,9 @@ public class Address {
     public int hashCode() {
         return Objects.hash(city, street, zipcode);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", city, street, zipcode);
+    }
 }

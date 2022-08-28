@@ -44,6 +44,10 @@ public class Member {
         this.address = address;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public boolean comparePassword(String finePassword){
         return this.password.equals(Encryptor.encrypt(finePassword));
     }
