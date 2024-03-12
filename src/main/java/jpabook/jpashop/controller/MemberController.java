@@ -1,6 +1,5 @@
 package jpabook.jpashop.controller;
 
-
 import jpabook.jpashop.controller.response.ErrorResponse;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.dto.MemberDto;
@@ -13,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.util.Map;
+
 import java.util.Objects;
 
 @RestController
@@ -23,14 +22,12 @@ public class MemberController {
 
     private final MemberService memberService;
 
-
     @PostMapping("/signIn")
     public ResponseEntity signIn(@RequestBody MemberDto memberDto)throws MemberService.RegisterFailed {
         memberService.register(memberDto);
 
         return new ResponseEntity(HttpStatus.OK);
     }
-
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody MemberDto memberDto, HttpSession session) throws MemberService.LoginFailed {
@@ -45,7 +42,6 @@ public class MemberController {
         Long memberEntityId = SessionUtils.getUserFromSession(session);
 
         MemberDto memberDetail = memberService.getMemberDetail(memberEntityId);
-
         return new ResponseEntity<>(new MemberDetailResponse(memberDetail.getUsername(), memberDetail.getAddress().toString()),
                         HttpStatus.OK);
     }
@@ -85,7 +81,6 @@ public class MemberController {
     public ResponseEntity<ErrorResponse> handleException(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
-
 
 }
 

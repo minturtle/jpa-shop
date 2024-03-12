@@ -71,6 +71,8 @@ public class MemberService {
                     .build();
         }catch (EntityNotFoundException e){
             throw new EntityNotFoundException("유저 정보를 찾을 수 없습니다.");
+        }catch(RuntimeException e){
+            throw new EntityNotFoundException("입력된 아이디 값이 없습니다.");
         }
     }
 
@@ -111,7 +113,6 @@ public class MemberService {
         findMember.encryptPassword();
     }
 
-    @Transactional(readOnly = true)
     protected void checkIsDuplicatedUserId(String id) throws IllegalStateException{
         try {
             Member findMember = memberRepository.findByUserId(id); //findMember 값이 있으면 안됨. 없으면 예외발생해서 정상 리턴
