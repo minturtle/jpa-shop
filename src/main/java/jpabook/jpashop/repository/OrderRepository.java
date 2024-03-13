@@ -1,4 +1,4 @@
-package jpabook.jpashop.dao;
+package jpabook.jpashop.repository;
 
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;

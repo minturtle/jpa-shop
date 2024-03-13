@@ -1,8 +1,8 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.dao.ItemRepository;
-import jpabook.jpashop.dao.MemberRepository;
-import jpabook.jpashop.dao.OrderRepository;
+import jpabook.jpashop.repository.ItemRepository;
+import jpabook.jpashop.repository.MemberRepository;
+import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderItem;

@@ -1,6 +1,6 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.dao.MemberRepository;
+import jpabook.jpashop.repository.MemberRepository;
 import jpabook.jpashop.domain.Address;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.dto.MemberDto;

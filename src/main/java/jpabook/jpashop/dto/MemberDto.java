@@ -1,7 +1,6 @@
 package jpabook.jpashop.dto;
 
 import jpabook.jpashop.domain.Address;
-import jpabook.jpashop.domain.Member;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

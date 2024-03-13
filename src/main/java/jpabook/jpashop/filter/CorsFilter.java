@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.filter;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;

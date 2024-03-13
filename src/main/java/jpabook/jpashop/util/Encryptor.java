@@ -1,5 +1,7 @@
 package jpabook.jpashop.util;
 
+import jpabook.jpashop.exception.user.EncryptFailedException;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,8 +14,7 @@ public class Encryptor {
             md.update(string.getBytes());
             return String.format("%064x", new BigInteger(1, md.digest()));
         }catch (NoSuchAlgorithmException e){}
-        throw new EncryptFailed();
+        throw new EncryptFailedException();
     }
 }
 
-class EncryptFailed extends RuntimeException{}

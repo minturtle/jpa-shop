@@ -1,10 +1,12 @@
 package jpabook.jpashop.controller;
 
 
+import jpabook.jpashop.controller.request.OrderRequest;
+import jpabook.jpashop.controller.response.OrderResponse;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
+import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.service.OrderService;
-import jpabook.jpashop.util.SessionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,38 +18,35 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/order")
+@RequestMapping("/api/order")
 public class OrderController {
 
     private final OrderService orderService;
 
     @PostMapping("")
-    public void doOrder(@RequestBody OrderItemListDto listDto, HttpSession session, HttpServletResponse res) throws IOException {
+    public void doOrder(@RequestBody OrderRequest.ItemInfoList requestItems){
 
-        Long memberId = SessionUtils.getUserFromSession(session);
-        orderService.order(memberId , listDto);
-
-        res.sendRedirect("/");
     }
 
     @GetMapping("/orders")
-    public List<OrderDto.OrderPreviewDto> getOrderbyMember(HttpSession session){
-
-        Long memberId = SessionUtils.getUserFromSession(session);
-        List<OrderDto> orderDtos = orderService.findByUser(memberId);
-
-        return orderDtos.stream().map(orderService::createOrderPreviewDto).collect(Collectors.toList());
+    public PaginationListDto<OrderResponse.Preview> getOrderbyMember(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "5") int size
+    ){
+        return null;
     }
 
-    @GetMapping("/detail")
-    public OrderDto getOrderDetail(@RequestParam(name="id") Long orderId){
-        return orderService.findById(orderId);
+    @GetMapping("/{orderId}")
+    public OrderResponse.Detail getOrderDetail(
+            @PathVariable(name="orderId") String id
+    ){
+        return null;
     }
 
-    @PostMapping("/cancel")
-    public void cancelOrder(@RequestParam(name="id") Long orderId, HttpServletResponse res) throws IOException {
-        orderService.cancel(orderId);
+    @PostMapping("/{orderId}/cancel")
+    public void cancelOrder(
+            @PathVariable(name="orderId") String id
+    ){
 
-        res.sendRedirect("/");
     }
 }
