@@ -3,7 +3,7 @@ package jpabook.jpashop.domain;
 import jpabook.jpashop.util.Encryptor;
 import lombok.Getter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 
 @Getter @Entity

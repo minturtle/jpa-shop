@@ -1,6 +1,6 @@
 package jpabook.jpashop.util;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 public class SessionUtils {
 

@@ -12,7 +12,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;

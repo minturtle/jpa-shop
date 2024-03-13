@@ -3,9 +3,9 @@ package jpabook.jpashop.dao.em;
 import jpabook.jpashop.dao.MemberRepository;
 import jpabook.jpashop.domain.Member;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.NoResultException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
 
 
 public class EntityManagerMemberRepository extends EntityManagerRepository<Member> implements MemberRepository {

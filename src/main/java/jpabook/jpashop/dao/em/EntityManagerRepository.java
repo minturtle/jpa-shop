@@ -2,9 +2,9 @@ package jpabook.jpashop.dao.em;
 
 import lombok.RequiredArgsConstructor;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.NoResultException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
 import java.util.List;
 
 

@@ -3,7 +3,7 @@ package jpabook.jpashop.dao;
 import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 
 public interface OrderRepository {

@@ -3,7 +3,7 @@ package jpabook.jpashop.domain;
 import jpabook.jpashop.domain.item.Item;
 import lombok.Getter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity

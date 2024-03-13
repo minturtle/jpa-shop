@@ -2,7 +2,7 @@ package jpabook.jpashop.domain;
 
 import lombok.Getter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Embeddable
 @Getter

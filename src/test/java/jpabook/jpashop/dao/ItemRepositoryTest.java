@@ -18,7 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;

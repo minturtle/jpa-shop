@@ -12,7 +12,7 @@ import jpabook.jpashop.dto.OrderItemListDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

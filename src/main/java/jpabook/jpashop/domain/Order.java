@@ -3,7 +3,7 @@ package jpabook.jpashop.domain;
 import jdk.jfr.Timestamp;
 import lombok.Getter;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

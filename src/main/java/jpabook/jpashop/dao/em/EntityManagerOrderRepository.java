@@ -6,7 +6,7 @@ import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Collectors;
 

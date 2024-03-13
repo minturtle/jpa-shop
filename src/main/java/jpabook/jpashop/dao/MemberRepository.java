@@ -2,8 +2,8 @@ package jpabook.jpashop.dao;
 
 import jpabook.jpashop.domain.Member;
 
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.NoResultException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
 import java.util.List;
 
 public interface MemberRepository {

@@ -1,9 +1,9 @@
 package jpabook.jpashop.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.*;
 import java.io.IOException;
 
 

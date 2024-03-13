@@ -1,13 +1,13 @@
 package jpabook.jpashop.controller;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import jpabook.jpashop.controller.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.persistence.EntityNotFoundException;
 
 @RestControllerAdvice
 public class MyControllerAdvice {
@@ -22,7 +22,6 @@ public class MyControllerAdvice {
     * */
     @ExceptionHandler({ EntityNotFoundException.class, IllegalStateException.class })
     public ResponseEntity<ErrorResponse> entityNotFound(Exception e){
-
         return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 

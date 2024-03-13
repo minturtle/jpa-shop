@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;

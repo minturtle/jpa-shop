@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 
 public class EntityManagerItemRepository extends EntityManagerRepository<Item> implements ItemRepository {
