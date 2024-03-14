@@ -1,6 +1,7 @@
 package jpabook.jpashop.domain.user;
 
 
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@Entity
 public class UsernamePasswordUser extends User{
 
 

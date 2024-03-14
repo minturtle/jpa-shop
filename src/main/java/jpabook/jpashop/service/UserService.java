@@ -1,7 +1,6 @@
 package jpabook.jpashop.service;
 
 import jpabook.jpashop.exception.user.LoginFailedException;
-import jpabook.jpashop.exception.user.RegisterFailedException;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.dto.UserDto;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +17,13 @@ public class UserService {
     private final UserRepository userRepository;
 
 
-    /*
-    * 사용자의 회원가입 폼을 입력받아, 검증 후 회원가입을 진행
-    *
-    * @param registerDto : 회원가입 폼의 입력 값들(빈 값이 있어선 안됨.)
-    * @return member entity의 ID값
-    * */
-    public void register(UserDto registerDto) throws RegisterFailedException {
+    /**
+     * @description 회원가입 API
+     * @author minseok kim
+     * @param registerInfo 회원가입 정보
+     * @throws
+    */
+    public void register(UserDto.UsernamePasswordUserRegisterInfo registerInfo){
 
     }
 

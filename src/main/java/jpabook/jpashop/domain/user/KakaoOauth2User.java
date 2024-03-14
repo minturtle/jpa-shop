@@ -1,10 +1,12 @@
 package jpabook.jpashop.domain.user;
 
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class KakaoOauth2User extends User{
 
     @Builder

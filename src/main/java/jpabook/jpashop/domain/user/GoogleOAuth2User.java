@@ -1,10 +1,12 @@
 package jpabook.jpashop.domain.user;
 
 
+import jakarta.persistence.Entity;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
+@Entity
 public class GoogleOAuth2User extends User{
 
 
