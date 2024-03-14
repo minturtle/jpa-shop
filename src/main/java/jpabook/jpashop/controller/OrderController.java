@@ -3,18 +3,10 @@ package jpabook.jpashop.controller;
 
 import jpabook.jpashop.controller.request.OrderRequest;
 import jpabook.jpashop.controller.response.OrderResponse;
-import jpabook.jpashop.dto.OrderDto;
-import jpabook.jpashop.dto.OrderItemListDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor

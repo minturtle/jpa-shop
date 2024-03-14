@@ -2,7 +2,7 @@ package jpabook.jpashop.controller;
 
 import jpabook.jpashop.controller.request.MemberRequest;
 import jpabook.jpashop.controller.response.MemberResponse;
-import jpabook.jpashop.service.MemberService;
+import jpabook.jpashop.service.UserService;
 import lombok.*;
 
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/member")
 public class MemberController {
 
-    private final MemberService memberService;
+    private final UserService userService;
 
     @PostMapping("/new")
     public void signIn(@RequestBody MemberRequest.Create newMemberInfo){

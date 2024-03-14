@@ -1,26 +1,19 @@
 package jpabook.jpashop.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public abstract class ItemDto {
+public abstract class UserDto {
 
-
-    @Data
     @AllArgsConstructor
     @Builder
+    @Data
     public static class Detail{
 
     }
 
 
-    @Data
-    @AllArgsConstructor
-    @Builder
-    public static class Preview{
-
-    }
-
 }
+

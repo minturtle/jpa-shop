@@ -11,8 +11,4 @@ import java.util.List;
 @Repository
 public interface ItemRepository extends CrudRepository<Item, Long> {
 
-    Long save(Item item);
-    List<Item> findByNameContains(String name);
-    List<Item> findAll(Pageable pageable);
-    List<Item> findAll();
 }

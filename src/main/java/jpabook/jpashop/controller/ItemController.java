@@ -24,7 +24,7 @@ public class ItemController {
         return null;
     }
 
-    @GetMapping("/{itemId}}")
+    @GetMapping("/{itemId}")
     public ItemResponse.Detail findById(
             @PathVariable(name = "itemId")String itemId
     ){

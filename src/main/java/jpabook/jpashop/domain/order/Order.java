@@ -22,7 +22,7 @@ public class Order extends BaseEntity {
         orderItems.forEach(OrderItem::cancel);
     }
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     private Long id;
 

@@ -35,7 +35,7 @@ public abstract class User extends BaseEntity {
         this.addressInfo = new AddressInfo(address, detailedAddress);
     }
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 

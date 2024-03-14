@@ -12,7 +12,6 @@ public abstract class MemberRequest{
 
 
     @NoArgsConstructor
-    @AllArgsConstructor
     @Getter
     @Setter
     public static class Create{
@@ -22,7 +21,6 @@ public abstract class MemberRequest{
 
 
     @NoArgsConstructor
-    @AllArgsConstructor
     @Getter
     @Setter
     public static class Update {
@@ -33,7 +31,6 @@ public abstract class MemberRequest{
 
 
     @NoArgsConstructor
-    @AllArgsConstructor
     @Getter
     @Setter
     public class Login {

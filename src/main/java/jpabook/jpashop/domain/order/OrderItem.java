@@ -12,7 +12,7 @@ import java.util.Objects;
 public class OrderItem {
 
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_item_id")
     private Long id;
 

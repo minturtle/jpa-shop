@@ -9,7 +9,7 @@ import jpabook.jpashop.domain.user.User;
 public class Cart extends BaseEntity{
 
 
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
 
