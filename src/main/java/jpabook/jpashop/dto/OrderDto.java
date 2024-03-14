@@ -1,9 +1,8 @@
 package jpabook.jpashop.dto;
 
-import jpabook.jpashop.domain.Delivery;
-import jpabook.jpashop.domain.Member;
+import jpabook.jpashop.domain.user.User;
 
-import jpabook.jpashop.domain.OrderStatus;
+import jpabook.jpashop.domain.order.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,9 +21,9 @@ public class OrderDto {
     public OrderDto() {
     }
 
-    public OrderDto(Long id, Member member, LocalDateTime orderedTime, OrderStatus status, List<OrderItemListDto.OrderItemDto> orderItems, Delivery delivery) {
+    public OrderDto(Long id, User user, LocalDateTime orderedTime, OrderStatus status, List<OrderItemListDto.OrderItemDto> orderItems, Delivery delivery) {
         this.id = id;
-        this.member = member;
+        this.user = user;
         this.orderedTime = orderedTime;
         this.status = status;
         this.orderItems = orderItems;
@@ -33,7 +32,7 @@ public class OrderDto {
 
     private Long id;
 
-    private Member member;
+    private User user;
 
     private LocalDateTime orderedTime;
 
@@ -49,12 +48,12 @@ public class OrderDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OrderDto orderDto = (OrderDto) o;
-        return Objects.equals(id, orderDto.id) && Objects.equals(member, orderDto.member) && Objects.equals(orderedTime, orderDto.orderedTime) && status == orderDto.status && Objects.equals(orderItems, orderDto.orderItems) && Objects.equals(delivery, orderDto.delivery);
+        return Objects.equals(id, orderDto.id) && Objects.equals(user, orderDto.user) && Objects.equals(orderedTime, orderDto.orderedTime) && status == orderDto.status && Objects.equals(orderItems, orderDto.orderItems) && Objects.equals(delivery, orderDto.delivery);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, member, orderedTime, status, orderItems, delivery);
+        return Objects.hash(id, user, orderedTime, status, orderItems, delivery);
     }
 
 

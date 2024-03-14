@@ -1,6 +1,6 @@
 package jpabook.jpashop.dto;
 
-import jpabook.jpashop.domain.Address;
+import jpabook.jpashop.domain.user.AddressInfo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,14 +13,14 @@ public class MemberDto {
         this.userId = userId;
         this.password = password;
         this.username = username;
-        this.address = new Address(city, street, zipcode);
+        this.addressInfo = new AddressInfo(city, street, zipcode);
     }
 
     private Long id;
     private String userId;
     private String password;
     private String username;
-    private Address address;
+    private AddressInfo addressInfo;
 
 
     public static class MemberDtoBuilder{
@@ -42,8 +42,8 @@ public class MemberDto {
             return this;
         }
 
-        public MemberDtoBuilder address(Address address){
-            address(address.getCity(), address.getStreet(), address.getZipcode());
+        public MemberDtoBuilder address(AddressInfo addressInfo){
+            address(addressInfo.getCity(), addressInfo.getStreet(), addressInfo.getZipcode());
             return this;
         }
 

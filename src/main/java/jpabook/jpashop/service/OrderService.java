@@ -3,10 +3,10 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.repository.ItemRepository;
 import jpabook.jpashop.repository.MemberRepository;
 import jpabook.jpashop.repository.OrderRepository;
-import jpabook.jpashop.domain.Member;
-import jpabook.jpashop.domain.Order;
-import jpabook.jpashop.domain.OrderItem;
-import jpabook.jpashop.domain.item.Item;
+import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.domain.order.Order;
+import jpabook.jpashop.domain.order.OrderItem;
+import jpabook.jpashop.domain.Item;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.OrderItemListDto;
 import lombok.RequiredArgsConstructor;
@@ -27,12 +27,12 @@ public class OrderService {
     private final MemberRepository memberRepository;
 
     public OrderDto order(Long userId, OrderItemListDto orderItemDtos){
-        Member member = memberRepository.findById(userId);
+        User user = memberRepository.findById(userId);
 
         List<OrderItem> orderItems = createOrderItemList(orderItemDtos);
         removeStockInList(orderItems);
 
-        Order order = new Order(member, orderItems);
+        Order order = new Order(user, orderItems);
 
         orderRepository.save(order);
 
@@ -65,9 +65,9 @@ public class OrderService {
     * @return : 유저의 Order 리스트
     * */
     public List<OrderDto> findByUser(Long memberId) throws EntityNotFoundException{
-        Member member = memberRepository.findById(memberId);
+        User user = memberRepository.findById(memberId);
 
-        List<Order> ordersByMember = orderRepository.findByMember(member);
+        List<Order> ordersByMember = orderRepository.findByMember(user);
 
         return ordersByMember.stream().map(this::createOrderDto).collect(Collectors.toList());
     }
@@ -106,7 +106,7 @@ public class OrderService {
     }
 
     private OrderDto createOrderDto(Order order) {
-        OrderDto orderDto = new OrderDto(order.getId(), order.getMember(), order.getOrderedTime(), order.getStatus()
+        OrderDto orderDto = new OrderDto(order.getId(), order.getUser(), order.getOrderedTime(), order.getStatus()
                 , createOrderItemDtoList(order.getOrderItems()), order.getDelivery());
         return orderDto;
     }

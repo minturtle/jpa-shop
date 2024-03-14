@@ -1,8 +1,8 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.repository.MemberRepository;
-import jpabook.jpashop.domain.Address;
-import jpabook.jpashop.domain.Member;
+import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.MemberDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +30,12 @@ public class MemberService {
         try {
             validRegisterForm(registerDto); //회원가입이 가능한 입력인지 검증
 
-            Member member = Member.createMember(registerDto.getUsername(), registerDto.getUserId()
-                    , registerDto.getPassword(), registerDto.getAddress().getCity()
-                    ,registerDto.getAddress().getStreet(),registerDto.getAddress().getZipcode());
-            member.encryptPassword();
+            User user = User.createMember(registerDto.getUsername(), registerDto.getUserId()
+                    , registerDto.getPassword(), registerDto.getAddressInfo().getCity()
+                    ,registerDto.getAddressInfo().getStreet(),registerDto.getAddressInfo().getZipcode());
+            user.encryptPassword();
 
-            memberRepository.save(member);
+            memberRepository.save(user);
         }catch (IllegalStateException e){
             throw new RegisterFailed(e.getMessage() , e);
         }
@@ -45,10 +45,10 @@ public class MemberService {
     public Long login(MemberDto loginDto) throws LoginFailed{
         try {
 
-            Member findMember = memberRepository.findByUserId(loginDto.getUserId()); //throwable EntityNotFound
-            checkIsPasswordCorrect(findMember, loginDto.getPassword()); //throwable LoginFailed
+            User findUser = memberRepository.findByUserId(loginDto.getUserId()); //throwable EntityNotFound
+            checkIsPasswordCorrect(findUser, loginDto.getPassword()); //throwable LoginFailed
 
-            return findMember.getId();
+            return findUser.getId();
 
         }catch (EntityNotFoundException e){
             throw new LoginFailed("유저 정보를 찾을 수 없습니다.", e);}
@@ -63,11 +63,11 @@ public class MemberService {
     @Transactional(readOnly = true)
     public MemberDto getMemberDetail(Long id) throws EntityNotFoundException {
         try {
-            Member findMember = memberRepository.findById(id);
+            User findUser = memberRepository.findById(id);
 
             return new MemberDto.MemberDtoBuilder()
-                    .username(findMember.getName())
-                    .address(findMember.getAddress())
+                    .username(findUser.getName())
+                    .address(findUser.getAddressInfo())
                     .build();
         }catch (EntityNotFoundException e){
             throw new EntityNotFoundException("유저 정보를 찾을 수 없습니다.");
@@ -83,8 +83,8 @@ public class MemberService {
     * @param String modifiedName : 바꿀 이름
     * */
     public void updateName(Long id, String modifiedName) throws EntityNotFoundException{
-        Member findMember = memberRepository.findById(id);
-        findMember.setName(modifiedName);
+        User findUser = memberRepository.findById(id);
+        findUser.setName(modifiedName);
     }
 
     /*
@@ -93,9 +93,9 @@ public class MemberService {
     * @param id : User Entity의 Id값
     * @param address : 바뀐 주소 정보가 담겨있음.
     * */
-    public void updateAddress(Long id, Address modifiedAddress) throws EntityNotFoundException{
-         Member findMember = memberRepository.findById(id);
-            findMember.setAddress(modifiedAddress);
+    public void updateAddress(Long id, AddressInfo modifiedAddressInfo) throws EntityNotFoundException{
+         User findUser = memberRepository.findById(id);
+            findUser.setAddressInfo(modifiedAddressInfo);
     }
 
 
@@ -108,26 +108,26 @@ public class MemberService {
     public void updatePassword(Long id, String modifiedPassword) throws IllegalStateException, EntityNotFoundException{
         checkIsPasswordUsable(modifiedPassword); //throwable IllegalStateException
 
-        Member findMember = memberRepository.findById(id);
-        findMember.setPassword(modifiedPassword);
-        findMember.encryptPassword();
+        User findUser = memberRepository.findById(id);
+        findUser.setPassword(modifiedPassword);
+        findUser.encryptPassword();
     }
 
     protected void checkIsDuplicatedUserId(String id) throws IllegalStateException{
         try {
-            Member findMember = memberRepository.findByUserId(id); //findMember 값이 있으면 안됨. 없으면 예외발생해서 정상 리턴
-            checkIsFindMemberNull(findMember);
+            User findUser = memberRepository.findByUserId(id); //findMember 값이 있으면 안됨. 없으면 예외발생해서 정상 리턴
+            checkIsFindMemberNull(findUser);
         }catch (EntityNotFoundException e){ return; }
 
         throw new IllegalStateException("이미 존재하는 ID입니다."); //findMember 값이 있는 경우
     }
 
-    private void checkIsFindMemberNull(Member findMember) {
-        if(findMember == null) throw new EntityNotFoundException();
+    private void checkIsFindMemberNull(User findUser) {
+        if(findUser == null) throw new EntityNotFoundException();
     }
 
-    private void checkIsPasswordCorrect(Member findMember, String finePassword) throws LoginFailed{
-        if(!findMember.comparePassword(finePassword)) throw new LoginFailed("잘못된 비밀번호 입니다.");
+    private void checkIsPasswordCorrect(User findUser, String finePassword) throws LoginFailed{
+        if(!findUser.comparePassword(finePassword)) throw new LoginFailed("잘못된 비밀번호 입니다.");
     }
 
     private void validRegisterForm(MemberDto dto) throws IllegalStateException{
@@ -139,7 +139,7 @@ public class MemberService {
     }
 
     private void checkIsEmptyFieldExist(MemberDto dto) throws IllegalStateException{
-        if (isEmpty(dto.getUserId()) || isEmpty(dto.getPassword()) || isEmpty(dto.getUsername()) || isEmpty(dto.getAddress())) {
+        if (isEmpty(dto.getUserId()) || isEmpty(dto.getPassword()) || isEmpty(dto.getUsername()) || isEmpty(dto.getAddressInfo())) {
             throw new IllegalStateException("필드를 모두 채워야 합니다.");
         }
     }
@@ -149,8 +149,8 @@ public class MemberService {
     }
 
     private boolean isEmpty(String st){ return (st == null || st.isEmpty());}
-    private boolean isEmpty(Address address){
-        return (address == null || isEmpty(address.getCity()) || isEmpty(address.getStreet()) || isEmpty(address.getZipcode()));
+    private boolean isEmpty(AddressInfo addressInfo){
+        return (addressInfo == null || isEmpty(addressInfo.getCity()) || isEmpty(addressInfo.getStreet()) || isEmpty(addressInfo.getZipcode()));
     }
 
     public static class LoginFailed extends RuntimeException{

@@ -180,7 +180,7 @@
 											"top": 531,
 											"width": 100.81982421875,
 											"height": 13,
-											"text": "-address",
+											"text": "-addressInfo",
 											"horizontalAlignment": 0
 										},
 										{
@@ -4281,7 +4281,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGONn4lwbhjJP0="
 							},
-							"name": "address",
+							"name": "addressInfo",
 							"visibility": "private"
 						},
 						{

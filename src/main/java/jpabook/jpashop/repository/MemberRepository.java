@@ -1,6 +1,6 @@
 package jpabook.jpashop.repository;
 
-import jpabook.jpashop.domain.Member;
+import jpabook.jpashop.domain.user.User;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -8,14 +8,14 @@ import java.util.List;
 
 public interface MemberRepository {
 
-    void save(Member member);
+    void save(User user);
 
-    Member findByName(String name)throws EntityNotFoundException;
+    User findByName(String name)throws EntityNotFoundException;
 
-    Member findByUserId(String userId) throws EntityNotFoundException;
+    User findByUserId(String userId) throws EntityNotFoundException;
 
-    Member findById(Long id) throws EntityNotFoundException;
+    User findById(Long id) throws EntityNotFoundException;
 
-    List<Member> findAll();
+    List<User> findAll();
 
 }
