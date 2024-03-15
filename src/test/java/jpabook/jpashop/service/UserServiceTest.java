@@ -186,12 +186,13 @@ class UserServiceTest {
                 .build();
 
 
-        when(userRepository.findByUsername(givenEmail))
+        when(userRepository.findByUsername(username))
                 .thenReturn(Optional.of(new UsernamePasswordUser()));
-        //when
 
-        //then
-
+        //when & then
+        assertThatThrownBy(()->userService.register(dto))
+                .isInstanceOf(AlreadyExistsUserException.class)
+                .hasMessage(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
     }
 
 

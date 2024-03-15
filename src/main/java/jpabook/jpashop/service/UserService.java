@@ -112,6 +112,9 @@ public class UserService {
         if(userRepository.findByEmail(email).isPresent()){
             throw new AlreadyExistsUserException(UserExceptonMessages.ALREADY_EXISTS_EMAIL.getMessage());
         }
+        if(userRepository.findByUsername(username).isPresent()){
+            throw new AlreadyExistsUserException(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
+        }
     }
 
 
