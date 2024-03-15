@@ -2,6 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
+import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.LoginFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
@@ -35,9 +36,9 @@ public class UserService {
      * @return 저장된 사용자의 uid
      * @throws
     */
-    @Transactional(rollbackFor = {PasswordValidationException.class, RuntimeException.class})
-    public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo) throws PasswordValidationException {
-        validPassword(registerInfo.getPassword());
+    @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
+    public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo) throws PasswordValidationException, AlreadyExistsUserException {
+        validRegisterForm(registerInfo);
 
 
         byte[] salt = passwordUtils.createSalt();
@@ -93,6 +94,25 @@ public class UserService {
     }
 
 
+    /**
+     * @author minseok kim
+     * @description 회원가입 정보가 유효한지 확인하는 메서드
+     * @param registerInfo 검증하고자 하는 회원가입 정보
+     * @exception PasswordValidationException 비밀번호 검증 실패시
+    */
+    private void validRegisterForm(
+            UserDto.UsernamePasswordUserRegisterInfo registerInfo
+    ) throws PasswordValidationException, AlreadyExistsUserException {
+        validDuplicationUser(registerInfo.getUsername(), registerInfo.getEmail());
+        validPassword(registerInfo.getPassword());
+    }
+
+
+    private void validDuplicationUser(String username, String email) throws AlreadyExistsUserException {
+        if(userRepository.findByEmail(email).isPresent()){
+            throw new AlreadyExistsUserException(UserExceptonMessages.ALREADY_EXISTS_EMAIL.getMessage());
+        }
+    }
 
 
     /**
