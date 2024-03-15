@@ -48,6 +48,24 @@ class PasswordUtilsTest {
 
     }
 
+    @Test
+    @DisplayName("비밀번호를 암호화 할 수 있다. 이 때 암호화 함수는 멱등성을 보장한다.")
+    public void testEncodePassword() throws Exception{
+        //given
+        String givenPassword = "givenPassword";
+        byte[] givenSalt = passwordUtils.createSalt();
+
+        //when
+        String actual1 = passwordUtils.encodePassword(givenPassword, givenSalt);
+        String actual2 = passwordUtils.encodePassword(givenPassword, givenSalt);
+
+        //then
+        assertThat(actual1).isNotEqualTo(givenPassword);
+
+        assertThat(actual1).isEqualTo(actual2);
+    }
+
+
 
 
     @TestConfiguration
