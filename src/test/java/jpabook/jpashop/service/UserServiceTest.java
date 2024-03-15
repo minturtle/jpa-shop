@@ -163,6 +163,37 @@ class UserServiceTest {
 
     }
 
+    @Test
+    @DisplayName("회원가입 시도시 이미 존재하는 username이라면 회원가입에 실패한다.")
+    public void testAlreadyExistsUsernameRegister() throws Exception{
+        //given
+        String givenName = "givenName";
+        String givenEmail = "email@email.com";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+        String password = "abc1234!";
+        String username = "username";
+
+        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
+                .name(givenName)
+                .email(givenEmail)
+                .address(address)
+                .detailedAddress(detailedAddress)
+                .profileImageUrl(imageUrl)
+                .username(username)
+                .password(password)
+                .build();
+
+
+        when(userRepository.findByUsername(givenEmail))
+                .thenReturn(Optional.of(new UsernamePasswordUser()));
+        //when
+
+        //then
+
+    }
+
 
 
     @TestConfiguration
