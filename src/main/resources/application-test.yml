@@ -10,3 +10,5 @@ spring:
     password:
       iterations: 100000
       hashwidth: 192
+nanoId:
+  size : 10

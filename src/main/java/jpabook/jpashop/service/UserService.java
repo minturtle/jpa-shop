@@ -1,12 +1,18 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.domain.user.UsernamePasswordUser;
 import jpabook.jpashop.exception.user.LoginFailedException;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.util.NanoIdProvider;
+import jpabook.jpashop.util.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Base64;
 
 @Service
 @RequiredArgsConstructor
@@ -15,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-
+    private final PasswordUtils passwordUtils;
+    private final NanoIdProvider nanoIdProvider;
 
     /**
      * @description 회원가입 API
@@ -25,7 +32,26 @@ public class UserService {
      * @throws
     */
     public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo){
-        return null;
+        byte[] salt = passwordUtils.createSalt();
+        String encodedPassword = passwordUtils
+                .encodePassword(registerInfo.getPassword(), salt);
+
+        UsernamePasswordUser newUser = new UsernamePasswordUser(
+                nanoIdProvider.createNanoId(),
+                registerInfo.getEmail(),
+                registerInfo.getName(),
+                registerInfo.getProfileImageUrl(),
+                registerInfo.getAddress(),
+                registerInfo.getDetailedAddress(),
+                registerInfo.getUsername(),
+                encodedPassword,
+                new String(Base64.getEncoder().encode(salt))
+        );
+
+
+        userRepository.save(newUser);
+
+        return newUser.getUid();
     }
 
 

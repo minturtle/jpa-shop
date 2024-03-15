@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 @Getter
@@ -70,5 +71,16 @@ public abstract class User extends BaseEntity {
         this.addressInfo = new AddressInfo(address, detailedAddress);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(uid, user.uid) && Objects.equals(email, user.email) && Objects.equals(name, user.name) && Objects.equals(profileImageUrl, user.profileImageUrl) && Objects.equals(addressInfo, user.addressInfo);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, uid, email, name, profileImageUrl, addressInfo);
+    }
 }

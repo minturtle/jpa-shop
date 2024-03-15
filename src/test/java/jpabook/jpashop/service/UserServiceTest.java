@@ -13,7 +13,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Base64;
@@ -24,18 +31,19 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
+@ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class)
 class UserServiceTest {
 
-    @InjectMocks
+    @Autowired
     private UserService userService;
 
-    @Mock
+    @Autowired
     private UserRepository userRepository;
 
-    @Mock
+    @Autowired
     private NanoIdProvider nanoIdProvider;
 
-    @Spy
+    @Autowired
     private PasswordUtils passwordUtils;
 
     @Test
@@ -80,11 +88,32 @@ class UserServiceTest {
                 detailedAddress,
                 username,
                 passwordUtils.encodePassword(password, givenSalt),
-                new String(givenSalt)
+                new String(Base64.getEncoder().encode(givenSalt))
                 );
 
         verify(userRepository, times(1))
                 .save(user);
     }
 
+
+
+
+    @TestConfiguration
+    public static class TestConfig{
+
+        @MockBean
+        private UserRepository userRepository;
+
+        @MockBean
+        private NanoIdProvider nanoIdProvider;
+
+        @SpyBean
+        private PasswordUtils passwordUtils;
+
+        @Bean
+        public UserService userService(){
+            return new UserService(userRepository, passwordUtils, nanoIdProvider);
+        }
+
+    }
 }
