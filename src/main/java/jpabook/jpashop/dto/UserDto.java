@@ -9,7 +9,6 @@ public abstract class UserDto {
 
 
     @AllArgsConstructor
-    @Builder
     @Data
     public abstract static class RegisterInfo{
         private String name;
@@ -19,11 +18,33 @@ public abstract class UserDto {
         private String profileImageUrl;
     }
 
-    @Builder
-    @Data
     public static class UsernamePasswordUserRegisterInfo extends RegisterInfo{
+
+        @Builder
+        public UsernamePasswordUserRegisterInfo(
+                String name,
+                String email,
+                String address,
+                String detailedAddress,
+                String profileImageUrl,
+                String username,
+                String password
+        ) {
+            super(name, email, address, detailedAddress, profileImageUrl);
+            this.username = username;
+            this.password = password;
+        }
+
         private String username;
         private String password;
+
+        public String getUsername() {
+            return username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
     }
 
 

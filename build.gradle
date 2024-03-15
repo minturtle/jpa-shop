@@ -33,6 +33,10 @@ dependencies {
 	// util dependencies
 	annotationProcessor 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
+	implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
+
+
+
 
 	// test dependecies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

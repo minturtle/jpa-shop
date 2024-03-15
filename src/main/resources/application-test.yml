@@ -6,3 +6,7 @@ spring:
         format_sql: true
         hbm2ddl:
           auto: create
+  security:
+    password:
+      iterations: 100000
+      hashwidth: 192

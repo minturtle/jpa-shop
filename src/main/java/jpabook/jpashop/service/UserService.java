@@ -21,10 +21,11 @@ public class UserService {
      * @description 회원가입 API
      * @author minseok kim
      * @param registerInfo 회원가입 정보
+     * @return 저장된 사용자의 uid
      * @throws
     */
-    public void register(UserDto.UsernamePasswordUserRegisterInfo registerInfo){
-
+    public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo){
+        return null;
     }
 
 
