@@ -3,12 +3,15 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
 import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.PasswordUtils;
 import jpabook.jpashop.util.NanoIdProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -26,6 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Base64;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 
@@ -95,6 +99,39 @@ class UserServiceTest {
     }
 
 
+    @ParameterizedTest
+    @CsvSource({"abcdefgh","12345678", "!@#$%^&*", "abcd1234", "abc123!"})
+    @DisplayName("회원가입을 수행할 때 비밀번호는 영문, 숫자, 특수문자를 모두 포함하며, 8자 이상이 아니라면 회원가입에 실패한다.")
+    public void testRegisterPasswordFailTest(String givenPassword) throws Exception{
+        //given
+        String givenName = "givenName";
+        String givenEmail = "email@email.com";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+        String username = "username";
+        byte[] givenSalt = Base64.getDecoder().decode("salt");
+
+
+        when(passwordUtils.createSalt()).thenReturn(givenSalt);
+
+        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
+                .name(givenName)
+                .email(givenEmail)
+                .address(address)
+                .detailedAddress(detailedAddress)
+                .profileImageUrl(imageUrl)
+                .username(username)
+                .password(givenPassword)
+                .build();
+
+        //when & then
+        assertThatThrownBy(()->userService.register(dto))
+                .isInstanceOf(PasswordValidationException.class);
+    
+
+    
+    }
 
 
     @TestConfiguration

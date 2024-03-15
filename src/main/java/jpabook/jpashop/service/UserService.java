@@ -3,6 +3,8 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
 import jpabook.jpashop.exception.user.LoginFailedException;
+import jpabook.jpashop.exception.user.PasswordValidationException;
+import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.util.NanoIdProvider;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +35,11 @@ public class UserService {
      * @return 저장된 사용자의 uid
      * @throws
     */
-    public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo){
+    @Transactional(rollbackFor = {PasswordValidationException.class, RuntimeException.class})
+    public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo) throws PasswordValidationException {
+        validPassword(registerInfo.getPassword());
+
+
         byte[] salt = passwordUtils.createSalt();
         String encodedPassword = passwordUtils
                 .encodePassword(registerInfo.getPassword(), salt);
@@ -58,6 +66,7 @@ public class UserService {
     }
 
 
+
     public String login(String username, String password) throws LoginFailedException {
         return null;
     }
@@ -81,6 +90,29 @@ public class UserService {
     * */
     public void update(String userUid){
 
+    }
+
+
+
+
+    /**
+     * @author minseok kim
+     * @description 비밀번호가 유효한지 확인하는 메서드
+     * @param password 검증하고자 하는 비밀번호
+     * @exception PasswordValidationException 비밀번호 검증 실패시
+    */
+    private void validPassword(String password) throws PasswordValidationException {
+        if(password.length() < 8){
+            throw new PasswordValidationException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
+        }
+        String passwordPattern = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$";
+
+        Pattern pattern = Pattern.compile(passwordPattern);
+        Matcher matcher = pattern.matcher(password);
+
+        if(!matcher.matches()){
+            throw new PasswordValidationException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
+        }
     }
 
 
