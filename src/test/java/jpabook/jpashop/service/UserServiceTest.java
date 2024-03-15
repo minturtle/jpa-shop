@@ -25,6 +25,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Base64;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 
@@ -39,9 +40,6 @@ class UserServiceTest {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private NanoIdProvider nanoIdProvider;
 
     @Autowired
     private PasswordUtils passwordUtils;
@@ -93,6 +91,7 @@ class UserServiceTest {
 
         verify(userRepository, times(1))
                 .save(user);
+        assertThat(savedUid).isNotNull();
     }
 
 
@@ -113,6 +112,11 @@ class UserServiceTest {
         @Bean
         public UserService userService(){
             return new UserService(userRepository, passwordUtils, nanoIdProvider);
+        }
+
+        @Bean
+        public NanoIdProvider nanoIdProvider(){
+            return new NanoIdProvider();
         }
 
     }

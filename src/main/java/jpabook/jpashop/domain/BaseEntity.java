@@ -6,6 +6,6 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 public class BaseEntity {
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime modifiedAt = LocalDateTime.now();;
 }

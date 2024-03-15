@@ -36,8 +36,11 @@ public class UserService {
         String encodedPassword = passwordUtils
                 .encodePassword(registerInfo.getPassword(), salt);
 
+        String uid = nanoIdProvider.createNanoId();
+
+
         UsernamePasswordUser newUser = new UsernamePasswordUser(
-                nanoIdProvider.createNanoId(),
+                uid,
                 registerInfo.getEmail(),
                 registerInfo.getName(),
                 registerInfo.getProfileImageUrl(),
