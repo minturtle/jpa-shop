@@ -1,5 +1,6 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
 import jpabook.jpashop.dto.UserDto;
@@ -8,47 +9,41 @@ import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.PasswordUtils;
-import jpabook.jpashop.util.NanoIdProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
 
-@ExtendWith(SpringExtension.class)
+
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
-@ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class)
+@SpringBootTest
+@Transactional
 class UserServiceTest {
 
     @Autowired
     private UserService userService;
 
-    @Autowired
+    @SpyBean
     private UserRepository userRepository;
 
-    @Autowired
+    @SpyBean
     private PasswordUtils passwordUtils;
 
     @Test
@@ -84,21 +79,18 @@ class UserServiceTest {
         String savedUid = userService.register(dto);
 
         // then
-        User user = new UsernamePasswordUser(
-                savedUid,
-                givenEmail,
-                givenName,
-                imageUrl,
-                address,
-                detailedAddress,
-                username,
-                passwordUtils.encodePassword(password, givenSalt),
-                new String(Base64.getEncoder().encode(givenSalt))
-                );
+        UsernamePasswordUser actual = (UsernamePasswordUser)userRepository.findByUid(savedUid)
+                .orElseThrow(RuntimeException::new);
 
-        verify(userRepository, times(1))
-                .save(user);
         assertThat(savedUid).isNotNull();
+        assertThat(actual).extracting("name", "email", "addressInfo", "profileImageUrl", "username", "salt")
+                .contains(givenName, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, username, "salt");
+
+        assertAll("verify password encode",
+                ()->assertThat(actual.getPassword()).isNotNull(),
+                ()->assertThat(actual.getPassword()).isNotEqualTo(password)
+        );
+
     }
 
 
@@ -196,25 +188,4 @@ class UserServiceTest {
     }
 
 
-
-    @TestConfiguration
-    public static class TestConfig{
-
-        @MockBean
-        private UserRepository userRepository;
-
-        @SpyBean
-        private PasswordUtils passwordUtils;
-
-        @Bean
-        public UserService userService(NanoIdProvider nanoIdProvider){
-            return new UserService(userRepository, passwordUtils, nanoIdProvider);
-        }
-
-        @Bean
-        public NanoIdProvider nanoIdProvider(){
-            return new NanoIdProvider();
-        }
-
-    }
 }

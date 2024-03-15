@@ -60,7 +60,7 @@ public class UserService {
                 new String(Base64.getEncoder().encode(salt))
         );
 
-
+        // TODO : 동시성 제어 필요(동시의 두 유저가 동일한 email 또는 username으로 회원가입 하는 경우)
         userRepository.save(newUser);
 
         return newUser.getUid();
