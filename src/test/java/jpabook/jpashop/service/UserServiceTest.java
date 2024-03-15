@@ -103,14 +103,11 @@ class UserServiceTest {
         @MockBean
         private UserRepository userRepository;
 
-        @MockBean
-        private NanoIdProvider nanoIdProvider;
-
         @SpyBean
         private PasswordUtils passwordUtils;
 
         @Bean
-        public UserService userService(){
+        public UserService userService(NanoIdProvider nanoIdProvider){
             return new UserService(userRepository, passwordUtils, nanoIdProvider);
         }
 
