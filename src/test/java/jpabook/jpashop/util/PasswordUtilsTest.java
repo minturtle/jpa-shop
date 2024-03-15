@@ -13,7 +13,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 
@@ -65,6 +64,23 @@ class PasswordUtilsTest {
         assertThat(actual1).isEqualTo(actual2);
     }
 
+    @Test
+    @DisplayName("비밀번호 원문과 salt 값을 통해 암호화된 비밀번호와 비교할 수 있다.")
+    public void testMatchPassword() throws Exception{
+        //given
+        String givenPassword = "givenPassword";
+        byte[] givenSalt = passwordUtils.createSalt();
+        byte[] givenSalt2 = passwordUtils.createSalt();
+
+        String encodedPassword = passwordUtils.encodePassword(givenPassword, givenSalt);
+        //when
+        boolean expectedTrue = passwordUtils.matches(givenPassword, givenSalt, encodedPassword);
+        boolean expectedFalse = passwordUtils.matches(givenPassword, givenSalt2, encodedPassword);
+
+        //then
+        assertThat(expectedTrue).isTrue();
+        assertThat(expectedFalse).isFalse();
+    }
 
 
 

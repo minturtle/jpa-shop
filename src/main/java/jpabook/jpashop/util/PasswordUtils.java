@@ -54,5 +54,10 @@ public class PasswordUtils {
         }
     }
 
+    public boolean matches(String givenPassword, byte[] givenSalt, String encodedPassword) {
+        String createdPassword = encodePassword(givenPassword, givenSalt);
+
+        return createdPassword.equals(encodedPassword);
+    }
 }
 
