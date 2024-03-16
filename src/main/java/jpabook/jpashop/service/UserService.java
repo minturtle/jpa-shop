@@ -1,5 +1,6 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.user.KakaoOauth2User;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
 import jpabook.jpashop.exception.user.*;
@@ -11,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
@@ -29,7 +29,7 @@ public class UserService {
     private final NanoIdProvider nanoIdProvider;
 
     /**
-     * @description 회원가입 API
+     * @description 회원가입(Username, Password) 메서드
      * @author minseok kim
      * @param registerInfo 회원가입 정보
      * @return 저장된 사용자의 uid
@@ -37,8 +37,10 @@ public class UserService {
     */
     @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
     public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo) throws PasswordValidationException, AlreadyExistsUserException {
-        validRegisterForm(registerInfo);
 
+        validDuplicationEmail(registerInfo.getEmail());
+        validDuplicationUsername(registerInfo.getUsername());
+        validPassword(registerInfo.getPassword());
 
         byte[] salt = passwordUtils.createSalt();
         String encodedPassword = passwordUtils
@@ -59,13 +61,37 @@ public class UserService {
                 new String(Base64.getEncoder().encode(salt))
         );
 
-        try{
-            userRepository.save(newUser);
-        }catch (DataIntegrityViolationException e){
-            throw new AlreadyExistsUserException();
-        }
+        saveProcess(newUser);
 
-        return newUser.getUid();
+        return uid;
+    }
+
+    /**
+     * @description 회원가입(Kakao) 메서드
+     * @author minseok kim
+     * @param registerInfo 회원가입 정보
+     * @return 저장된 사용자의 uid
+     * @throws
+     */
+    @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
+    public String register(UserDto.KakaoUserRegisterInfo registerInfo) throws AlreadyExistsUserException {
+        validDuplicationEmail(registerInfo.getEmail());
+
+        String uid = nanoIdProvider.createNanoId();
+
+        KakaoOauth2User newUser = new KakaoOauth2User(
+                uid,
+                registerInfo.getEmail(),
+                registerInfo.getName(),
+                registerInfo.getProfileImageUrl(),
+                registerInfo.getAddress(),
+                registerInfo.getDetailedAddress(),
+                registerInfo.getKakaoUid()
+        );
+
+        saveProcess(newUser);
+
+        return uid;
     }
 
 
@@ -93,34 +119,24 @@ public class UserService {
     }
 
     /*
-    * 사용자 이름 변경
+    * 사용자 정보 변경
     *
     * @param userUid : MemberEntity의 ID값
     * @param String modifiedName : 바꿀 이름
     * */
-    public void update(String userUid){
+    public void update(String userUid, UserDto.Update dto){
 
     }
 
 
-    /**
-     * @author minseok kim
-     * @description 회원가입 정보가 유효한지 확인하는 메서드
-     * @param registerInfo 검증하고자 하는 회원가입 정보
-     * @exception PasswordValidationException 비밀번호 검증 실패시
-    */
-    private void validRegisterForm(
-            UserDto.UsernamePasswordUserRegisterInfo registerInfo
-    ) throws PasswordValidationException, AlreadyExistsUserException {
-        validDuplicationUser(registerInfo.getUsername(), registerInfo.getEmail());
-        validPassword(registerInfo.getPassword());
-    }
 
-
-    private void validDuplicationUser(String username, String email) throws AlreadyExistsUserException {
+    private void validDuplicationEmail(String email) throws AlreadyExistsUserException {
         if(userRepository.findByEmail(email).isPresent()){
             throw new AlreadyExistsUserException(UserExceptonMessages.ALREADY_EXISTS_EMAIL.getMessage());
         }
+    }
+
+    private void validDuplicationUsername(String username) throws AlreadyExistsUserException {
         if(userRepository.findByUsername(username).isPresent()){
             throw new AlreadyExistsUserException(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
         }
@@ -144,6 +160,15 @@ public class UserService {
 
         if(!matcher.matches()){
             throw new PasswordValidationException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
+        }
+    }
+
+
+    private void saveProcess(User newUser) throws AlreadyExistsUserException {
+        try{
+            userRepository.save(newUser);
+        }catch (DataIntegrityViolationException e){
+            throw new AlreadyExistsUserException();
         }
     }
 

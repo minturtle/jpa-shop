@@ -76,11 +76,11 @@ public abstract class User extends BaseEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(uid, user.uid) && Objects.equals(email, user.email) && Objects.equals(name, user.name) && Objects.equals(profileImageUrl, user.profileImageUrl) && Objects.equals(addressInfo, user.addressInfo);
+        return Objects.equals(id, user.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, uid, email, name, profileImageUrl, addressInfo);
+        return Objects.hash(id);
     }
 }

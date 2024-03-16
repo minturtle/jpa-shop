@@ -1,9 +1,6 @@
 package jpabook.jpashop.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 public abstract class UserDto {
 
@@ -49,6 +46,26 @@ public abstract class UserDto {
 
 
 
+    @Getter
+    public static class KakaoUserRegisterInfo extends RegisterInfo {
+
+
+        @Builder
+        public KakaoUserRegisterInfo(
+                String name,
+                String email,
+                String address,
+                String detailedAddress,
+                String profileImageUrl,
+                String kakaoUid
+        ) {
+            super(name, email, address, detailedAddress, profileImageUrl);
+            this.kakaoUid = kakaoUid;
+        }
+
+        private String kakaoUid;
+    }
+
 
     @AllArgsConstructor
     @Builder
@@ -57,6 +74,9 @@ public abstract class UserDto {
 
     }
 
+
+    public static class Update {
+    }
 
 }
 

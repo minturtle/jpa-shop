@@ -6,6 +6,7 @@ import jpabook.jpashop.domain.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,6 +29,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @Lock(LockModeType.PESSIMISTIC_READ)
     @Query("select u from UsernamePasswordUser u where u.username = :username")
     Optional<UsernamePasswordUser> findByUsernameWithLock(@Param("username") String username);
-
 
 }

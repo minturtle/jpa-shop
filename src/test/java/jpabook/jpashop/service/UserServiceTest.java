@@ -11,8 +11,7 @@ import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -20,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,8 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
@@ -49,12 +48,16 @@ class UserServiceTest {
     @Autowired
     private UserService userService;
 
-    @SpyBean
+    @Autowired
     private UserRepository userRepository;
 
     @SpyBean
     private PasswordUtils passwordUtils;
 
+    @BeforeEach
+    void setUp() {
+        userRepository.deleteAll();
+    }
 
     @Test
     @DisplayName(
@@ -155,8 +158,7 @@ class UserServiceTest {
                 .password(password)
                 .build();
 
-        when(userRepository.findByEmail(givenEmail))
-                .thenReturn(Optional.of(new UsernamePasswordUser()));
+        saveUser("usernam1", "asdsad23123!@!@#", givenEmail);
 
 
         //when & then
@@ -189,8 +191,7 @@ class UserServiceTest {
                 .build();
 
 
-        when(userRepository.findByUsername(username))
-                .thenReturn(Optional.of(new UsernamePasswordUser()));
+        saveUser(username, "asdsad23123!@!@#", "email2@email.com");
 
         //when & then
         assertThatThrownBy(()->userService.register(dto))
@@ -209,7 +210,7 @@ class UserServiceTest {
         AtomicInteger successCount = new AtomicInteger();
         AtomicInteger failCount = new AtomicInteger();
         String givenName = "givenName";
-        String givenEmail = "email2@email.com";
+        String givenEmail = "email3@email.com";
         String address = "address";
         String detailedAddress = "detailedAddress";
         String imageUrl = "http://image.com/image.png";
@@ -256,6 +257,39 @@ class UserServiceTest {
 
     }
 
+    @Test
+    @DisplayName("KakaoUid, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 값을 저장할 수 있다.")
+    public void testRegisterKakao() throws Exception{
+        //given
+        String givenName = "givenName";
+        String givenEmail = "email@email.com";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+        String kakaoUid = "2131241241";
+
+        //when
+
+        UserDto.KakaoUserRegisterInfo dto = UserDto.KakaoUserRegisterInfo.builder()
+                .name(givenName)
+                .email(givenEmail)
+                .address(address)
+                .detailedAddress(detailedAddress)
+                .profileImageUrl(imageUrl)
+                .kakaoUid(kakaoUid)
+                .build();
+
+        String savedUid = userService.register(dto);
+        //then
+        List<User> savedUsers = userRepository.findAll();
+
+
+        assertThat(savedUsers).hasSize(1);
+        assertThat(savedUsers).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "kakaoUid")
+                .contains(tuple(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, kakaoUid));
+    }
+
+
 
     @Test
     @DisplayName("username과 password를 입력해서 로그인할 수 있다.")
@@ -264,7 +298,7 @@ class UserServiceTest {
         String password = "abc1234!";
         String username = "username";
 
-        String savedUid = saveUser(username, password);
+        String savedUid = saveUser(username, password, "email@email.com");
 
         //when
         String actualUid = userService.login(username, password);
@@ -283,7 +317,7 @@ class UserServiceTest {
         String incorrectUsername = "username11";
 
 
-        String savedUid = saveUser(username, password);
+        saveUser(username, password, "email@email.com");
         //when & then
         assertThatThrownBy(()->userService.login(incorrectUsername, password))
                 .isInstanceOf(LoginFailedException.class)
@@ -300,7 +334,7 @@ class UserServiceTest {
         String incorrectPassword = "abcd1234!";
 
 
-        String savedUid = saveUser(username, password);
+        saveUser(username, password, "email@email.com");
         //when & then
         assertThatThrownBy(()->userService.login(username, incorrectPassword))
                 .isInstanceOf(LoginFailedException.class)
@@ -309,16 +343,17 @@ class UserServiceTest {
 
 
 
-    private String saveUser(String username, String password) throws PasswordValidationException, AlreadyExistsUserException {
+
+
+    private String saveUser(String username, String password, String email) throws PasswordValidationException, AlreadyExistsUserException {
         String givenName = "givenName";
-        String givenEmail = "email@email.com";
         String address = "address";
         String detailedAddress = "detailedAddress";
         String imageUrl = "http://image.com/image.png";
 
         UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
                 .name(givenName)
-                .email(givenEmail)
+                .email(email)
                 .address(address)
                 .detailedAddress(detailedAddress)
                 .profileImageUrl(imageUrl)
