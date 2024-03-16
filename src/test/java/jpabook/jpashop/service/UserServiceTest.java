@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
+import jpabook.jpashop.exception.user.LoginFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
@@ -272,6 +273,41 @@ class UserServiceTest {
         assertThat(savedUid).isEqualTo(actualUid);
 
     }
+
+    @Test
+    @DisplayName("저장되지 않은 username으로 로그인에 시도할 시 로그인에 실패한다.")
+    public void testIncorrectUsername() throws Exception{
+        //given
+        String password = "abc1234!";
+        String username = "username";
+        String incorrectUsername = "username11";
+
+
+        String savedUid = saveUser(username, password);
+        //when & then
+        assertThatThrownBy(()->userService.login(incorrectUsername, password))
+                .isInstanceOf(LoginFailedException.class)
+                .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
+
+    }
+
+    @Test
+    @DisplayName("잘못된 비밀번호로 로그인에 시도할시 로그인에 실패한다.")
+    public void testIncorrectPassword() throws Exception{
+        //given
+        String password = "abc1234!";
+        String username = "username";
+        String incorrectPassword = "abcd1234!";
+
+
+        String savedUid = saveUser(username, password);
+        //when & then
+        assertThatThrownBy(()->userService.login(username, incorrectPassword))
+                .isInstanceOf(LoginFailedException.class)
+                .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
+    }
+
+
 
     private String saveUser(String username, String password) throws PasswordValidationException, AlreadyExistsUserException {
         String givenName = "givenName";
