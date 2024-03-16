@@ -2,10 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordUser;
-import jpabook.jpashop.exception.user.AlreadyExistsUserException;
-import jpabook.jpashop.exception.user.LoginFailedException;
-import jpabook.jpashop.exception.user.PasswordValidationException;
-import jpabook.jpashop.exception.user.UserExceptonMessages;
+import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.util.NanoIdProvider;
@@ -73,8 +70,15 @@ public class UserService {
 
 
 
-    public String login(String username, String password) throws LoginFailedException {
-        return null;
+    public String login(String username, String password) throws LoginFailedException{
+        UsernamePasswordUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage()));
+
+        if(!passwordUtils.matches(password, user.getSaltBytes(), user.getPassword())){
+            throw new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage());
+        }
+
+        return user.getUid();
     }
 
     /*

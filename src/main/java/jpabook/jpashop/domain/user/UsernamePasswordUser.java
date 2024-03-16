@@ -3,11 +3,11 @@ package jpabook.jpashop.domain.user;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Base64;
 import java.util.Objects;
 
 @NoArgsConstructor
@@ -54,4 +54,10 @@ public class UsernamePasswordUser extends User{
     public int hashCode() {
         return Objects.hash(super.hashCode(), username, password, salt);
     }
+
+
+    public byte[] getSaltBytes(){
+        return Base64.getDecoder().decode(salt);
+    }
+
 }

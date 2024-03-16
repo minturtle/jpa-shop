@@ -8,10 +8,8 @@ import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
-import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +17,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -256,6 +253,44 @@ class UserServiceTest {
                 ()->assertThat(successCount.get()).isEqualTo(1),
                 ()->assertThat(failCount.get()).isEqualTo(threadSize - 1));
 
+    }
+
+
+    @Test
+    @DisplayName("username과 password를 입력해서 로그인할 수 있다.")
+    public void testLogin() throws Exception{
+        //given
+        String password = "abc1234!";
+        String username = "username";
+
+        String savedUid = saveUser(username, password);
+
+        //when
+        String actualUid = userService.login(username, password);
+
+        //then
+        assertThat(savedUid).isEqualTo(actualUid);
+
+    }
+
+    private String saveUser(String username, String password) throws PasswordValidationException, AlreadyExistsUserException {
+        String givenName = "givenName";
+        String givenEmail = "email@email.com";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+
+        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
+                .name(givenName)
+                .email(givenEmail)
+                .address(address)
+                .detailedAddress(detailedAddress)
+                .profileImageUrl(imageUrl)
+                .username(username)
+                .password(password)
+                .build();
+
+        return userService.register(dto);
     }
 
 
