@@ -67,6 +67,27 @@ public abstract class UserDto {
     }
 
 
+
+    @Getter
+    public static class GoogleUserRegisterInfo extends RegisterInfo{
+
+        @Builder
+        public GoogleUserRegisterInfo(
+                String name,
+                String email,
+                String address,
+                String detailedAddress,
+                String profileImageUrl,
+                String googleUid
+        ) {
+            super(name, email, address, detailedAddress, profileImageUrl);
+            this.googleUid = googleUid;
+        }
+
+        private String googleUid;
+    }
+
+
     @AllArgsConstructor
     @Builder
     @Data

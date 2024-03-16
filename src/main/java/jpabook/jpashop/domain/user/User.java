@@ -9,16 +9,16 @@ import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
 
 
 @Getter
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
 @Table(name = "users")
-public abstract class User extends BaseEntity {
+public class User extends BaseEntity {
 
 
     public User(
@@ -67,8 +67,31 @@ public abstract class User extends BaseEntity {
     private Account account;
 
 
+    @Embedded
+    private UsernamePasswordAuthInfo usernamePasswordAuthInfo;
+
+    @Embedded
+    private KakaoOAuth2AuthInfo kakaoOAuth2AuthInfo;
+
+    @Embedded
+    private GoogleOAuth2AuthInfo googleOAuth2AuthInfo;
+
+
     public void setAddressInfo(String address, String detailedAddress) {
         this.addressInfo = new AddressInfo(address, detailedAddress);
+    }
+
+    public void setUsernamePasswordAuthInfo(String username, String encodedPassword, byte[] salt){
+        this.usernamePasswordAuthInfo = new UsernamePasswordAuthInfo(username, encodedPassword, new String(Base64.getEncoder().encode(salt)));
+    }
+
+    public void setKakaoOAuth2AuthInfo(String kakaoUid) {
+        this.kakaoOAuth2AuthInfo = new KakaoOAuth2AuthInfo(kakaoUid);
+    }
+
+
+    public void setGoogleOAuth2AuthInfo(String googleUid) {
+        this.googleOAuth2AuthInfo = new GoogleOAuth2AuthInfo(googleUid);
     }
 
     @Override

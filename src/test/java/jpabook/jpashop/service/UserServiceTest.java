@@ -1,8 +1,6 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.domain.user.AddressInfo;
-import jpabook.jpashop.domain.user.User;
-import jpabook.jpashop.domain.user.UsernamePasswordUser;
+import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.LoginFailedException;
@@ -19,13 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -92,18 +88,22 @@ class UserServiceTest {
         String savedUid = userService.register(dto);
 
         // then
-        UsernamePasswordUser actual = (UsernamePasswordUser)userRepository.findByUid(savedUid)
+        User actual = userRepository.findByUid(savedUid)
                 .orElseThrow(RuntimeException::new);
 
-        
-        assertThat(savedUid).isNotNull();
-        assertThat(actual).extracting("name", "email", "addressInfo", "profileImageUrl", "username", "salt")
-                .contains(givenName, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, username, "salt");
+        UsernamePasswordAuthInfo usernamePasswordAuthInfo = actual.getUsernamePasswordAuthInfo();
 
+        assertThat(savedUid).isNotNull();
+        assertThat(actual).extracting("name", "email", "addressInfo", "profileImageUrl")
+                .contains(givenName, givenEmail, new AddressInfo(address, detailedAddress), imageUrl);
+
+        assertThat(usernamePasswordAuthInfo.getUsername()).isEqualTo(username);
+        assertThat(usernamePasswordAuthInfo.getSalt()).isEqualTo("salt");
         assertAll("verify password encode",
-                ()->assertThat(actual.getPassword()).isNotNull(),
-                ()->assertThat(actual.getPassword()).isNotEqualTo(password)
+                ()->assertThat(usernamePasswordAuthInfo.getPassword()).isNotNull(),
+                ()->assertThat(usernamePasswordAuthInfo.getPassword()).isNotEqualTo(password)
         );
+
 
     }
 
@@ -137,7 +137,7 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("이미 가입되어 회원 DB에 저장된 이메일이라면 회원가입이 실패한다.")
+    @DisplayName("이미 가입되어 회원 DB에 저장된 이메일의 유저가 Username으로 저장된 유저라면 회원가입이 실패한다.")
     public void testAlreadySavedEmail() throws Exception{
         //given
         String givenName = "givenName";
@@ -281,12 +281,41 @@ class UserServiceTest {
 
         String savedUid = userService.register(dto);
         //then
-        List<User> savedUsers = userRepository.findAll();
+        User actual = userRepository.findByUid(savedUid)
+                .orElseThrow(RuntimeException::new);
 
+        assertThat(actual).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "kakaoOAuth2AuthInfo")
+                .contains(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, new KakaoOAuth2AuthInfo(kakaoUid));
 
-        assertThat(savedUsers).hasSize(1);
-        assertThat(savedUsers).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "kakaoUid")
-                .contains(tuple(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, kakaoUid));
+    }
+
+    @Test
+    @DisplayName("googleUid, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 값을 저장할 수 있다.")
+    public void testRegisterGoogle() throws Exception{
+        //given
+        String givenName = "givenName";
+        String givenEmail = "email@email.com";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+        String googleUid = "2131241241";
+        //when
+        UserDto.GoogleUserRegisterInfo dto = UserDto.GoogleUserRegisterInfo.builder()
+                .name(givenName)
+                .email(givenEmail)
+                .address(address)
+                .detailedAddress(detailedAddress)
+                .profileImageUrl(imageUrl)
+                .googleUid(googleUid)
+                .build();
+
+        String savedUid = userService.register(dto);
+        //then
+        User actual = userRepository.findByUid(savedUid)
+                .orElseThrow(RuntimeException::new);
+
+        assertThat(actual).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "googleOAuth2AuthInfo")
+                .contains(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, new GoogleOAuth2AuthInfo(googleUid));
     }
 
 

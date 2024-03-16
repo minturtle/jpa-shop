@@ -1,8 +1,8 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.domain.user.KakaoOauth2User;
+import jpabook.jpashop.domain.user.KakaoOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.User;
-import jpabook.jpashop.domain.user.UsernamePasswordUser;
+import jpabook.jpashop.domain.user.UsernamePasswordAuthInfo;
 import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.dto.UserDto;
@@ -14,7 +14,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Base64;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,17 +48,17 @@ public class UserService {
         String uid = nanoIdProvider.createNanoId();
 
 
-        UsernamePasswordUser newUser = new UsernamePasswordUser(
+        User newUser = new User(
                 uid,
                 registerInfo.getEmail(),
                 registerInfo.getName(),
                 registerInfo.getProfileImageUrl(),
                 registerInfo.getAddress(),
-                registerInfo.getDetailedAddress(),
-                registerInfo.getUsername(),
-                encodedPassword,
-                new String(Base64.getEncoder().encode(salt))
+                registerInfo.getDetailedAddress()
         );
+
+        newUser.setUsernamePasswordAuthInfo(registerInfo.getUsername(), encodedPassword, salt);
+
 
         saveProcess(newUser);
 
@@ -79,28 +78,61 @@ public class UserService {
 
         String uid = nanoIdProvider.createNanoId();
 
-        KakaoOauth2User newUser = new KakaoOauth2User(
+        User newUser = new User(
                 uid,
                 registerInfo.getEmail(),
                 registerInfo.getName(),
                 registerInfo.getProfileImageUrl(),
                 registerInfo.getAddress(),
-                registerInfo.getDetailedAddress(),
-                registerInfo.getKakaoUid()
+                registerInfo.getDetailedAddress()
         );
+
+        newUser.setKakaoOAuth2AuthInfo(registerInfo.getKakaoUid());
 
         saveProcess(newUser);
 
         return uid;
     }
 
+    /**
+     * @description 회원가입(google) 메서드
+     * @author minseok kim
+     * @param registerInfo 회원가입 정보
+     * @return 저장된 사용자의 uid
+     * @throws
+     */
+    @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
+    public String register(UserDto.GoogleUserRegisterInfo registerInfo) throws AlreadyExistsUserException {
+        validDuplicationEmail(registerInfo.getEmail());
+
+        String uid = nanoIdProvider.createNanoId();
+
+        User newUser = new User(
+                uid,
+                registerInfo.getEmail(),
+                registerInfo.getName(),
+                registerInfo.getProfileImageUrl(),
+                registerInfo.getAddress(),
+                registerInfo.getDetailedAddress()
+        );
+
+        newUser.setGoogleOAuth2AuthInfo(registerInfo.getGoogleUid());
+
+        saveProcess(newUser);
+
+        return uid;
+
+    }
+
 
 
     public String login(String username, String password) throws LoginFailedException{
-        UsernamePasswordUser user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage()));
 
-        if(!passwordUtils.matches(password, user.getSaltBytes(), user.getPassword())){
+        UsernamePasswordAuthInfo usernamePasswordAuthInfo = user.getUsernamePasswordAuthInfo();
+
+        if(!passwordUtils.matches(password, usernamePasswordAuthInfo.getSaltBytes(), usernamePasswordAuthInfo.getPassword())){
             throw new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage());
         }
 
