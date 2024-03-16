@@ -1,15 +1,14 @@
 package jpabook.jpashop.domain.order;
 
-import jpabook.jpashop.domain.Item;
+import jpabook.jpashop.domain.product.Product;
 import lombok.Getter;
 
 import jakarta.persistence.*;
-import java.util.Objects;
 
 @Entity
 @Getter
-@Table(name = "order_items")
-public class OrderItem {
+@Table(name = "order_products")
+public class OrderProduct {
 
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +21,7 @@ public class OrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
-    private Item item;
+    private Product product;
 
     private int count;
     private int itemPrice;
@@ -38,6 +37,6 @@ public class OrderItem {
 
 
     public void cancel(){
-        this.item.addStock(count);
+        this.product.addStock(count);
     }
 }

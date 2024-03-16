@@ -2,6 +2,7 @@ package jpabook.jpashop.domain;
 
 
 import jakarta.persistence.*;
+import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
 
 @Entity
@@ -15,7 +16,7 @@ public class Cart extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
-    private Item item;
+    private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

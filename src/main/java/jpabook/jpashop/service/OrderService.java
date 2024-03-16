@@ -1,6 +1,6 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.repository.ItemRepository;
+import jpabook.jpashop.repository.ProductRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.dto.OrderDto;
@@ -16,7 +16,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final ItemRepository itemRepository;
+    private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
 

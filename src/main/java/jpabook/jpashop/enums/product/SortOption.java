@@ -1,4 +1,4 @@
-package jpabook.jpashop.enums.item;
+package jpabook.jpashop.enums.product;
 
 public enum SortOption {
     BY_DATE, BY_NAME, BY_PRICE

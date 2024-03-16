@@ -1,6 +1,6 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.repository.ItemRepository;
+import jpabook.jpashop.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class ItemService {
-    private final ItemRepository itemRepository;
+    private final ProductRepository productRepository;
 
 }

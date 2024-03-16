@@ -1,13 +1,12 @@
 package jpabook.jpashop.domain.order;
 
-import jdk.jfr.Timestamp;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
 import lombok.Getter;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class Order extends BaseEntity {
 
     public void cancel(){
         this.status = OrderStatus.CANCEL;
-        orderItems.forEach(OrderItem::cancel);
+        orderProducts.forEach(OrderProduct::cancel);
     }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,12 +42,12 @@ public class Order extends BaseEntity {
     private OrderStatus status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems = new ArrayList<>();
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
 
-    public void addOrderItem(OrderItem orderItem){
-        orderItems.add(orderItem);
-        orderItem.setOrder(this);
+    public void addOrderItem(OrderProduct orderProduct){
+        orderProducts.add(orderProduct);
+        orderProduct.setOrder(this);
     }
 
 }

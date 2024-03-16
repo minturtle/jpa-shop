@@ -1,21 +1,20 @@
-package jpabook.jpashop.domain;
+package jpabook.jpashop.domain.product;
 
-import jpabook.jpashop.dto.ItemDto;
 import lombok.Getter;
 
 import jakarta.persistence.*;
-import java.util.Objects;
 
 @Entity
 @Getter
-@Table(name = "items")
-public class Item {
+@Table(name = "products")
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Product {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "item_id")
+    @Column(name = "product_id")
     private Long id;
 
-    @Column(name = "item_uid", nullable = false, updatable = false, unique = true)
+    @Column(name = "product_uid", nullable = false, updatable = false, unique = true)
     private String uid;
 
     private String name;

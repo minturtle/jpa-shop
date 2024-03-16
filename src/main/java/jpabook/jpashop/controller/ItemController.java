@@ -3,7 +3,7 @@ package jpabook.jpashop.controller;
 
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.controller.response.ItemResponse;
-import jpabook.jpashop.enums.item.SortOption;
+import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.service.ItemService;
 import lombok.*;
 import org.springframework.web.bind.annotation.*;
