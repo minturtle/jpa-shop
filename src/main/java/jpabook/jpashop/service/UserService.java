@@ -12,7 +12,9 @@ import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
@@ -60,8 +62,11 @@ public class UserService {
                 new String(Base64.getEncoder().encode(salt))
         );
 
-        // TODO : 동시성 제어 필요(동시의 두 유저가 동일한 email 또는 username으로 회원가입 하는 경우)
-        userRepository.save(newUser);
+        try{
+            userRepository.save(newUser);
+        }catch (DataIntegrityViolationException e){
+            throw new AlreadyExistsUserException();
+        }
 
         return newUser.getUid();
     }

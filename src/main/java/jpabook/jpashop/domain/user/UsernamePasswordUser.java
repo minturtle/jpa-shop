@@ -37,6 +37,7 @@ public class UsernamePasswordUser extends User{
     private String username;
     @Column(columnDefinition = "VARCHAR(512)")
     private String password;
+    @Column(columnDefinition = "VARCHAR(256)")
     private String salt;
 
 

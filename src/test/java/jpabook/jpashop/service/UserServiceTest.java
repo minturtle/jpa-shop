@@ -8,7 +8,10 @@ import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,17 +19,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.*;
 
 
@@ -35,6 +45,7 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
+@Slf4j
 class UserServiceTest {
 
     @Autowired
@@ -45,6 +56,7 @@ class UserServiceTest {
 
     @SpyBean
     private PasswordUtils passwordUtils;
+
 
     @Test
     @DisplayName(
@@ -82,6 +94,7 @@ class UserServiceTest {
         UsernamePasswordUser actual = (UsernamePasswordUser)userRepository.findByUid(savedUid)
                 .orElseThrow(RuntimeException::new);
 
+        
         assertThat(savedUid).isNotNull();
         assertThat(actual).extracting("name", "email", "addressInfo", "profileImageUrl", "username", "salt")
                 .contains(givenName, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, username, "salt");
@@ -185,6 +198,64 @@ class UserServiceTest {
         assertThatThrownBy(()->userService.register(dto))
                 .isInstanceOf(AlreadyExistsUserException.class)
                 .hasMessage(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
+    }
+
+
+    @Test
+    @DisplayName("동시에 같은 Id, 또는 이메일로 회원가입을 실패한다면, 맨 처음 회원가입을 제외하곤 실패한다.")
+    public void registerConcurrencyTest() throws Exception{
+        //given
+        int threadSize = 10;
+        CountDownLatch doneSignal = new CountDownLatch(threadSize);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadSize);
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+        String givenName = "givenName";
+        String givenEmail = "email2@email.com";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+        String password = "abc1234!";
+        String username = "username";
+
+        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
+                .name(givenName)
+                .email(givenEmail)
+                .address(address)
+                .detailedAddress(detailedAddress)
+                .profileImageUrl(imageUrl)
+                .username(username)
+                .password(password)
+                .build();
+
+        //when
+        for(int i = 0; i <threadSize; i++){
+            executorService.execute(()->{
+                try {
+                    userService.register(dto);
+                    successCount.getAndIncrement();
+                }catch (AlreadyExistsUserException e){
+                    failCount.getAndIncrement();
+                    log.info(e.getMessage());
+                }catch (Exception e){
+                    fail();
+                }finally {
+                    doneSignal.countDown();
+                }
+            });
+        }
+
+        doneSignal.await();
+        executorService.shutdown();
+        //then
+        List<User> savedUserList = userRepository.findAll();
+
+        assertThat(savedUserList.size()).isEqualTo(1);
+
+        assertAll("처음 회원가입을 제외하곤 실패",
+                ()->assertThat(successCount.get()).isEqualTo(1),
+                ()->assertThat(failCount.get()).isEqualTo(threadSize - 1));
+
     }
 
 
