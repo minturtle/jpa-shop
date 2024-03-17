@@ -99,5 +99,12 @@ public abstract class UserDto {
     public static class Update {
     }
 
+    @AllArgsConstructor
+    @Getter
+    public static class OAuthLoginResult {
+        private String uid;
+        private boolean isAdditionalInfoNeed;
+
+    }
 }
 

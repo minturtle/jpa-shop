@@ -258,69 +258,6 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("KakaoUid, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 값을 저장할 수 있다.")
-    public void testRegisterKakao() throws Exception{
-        //given
-        String givenName = "givenName";
-        String givenEmail = "email@email.com";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
-        String kakaoUid = "2131241241";
-
-        //when
-
-        UserDto.KakaoUserRegisterInfo dto = UserDto.KakaoUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .kakaoUid(kakaoUid)
-                .build();
-
-        String savedUid = userService.register(dto);
-        //then
-        User actual = userRepository.findByUid(savedUid)
-                .orElseThrow(RuntimeException::new);
-
-        assertThat(actual).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "kakaoOAuth2AuthInfo")
-                .contains(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, new KakaoOAuth2AuthInfo(kakaoUid));
-
-    }
-
-    @Test
-    @DisplayName("googleUid, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 값을 저장할 수 있다.")
-    public void testRegisterGoogle() throws Exception{
-        //given
-        String givenName = "givenName";
-        String givenEmail = "email@email.com";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
-        String googleUid = "2131241241";
-        //when
-        UserDto.GoogleUserRegisterInfo dto = UserDto.GoogleUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .googleUid(googleUid)
-                .build();
-
-        String savedUid = userService.register(dto);
-        //then
-        User actual = userRepository.findByUid(savedUid)
-                .orElseThrow(RuntimeException::new);
-
-        assertThat(actual).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "googleOAuth2AuthInfo")
-                .contains(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, new GoogleOAuth2AuthInfo(googleUid));
-    }
-
-
-
-    @Test
     @DisplayName("username과 password를 입력해서 로그인할 수 있다.")
     public void testLogin() throws Exception{
         //given
@@ -370,9 +307,67 @@ class UserServiceTest {
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
     }
 
+    @Test
+    @DisplayName("카카오 인증 시도시, 이미 카카오 이메일과 kakaoUid가 회원 DB에 저장되어 있다면 해당 유저의 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testUserAlreadyHasKakaoAuthInfo() throws Exception{
+        //given
+        String givenUid = "uid";
+        String givenEmail = "email@kakao.com";
+        String kakaoUid = "123141244124";
+
+        saveKakaoUser(givenUid, givenEmail, kakaoUid);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, givenEmail);
+
+        //then
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, false);
+    }
+
+    @Test
+    @DisplayName("카카오 인증 시도시, 카카오 이메일을 사용하나 kakaoUid가 회원 DB에 저장되어 있지 않다면 해당 유저에 kakaoUid 정보를 저장하고 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testUserAlreadyHasKakaoEmail() throws Exception{
+        //given
+
+        String username = "username";
+        String password = "abc1234!";
+        String email = "abcd@kakao.com";
+        String kakaoUid = "21312412421";
+        String savedUid = saveUser(username, password, email);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, email);
+
+        //then
+        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(savedUid, false);
+        assertThat(actual.getKakaoOAuth2AuthInfo().getKakaoUid()).isEqualTo(kakaoUid);
+
+    }
 
 
 
+
+    private void saveKakaoUser(String uid, String email, String kakaoUid){
+        String givenName = "givenName";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+
+        User newUser = new User(
+                uid,
+                email,
+                givenName,
+                imageUrl,
+                address,
+                detailedAddress
+        );
+        newUser.setKakaoOAuth2AuthInfo(kakaoUid);
+        userRepository.save(newUser);
+    }
 
     private String saveUser(String username, String password, String email) throws PasswordValidationException, AlreadyExistsUserException {
         String givenName = "givenName";

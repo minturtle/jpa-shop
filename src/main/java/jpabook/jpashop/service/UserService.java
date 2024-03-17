@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,66 +67,12 @@ public class UserService {
     }
 
     /**
-     * @description 회원가입(Kakao) 메서드
      * @author minseok kim
-     * @param registerInfo 회원가입 정보
-     * @return 저장된 사용자의 uid
-     * @throws
-     */
-    @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
-    public String register(UserDto.KakaoUserRegisterInfo registerInfo) throws AlreadyExistsUserException {
-        validDuplicationEmail(registerInfo.getEmail());
-
-        String uid = nanoIdProvider.createNanoId();
-
-        User newUser = new User(
-                uid,
-                registerInfo.getEmail(),
-                registerInfo.getName(),
-                registerInfo.getProfileImageUrl(),
-                registerInfo.getAddress(),
-                registerInfo.getDetailedAddress()
-        );
-
-        newUser.setKakaoOAuth2AuthInfo(registerInfo.getKakaoUid());
-
-        saveProcess(newUser);
-
-        return uid;
-    }
-
-    /**
-     * @description 회원가입(google) 메서드
-     * @author minseok kim
-     * @param registerInfo 회원가입 정보
-     * @return 저장된 사용자의 uid
-     * @throws
-     */
-    @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
-    public String register(UserDto.GoogleUserRegisterInfo registerInfo) throws AlreadyExistsUserException {
-        validDuplicationEmail(registerInfo.getEmail());
-
-        String uid = nanoIdProvider.createNanoId();
-
-        User newUser = new User(
-                uid,
-                registerInfo.getEmail(),
-                registerInfo.getName(),
-                registerInfo.getProfileImageUrl(),
-                registerInfo.getAddress(),
-                registerInfo.getDetailedAddress()
-        );
-
-        newUser.setGoogleOAuth2AuthInfo(registerInfo.getGoogleUid());
-
-        saveProcess(newUser);
-
-        return uid;
-
-    }
-
-
-
+     * @description username/password 인증 시도
+     * @param
+     * @return 인증된 사용자의 uid
+     * @exception
+    */
     public String login(String username, String password) throws LoginFailedException{
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage()));
@@ -138,6 +85,44 @@ public class UserService {
 
         return user.getUid();
     }
+
+
+    /**
+     * @author minseok kim
+     * @description 카카오 인증, 존재하지 않는 유저라면 DB에 사용자의 정보를 저장한 후 uid를 리턴한다.
+     * @param kakaoUid 카카오에서 전달한 유저의 uid
+     * @param email 사용자의 카카오 이메일
+     * @return
+     * @exception
+    */
+    public UserDto.OAuthLoginResult loginKakao(String kakaoUid, String email){
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        boolean isUserPresent = userOptional.isPresent();
+        KakaoOAuth2AuthInfo kakaoAuthInfo = userOptional.get().getKakaoOAuth2AuthInfo();
+
+        // 사용자의 카카오인증 정보와 요청받은 인증 정보가 일치하는 경우
+        if(isUserPresent && doKakaoAuthenticate(kakaoUid, kakaoAuthInfo)){
+            return new UserDto.OAuthLoginResult(userOptional.get().getUid(), false);
+        }
+        // 카카오 이메일을 사용하는 사용자는 존재하나, 카카오 인증정보가 존재하지 않는 경우
+        if(isUserPresent && !(new KakaoOAuth2AuthInfo(kakaoUid).equals(kakaoAuthInfo))){
+            userOptional.get().setKakaoOAuth2AuthInfo(kakaoUid);
+
+            return new UserDto.OAuthLoginResult(userOptional.get().getUid(), false);
+        }
+
+
+        return null;
+    }
+
+
+
+    public String loginGoogle(String googleUid){
+        return null;
+    }
+
+
 
     /*
     * 사용자 마이페이지에 필요한 정보들을 제공
@@ -204,6 +189,10 @@ public class UserService {
         }
     }
 
+
+    private boolean doKakaoAuthenticate(String kakaoUid, KakaoOAuth2AuthInfo kakaoAuthInfo) {
+        return  kakaoAuthInfo != null && kakaoAuthInfo.getKakaoUid().equals(kakaoUid);
+    }
 
 }
 
