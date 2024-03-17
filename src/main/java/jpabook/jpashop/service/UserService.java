@@ -99,21 +99,28 @@ public class UserService {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         boolean isUserPresent = userOptional.isPresent();
-        KakaoOAuth2AuthInfo kakaoAuthInfo = userOptional.get().getKakaoOAuth2AuthInfo();
 
         // 사용자의 카카오인증 정보와 요청받은 인증 정보가 일치하는 경우
-        if(isUserPresent && doKakaoAuthenticate(kakaoUid, kakaoAuthInfo)){
+        if(isUserPresent && doKakaoAuthenticate(kakaoUid, userOptional.get().getKakaoOAuth2AuthInfo())){
             return new UserDto.OAuthLoginResult(userOptional.get().getUid(), false);
         }
         // 카카오 이메일을 사용하는 사용자는 존재하나, 카카오 인증정보가 존재하지 않는 경우
-        if(isUserPresent && !(new KakaoOAuth2AuthInfo(kakaoUid).equals(kakaoAuthInfo))){
+        if(isUserPresent && !(new KakaoOAuth2AuthInfo(kakaoUid).equals(userOptional.get().getKakaoOAuth2AuthInfo()))){
             userOptional.get().setKakaoOAuth2AuthInfo(kakaoUid);
 
             return new UserDto.OAuthLoginResult(userOptional.get().getUid(), false);
         }
+        // 카카오 이메일을 사용하는 유저가 존재하지 않는 경우
 
+        String uid = nanoIdProvider.createNanoId();
 
-        return null;
+        User newUser = new User(uid, email, "손님", null, null, null);
+
+        newUser.setKakaoOAuth2AuthInfo(kakaoUid);
+
+        userRepository.save(newUser);
+
+        return new UserDto.OAuthLoginResult(uid, true);
     }
 
 

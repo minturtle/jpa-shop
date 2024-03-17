@@ -7,6 +7,7 @@ import jpabook.jpashop.exception.user.LoginFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -49,6 +50,9 @@ class UserServiceTest {
 
     @SpyBean
     private PasswordUtils passwordUtils;
+
+    @SpyBean
+    private NanoIdProvider nanoIdProvider;
 
     @BeforeEach
     void setUp() {
@@ -348,6 +352,29 @@ class UserServiceTest {
 
     }
 
+    @Test
+    @DisplayName("카카오 인증 시도시, 카카오 이메일에 해당하는 유저가 회원 DB에 저장되어 있지 않다면 해당 유저를 추가해 DB에 저장하고 uid와 추가정보가 필요하다는 결과값을 리턴한다.")
+    public void testNoKakaoUser() throws Exception{
+        //given
+        String kakaoUid = "123124141";
+        String email = "kakao@kakao.com";
+        String givenUid = "uid";
+
+        when(nanoIdProvider.createNanoId()).thenReturn(givenUid);
+
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, email);
+
+        //then
+        User actual = userRepository.findByUid(givenUid).orElseThrow(RuntimeException::new);
+
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, true);
+        assertThat(actual.getEmail()).isEqualTo(email);
+        assertThat(actual.getKakaoOAuth2AuthInfo().getKakaoUid()).isEqualTo(kakaoUid);
+
+    }
 
 
 
