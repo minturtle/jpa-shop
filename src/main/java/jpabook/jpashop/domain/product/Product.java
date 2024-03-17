@@ -4,6 +4,8 @@ import lombok.Getter;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Table(name = "products")
@@ -24,6 +26,10 @@ public abstract class Product {
     private int stockQuantity;
 
     private String thumbnailImageUrl;
+
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ProductCategory> categories;
 
 
     public void addStock(int quantity){
