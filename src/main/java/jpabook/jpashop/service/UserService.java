@@ -96,6 +96,7 @@ public class UserService {
      * @return
      * @exception AlreadyExistsUserException 해당 메서드 실행 도중 해당 email로 회원가입이 완료된 경우
     */
+    @Transactional(rollbackFor = {AlreadyExistsUserException.class, RuntimeException.class})
     public UserDto.OAuthLoginResult loginKakao(String kakaoUid, String email) throws AlreadyExistsUserException {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
