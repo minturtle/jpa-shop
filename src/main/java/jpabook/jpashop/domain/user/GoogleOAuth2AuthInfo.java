@@ -3,6 +3,7 @@ package jpabook.jpashop.domain.user;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Objects;
@@ -10,6 +11,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
+@Getter
 public class GoogleOAuth2AuthInfo {
 
     private String googleUid;

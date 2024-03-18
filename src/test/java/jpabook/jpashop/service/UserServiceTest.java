@@ -376,22 +376,128 @@ class UserServiceTest {
 
     }
 
+    @Test
+    @DisplayName("동시에 같은 카카오 정보로 로그인 및 DB 저장을 시도한다면, 첫번쨰 요청을 제외하곤 카카오 로그인에 실패한다.")
+    public void testConcurrencyKakaoLogin() throws Exception{
+        //given
+        String kakaoUid = "123124141";
+        String email = "kakao@kakao.com";
+        String givenUid = "uid";
 
+        int threadSize = 2;
+        CountDownLatch doneSignal = new CountDownLatch(threadSize);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadSize);
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+
+
+        when(nanoIdProvider.createNanoId()).thenReturn(givenUid);
+        //when
+        for(int i = 0; i < threadSize; i++){
+            executorService.execute(()->{
+                try{
+                    userService.loginKakao(kakaoUid, email);
+                    successCount.getAndIncrement();
+                }catch (AlreadyExistsUserException e){
+                    failCount.getAndIncrement();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    fail();
+                }finally {
+                    doneSignal.countDown();
+                }
+            });
+        }
+
+        doneSignal.await();
+        executorService.shutdown();
+
+        //then
+        User actual = userRepository.findByUid(givenUid)
+                .orElseThrow(RuntimeException::new);
+
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(failCount.get()).isEqualTo(1);
+        assertThat(actual.getEmail()).isEqualTo(email);
+        assertThat(actual.getKakaoOAuth2AuthInfo().getKakaoUid()).isEqualTo(kakaoUid);
+    }
+
+    @Test
+    @DisplayName("Google 인증 시도시, 이미 구글 이메일과 googleUid가 회원 DB에 저장되어 있다면 해당 유저의 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testGoogleAuth() throws Exception{
+        //given
+        String givenUid = "uid";
+        String givenEmail = "email@kakao.com";
+        String googleUid = "123141244124";
+
+        saveGoogleUser(givenUid, givenEmail, googleUid);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, givenEmail);
+
+        //then
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, false);
+
+    }
+
+    @Test
+    @DisplayName("구글 인증 시도시, 구글 이메일을 사용하나 googleUid가 회원 DB에 저장되어 있지 않다면 해당 유저에 googleUid 정보를 저장하고 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testGoogleNoAuthInfo() throws Exception{
+        //given
+        String username = "username";
+        String password = "abc1234!";
+        String email = "abcd@google.com";
+        String googleUid = "21312412421";
+        String savedUid = saveUser(username, password, email);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, email);
+
+        //then
+        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(savedUid, false);
+        assertThat(actual.getGoogleOAuth2AuthInfo().getGoogleUid()).isEqualTo(googleUid);
+
+    }
+
+
+    @Test
+    @DisplayName("구글 인증 시도시, 구글 이메일에 해당하는 유저가 회원 DB에 저장되어 있지 않다면 해당 유저를 추가해 DB에 저장하고 uid와 추가정보가 필요하다는 결과값을 리턴한다.")
+    public void testNoGoogleUser() throws Exception{
+        //given
+        String googleUid = "123124141";
+        String email = "google@google.com";
+        String givenUid = "uid";
+
+        when(nanoIdProvider.createNanoId()).thenReturn(givenUid);
+
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, email);
+
+        //then
+        User actual = userRepository.findByUid(givenUid).orElseThrow(RuntimeException::new);
+
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, true);
+        assertThat(actual.getEmail()).isEqualTo(email);
+        assertThat(actual.getGoogleOAuth2AuthInfo().getGoogleUid()).isEqualTo(googleUid);
+
+    }
+
+
+    private void saveGoogleUser(String uid, String email, String googleUid){
+        User newUser = createTestUser(uid, email);
+        newUser.setGoogleOAuth2AuthInfo(googleUid);
+        userRepository.save(newUser);
+
+    }
 
     private void saveKakaoUser(String uid, String email, String kakaoUid){
-        String givenName = "givenName";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
-
-        User newUser = new User(
-                uid,
-                email,
-                givenName,
-                imageUrl,
-                address,
-                detailedAddress
-        );
+        User newUser = createTestUser(uid, email);
         newUser.setKakaoOAuth2AuthInfo(kakaoUid);
         userRepository.save(newUser);
     }
@@ -413,6 +519,24 @@ class UserServiceTest {
                 .build();
 
         return userService.register(dto);
+    }
+
+
+    private User createTestUser(String uid, String email) {
+        String givenName = "givenName";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+
+        User newUser = new User(
+                uid,
+                email,
+                givenName,
+                imageUrl,
+                address,
+                detailedAddress
+        );
+        return newUser;
     }
 
 

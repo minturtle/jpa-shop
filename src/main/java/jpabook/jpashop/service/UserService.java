@@ -1,5 +1,6 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.user.GoogleOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.KakaoOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordAuthInfo;
@@ -93,9 +94,9 @@ public class UserService {
      * @param kakaoUid 카카오에서 전달한 유저의 uid
      * @param email 사용자의 카카오 이메일
      * @return
-     * @exception
+     * @exception AlreadyExistsUserException 해당 메서드 실행 도중 해당 email로 회원가입이 완료된 경우
     */
-    public UserDto.OAuthLoginResult loginKakao(String kakaoUid, String email){
+    public UserDto.OAuthLoginResult loginKakao(String kakaoUid, String email) throws AlreadyExistsUserException {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         boolean isUserPresent = userOptional.isPresent();
@@ -118,18 +119,46 @@ public class UserService {
 
         newUser.setKakaoOAuth2AuthInfo(kakaoUid);
 
-        userRepository.save(newUser);
+
+        saveProcess(newUser);
 
         return new UserDto.OAuthLoginResult(uid, true);
     }
 
 
 
-    public String loginGoogle(String googleUid){
-        return null;
+    /**
+     * @author minseok kim
+     * @description 구글 인증, 존재하지 않는 유저라면 DB에 사용자의 정보를 저장한 후 uid를 리턴한다.
+     * @param googleUid 카카오에서 전달한 유저의 uid
+     * @param email 사용자의 카카오 이메일
+     * @return
+     * @exception AlreadyExistsUserException 해당 메서드 실행 도중 해당 email로 회원가입이 완료된 경우
+     */
+    public UserDto.OAuthLoginResult loginGoogle(String googleUid,  String email) throws AlreadyExistsUserException {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        boolean isUserPresent = userOptional.isPresent();
+
+        // 사용자의 카카오인증 정보와 요청받은 인증 정보가 일치하는 경우
+        if(isUserPresent && doGoogleAuthenticate(googleUid, userOptional.get().getGoogleOAuth2AuthInfo())){
+            return new UserDto.OAuthLoginResult(userOptional.get().getUid(), false);
+        }
+        // 카카오 이메일을 사용하는 사용자는 존재하나, 카카오 인증정보가 존재하지 않는 경우
+        if(isUserPresent && !(new GoogleOAuth2AuthInfo(googleUid).equals(userOptional.get().getGoogleOAuth2AuthInfo()))){
+            userOptional.get().setGoogleOAuth2AuthInfo(googleUid);
+
+            return new UserDto.OAuthLoginResult(userOptional.get().getUid(), false);
+        }
+        String uid = nanoIdProvider.createNanoId();
+
+        User newUser = new User(uid, email, "손님", null, null, null);
+
+        newUser.setGoogleOAuth2AuthInfo(googleUid);
+
+        saveProcess(newUser);
+        return new UserDto.OAuthLoginResult(uid, true);
     }
-
-
 
     /*
     * 사용자 마이페이지에 필요한 정보들을 제공
@@ -199,6 +228,10 @@ public class UserService {
 
     private boolean doKakaoAuthenticate(String kakaoUid, KakaoOAuth2AuthInfo kakaoAuthInfo) {
         return  kakaoAuthInfo != null && kakaoAuthInfo.getKakaoUid().equals(kakaoUid);
+    }
+
+    private boolean doGoogleAuthenticate(String googleUid, GoogleOAuth2AuthInfo googleAuthInfo) {
+        return googleAuthInfo != null && googleAuthInfo.getGoogleUid().equals(googleUid);
     }
 
 }
