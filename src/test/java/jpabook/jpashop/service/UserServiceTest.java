@@ -132,10 +132,13 @@ class UserServiceTest {
                 .password(givenPassword)
                 .build();
 
-        //when & then
-        assertThatThrownBy(() -> userService.register(dto))
+        //when
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.register(dto);
+
+        //then
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(PasswordValidationException.class)
-                .hasMessage(UserExceptonMessages.INVALID_PASSWORD.getMessage());
+                .hasMessage(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
     }
 
     @Test
@@ -163,8 +166,11 @@ class UserServiceTest {
         saveUser("usernam1", "asdsad23123!@!@#", givenEmail);
 
 
-        //when & then
-        assertThatThrownBy(() -> userService.register(dto))
+        //when
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.register(dto);
+
+        //then
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(AlreadyExistsUserException.class)
                 .hasMessage(UserExceptonMessages.ALREADY_EXISTS_EMAIL.getMessage());
 
@@ -195,8 +201,11 @@ class UserServiceTest {
 
         saveUser(username, "asdsad23123!@!@#", "email2@email.com");
 
-        //when & then
-        assertThatThrownBy(() -> userService.register(dto))
+        //when
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.register(dto);
+
+        //then
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(AlreadyExistsUserException.class)
                 .hasMessage(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
     }
@@ -289,8 +298,11 @@ class UserServiceTest {
         saveUser(username, password, "email@email.com");
 
 
-        //when & then
-        assertThatThrownBy(() -> userService.login(incorrectUsername, password))
+        //when
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.login(incorrectUsername, password);
+
+        //then
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(AuthenticateFailedException.class)
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
 
@@ -308,8 +320,10 @@ class UserServiceTest {
         saveUser(username, password, "email@email.com");
 
 
-        //when & then
-        assertThatThrownBy(() -> userService.login(username, incorrectPassword))
+        //when
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.login(username, incorrectPassword);
+        //then
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(AuthenticateFailedException.class)
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
     }
@@ -611,10 +625,10 @@ class UserServiceTest {
         String updatedPassword = "update123!";
 
         // when
-        ThrowableAssert.ThrowingCallable execute =
+        ThrowableAssert.ThrowingCallable throwingCallable =
                 ()->userService.updatePassword(givenUid, new UserDto.UpdatePassword(password, updatedPassword));
         // then
-        assertThatThrownBy(execute)
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(CannotFindUserException.class)
                 .hasMessage(UserExceptonMessages.CANNOT_FIND_USER.getMessage());
     }
@@ -630,10 +644,10 @@ class UserServiceTest {
         userRepository.save(createTestUser(givenUid, "email@email.com"));
 
         // when
-        ThrowableAssert.ThrowingCallable execute =
+        ThrowableAssert.ThrowingCallable throwingCallable =
                 ()->userService.updatePassword(givenUid, new UserDto.UpdatePassword(password, updatedPassword));
         // then
-        assertThatThrownBy(execute)
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(UserAuthTypeException.class)
                 .hasMessage(UserExceptonMessages.NO_USERNAME_PASSWORD_AUTH_INFO.getMessage());
     }
@@ -652,11 +666,11 @@ class UserServiceTest {
 
         String savedUid = saveUser(username, password, email);
         // when
-        ThrowableAssert.ThrowingCallable execute =
+        ThrowableAssert.ThrowingCallable throwingCallable =
                 ()->userService.updatePassword(savedUid, new UserDto.UpdatePassword(incorrectPassword, updatedPassword));
 
         // then
-        assertThatThrownBy(execute)
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(AuthenticateFailedException.class)
                 .hasMessage(UserExceptonMessages.INVALID_PASSWORD.getMessage());
     }
@@ -673,10 +687,10 @@ class UserServiceTest {
 
         String savedUid = saveUser(username, password, email);
         // when
-        ThrowableAssert.ThrowingCallable execute =
+        ThrowableAssert.ThrowingCallable throwingCallable =
                 ()->userService.updatePassword(savedUid, new UserDto.UpdatePassword(password, updatedPassword));
         // then
-        assertThatThrownBy(execute)
+        assertThatThrownBy(throwingCallable)
                 .isInstanceOf(PasswordValidationException.class)
                 .hasMessage(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
 
