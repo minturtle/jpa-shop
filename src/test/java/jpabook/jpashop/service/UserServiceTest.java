@@ -9,6 +9,7 @@ import jpabook.jpashop.exception.user.LoginFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -39,7 +40,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
 @SpringBootTest
-@Transactional
 @Slf4j
 class UserServiceTest {
 
@@ -52,9 +52,9 @@ class UserServiceTest {
     @SpyBean
     private PasswordUtils passwordUtils;
 
-    @PersistenceContext
-    private EntityManager em;
 
+    @SpyBean
+    private NanoIdProvider nanoIdProvider;
 
     @BeforeEach
     void setUp() {
@@ -63,9 +63,9 @@ class UserServiceTest {
 
     @Test
     @DisplayName(
-        "Username과 Password, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 비밀번호가 암호화된 채로 값을 저장할 수 있다."
+            "Username과 Password, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 비밀번호가 암호화된 채로 값을 저장할 수 있다."
     )
-    void testUsernamePasswordRegister() throws Exception{
+    void testUsernamePasswordRegister() throws Exception {
         // given
         String givenName = "givenName";
         String givenEmail = "email@email.com";
@@ -106,8 +106,8 @@ class UserServiceTest {
         assertThat(usernamePasswordAuthInfo.getUsername()).isEqualTo(username);
         assertThat(usernamePasswordAuthInfo.getSalt()).isEqualTo("salt");
         assertAll("verify password encode",
-                ()->assertThat(usernamePasswordAuthInfo.getPassword()).isNotNull(),
-                ()->assertThat(usernamePasswordAuthInfo.getPassword()).isNotEqualTo(password)
+                () -> assertThat(usernamePasswordAuthInfo.getPassword()).isNotNull(),
+                () -> assertThat(usernamePasswordAuthInfo.getPassword()).isNotEqualTo(password)
         );
 
 
@@ -115,9 +115,9 @@ class UserServiceTest {
 
 
     @ParameterizedTest
-    @CsvSource({"abcdefgh","12345678", "!@#$%^&*", "abcd1234", "abc123!"})
+    @CsvSource({"abcdefgh", "12345678", "!@#$%^&*", "abcd1234", "abc123!"})
     @DisplayName("회원가입을 수행할 때 비밀번호는 영문, 숫자, 특수문자를 모두 포함하며, 8자 이상이 아니라면 회원가입에 실패한다.")
-    public void testRegisterPasswordFailTest(String givenPassword) throws Exception{
+    public void testRegisterPasswordFailTest(String givenPassword) throws Exception {
         //given
         String givenName = "givenName";
         String givenEmail = "email@email.com";
@@ -137,14 +137,14 @@ class UserServiceTest {
                 .build();
 
         //when & then
-        assertThatThrownBy(()->userService.register(dto))
+        assertThatThrownBy(() -> userService.register(dto))
                 .isInstanceOf(PasswordValidationException.class)
                 .hasMessage(UserExceptonMessages.INVALID_PASSWORD.getMessage());
     }
 
     @Test
     @DisplayName("이미 가입되어 회원 DB에 저장된 이메일의 유저가 Username으로 저장된 유저라면 회원가입이 실패한다.")
-    public void testAlreadySavedEmail() throws Exception{
+    public void testAlreadySavedEmail() throws Exception {
         //given
         String givenName = "givenName";
         String givenEmail = "email@email.com";
@@ -168,7 +168,7 @@ class UserServiceTest {
 
 
         //when & then
-        assertThatThrownBy(()->userService.register(dto))
+        assertThatThrownBy(() -> userService.register(dto))
                 .isInstanceOf(AlreadyExistsUserException.class)
                 .hasMessage(UserExceptonMessages.ALREADY_EXISTS_EMAIL.getMessage());
 
@@ -176,7 +176,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("회원가입 시도시 이미 존재하는 username이라면 회원가입에 실패한다.")
-    public void testAlreadyExistsUsernameRegister() throws Exception{
+    public void testAlreadyExistsUsernameRegister() throws Exception {
         //given
         String givenName = "givenName";
         String givenEmail = "email@email.com";
@@ -200,7 +200,7 @@ class UserServiceTest {
         saveUser(username, "asdsad23123!@!@#", "email2@email.com");
 
         //when & then
-        assertThatThrownBy(()->userService.register(dto))
+        assertThatThrownBy(() -> userService.register(dto))
                 .isInstanceOf(AlreadyExistsUserException.class)
                 .hasMessage(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
     }
@@ -208,7 +208,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("동시에 같은 Id, 또는 이메일로 회원가입을 실패한다면, 맨 처음 회원가입을 제외하곤 실패한다.")
-    public void registerConcurrencyTest() throws Exception{
+    public void registerConcurrencyTest() throws Exception {
         //given
         int threadSize = 10;
         CountDownLatch doneSignal = new CountDownLatch(threadSize);
@@ -234,17 +234,17 @@ class UserServiceTest {
                 .build();
 
         //when
-        for(int i = 0; i <threadSize; i++){
-            executorService.execute(()->{
+        for (int i = 0; i < threadSize; i++) {
+            executorService.execute(() -> {
                 try {
                     userService.register(dto);
                     successCount.getAndIncrement();
-                }catch (AlreadyExistsUserException e){
+                } catch (AlreadyExistsUserException e) {
                     failCount.getAndIncrement();
                     log.info(e.getMessage());
-                }catch (Exception e){
+                } catch (Exception e) {
                     fail();
-                }finally {
+                } finally {
                     doneSignal.countDown();
                 }
             });
@@ -258,83 +258,20 @@ class UserServiceTest {
         assertThat(savedUserList.size()).isEqualTo(1);
 
         assertAll("처음 회원가입을 제외하곤 실패",
-                ()->assertThat(successCount.get()).isEqualTo(1),
-                ()->assertThat(failCount.get()).isEqualTo(threadSize - 1));
+                () -> assertThat(successCount.get()).isEqualTo(1),
+                () -> assertThat(failCount.get()).isEqualTo(threadSize - 1));
 
     }
-
-    @Test
-    @DisplayName("KakaoUid, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 값을 저장할 수 있다.")
-    public void testRegisterKakao() throws Exception{
-        //given
-        String givenName = "givenName";
-        String givenEmail = "email@email.com";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
-        String kakaoUid = "2131241241";
-
-        //when
-
-        UserDto.KakaoUserRegisterInfo dto = UserDto.KakaoUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .kakaoUid(kakaoUid)
-                .build();
-
-        String savedUid = userService.register(dto);
-        //then
-        User actual = userRepository.findByUid(savedUid)
-                .orElseThrow(RuntimeException::new);
-
-        assertThat(actual).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "kakaoOAuth2AuthInfo")
-                .contains(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, new KakaoOAuth2AuthInfo(kakaoUid));
-
-    }
-
-    @Test
-    @DisplayName("googleUid, 기타 회원 정보를 입력해 회원가입을 수행해 회원 DB에 값을 저장할 수 있다.")
-    public void testRegisterGoogle() throws Exception{
-        //given
-        String givenName = "givenName";
-        String givenEmail = "email@email.com";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
-        String googleUid = "2131241241";
-        //when
-        UserDto.GoogleUserRegisterInfo dto = UserDto.GoogleUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .googleUid(googleUid)
-                .build();
-
-        String savedUid = userService.register(dto);
-        //then
-        User actual = userRepository.findByUid(savedUid)
-                .orElseThrow(RuntimeException::new);
-
-        assertThat(actual).extracting("name", "uid", "email", "addressInfo", "profileImageUrl", "googleOAuth2AuthInfo")
-                .contains(givenName, savedUid, givenEmail, new AddressInfo(address, detailedAddress), imageUrl, new GoogleOAuth2AuthInfo(googleUid));
-    }
-
-
 
     @Test
     @DisplayName("username과 password를 입력해서 로그인할 수 있다.")
-    public void testLogin() throws Exception{
+    public void testLogin() throws Exception {
         //given
         String password = "abc1234!";
         String username = "username";
 
         String savedUid = saveUser(username, password, "email@email.com");
-        clearEntityCache();
+
 
         //when
         String actualUid = userService.login(username, password);
@@ -346,7 +283,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("저장되지 않은 username으로 로그인에 시도할 시 로그인에 실패한다.")
-    public void testIncorrectUsername() throws Exception{
+    public void testIncorrectUsername() throws Exception {
         //given
         String password = "abc1234!";
         String username = "username";
@@ -354,10 +291,10 @@ class UserServiceTest {
 
 
         saveUser(username, password, "email@email.com");
-        clearEntityCache();
+
 
         //when & then
-        assertThatThrownBy(()->userService.login(incorrectUsername, password))
+        assertThatThrownBy(() -> userService.login(incorrectUsername, password))
                 .isInstanceOf(LoginFailedException.class)
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
 
@@ -365,7 +302,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("잘못된 비밀번호로 로그인에 시도할시 로그인에 실패한다.")
-    public void testIncorrectPassword() throws Exception{
+    public void testIncorrectPassword() throws Exception {
         //given
         String password = "abc1234!";
         String username = "username";
@@ -373,17 +310,196 @@ class UserServiceTest {
 
 
         saveUser(username, password, "email@email.com");
-        clearEntityCache();
+
 
         //when & then
-        assertThatThrownBy(()->userService.login(username, incorrectPassword))
+        assertThatThrownBy(() -> userService.login(username, incorrectPassword))
                 .isInstanceOf(LoginFailedException.class)
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
     }
 
+
+    @Test
+    @DisplayName("카카오 인증 시도시, 이미 카카오 이메일과 kakaoUid가 회원 DB에 저장되어 있다면 해당 유저의 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testUserAlreadyHasKakaoAuthInfo() throws Exception {
+        //given
+        String givenUid = "uid";
+        String givenEmail = "email@kakao.com";
+        String kakaoUid = "123141244124";
+
+        saveKakaoUser(givenUid, givenEmail, kakaoUid);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, givenEmail);
+
+        //then
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, false);
+    }
+
+    @Test
+    @DisplayName("카카오 인증 시도시, 카카오 이메일을 사용하나 kakaoUid가 회원 DB에 저장되어 있지 않다면 해당 유저에 kakaoUid 정보를 저장하고 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testUserAlreadyHasKakaoEmail() throws Exception {
+        //given
+
+        String username = "username";
+        String password = "abc1234!";
+        String email = "abcd@kakao.com";
+        String kakaoUid = "21312412421";
+        String savedUid = saveUser(username, password, email);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, email);
+
+        //then
+        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(savedUid, false);
+        assertThat(actual.getKakaoOAuth2AuthInfo().getKakaoUid()).isEqualTo(kakaoUid);
+
+    }
+
+    @Test
+    @DisplayName("카카오 인증 시도시, 카카오 이메일에 해당하는 유저가 회원 DB에 저장되어 있지 않다면 해당 유저를 추가해 DB에 저장하고 uid와 추가정보가 필요하다는 결과값을 리턴한다.")
+    public void testNoKakaoUser() throws Exception{
+        //given
+        String kakaoUid = "123124141";
+        String email = "kakao@kakao.com";
+        String givenUid = "uid";
+
+        when(nanoIdProvider.createNanoId()).thenReturn(givenUid);
+
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, email);
+
+        //then
+        User actual = userRepository.findByUid(givenUid).orElseThrow(RuntimeException::new);
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, true);
+        assertThat(actual.getEmail()).isEqualTo(email);
+        assertThat(actual.getKakaoOAuth2AuthInfo().getKakaoUid()).isEqualTo(kakaoUid);
+
+    }
+
+    @Test
+    @DisplayName("동시에 같은 카카오 정보로 로그인 및 DB 저장을 시도한다면, 첫번쨰 요청을 제외하곤 카카오 로그인에 실패한다.")
+    public void testConcurrencyKakaoLogin() throws Exception{
+        //given
+        String kakaoUid = "123124141";
+        String email = "kakao@kakao.com";
+        String givenUid = "uid";
+
+        int threadSize = 2;
+        CountDownLatch doneSignal = new CountDownLatch(threadSize);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadSize);
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+
+
+        when(nanoIdProvider.createNanoId()).thenReturn(givenUid);
+        //when
+        for(int i = 0; i < threadSize; i++){
+            executorService.execute(()->{
+                try{
+                    userService.loginKakao(kakaoUid, email);
+                    successCount.getAndIncrement();
+                }catch (AlreadyExistsUserException e){
+                    failCount.getAndIncrement();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    fail();
+                }finally {
+                    doneSignal.countDown();
+                }
+            });
+        }
+
+        doneSignal.await();
+        executorService.shutdown();
+
+        //then
+        User actual = userRepository.findByUid(givenUid)
+                .orElseThrow(RuntimeException::new);
+
+        assertThat(successCount.get()).isEqualTo(1);
+        assertThat(failCount.get()).isEqualTo(1);
+        assertThat(actual.getEmail()).isEqualTo(email);
+        assertThat(actual.getKakaoOAuth2AuthInfo().getKakaoUid()).isEqualTo(kakaoUid);
+    }
+
+    @Test
+    @DisplayName("Google 인증 시도시, 이미 구글 이메일과 googleUid가 회원 DB에 저장되어 있다면 해당 유저의 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testGoogleAuth() throws Exception{
+        //given
+        String givenUid = "uid";
+        String givenEmail = "email@kakao.com";
+        String googleUid = "123141244124";
+
+        saveGoogleUser(givenUid, givenEmail, googleUid);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, givenEmail);
+
+        //then
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, false);
+
+    }
+
+    @Test
+    @DisplayName("구글 인증 시도시, 구글 이메일을 사용하나 googleUid가 회원 DB에 저장되어 있지 않다면 해당 유저에 googleUid 정보를 저장하고 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
+    public void testGoogleNoAuthInfo() throws Exception{
+        //given
+        String username = "username";
+        String password = "abc1234!";
+        String email = "abcd@google.com";
+        String googleUid = "21312412421";
+        String savedUid = saveUser(username, password, email);
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, email);
+
+        //then
+        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(savedUid, false);
+        assertThat(actual.getGoogleOAuth2AuthInfo().getGoogleUid()).isEqualTo(googleUid);
+
+    }
+
+
+    @Test
+    @DisplayName("구글 인증 시도시, 구글 이메일에 해당하는 유저가 회원 DB에 저장되어 있지 않다면 해당 유저를 추가해 DB에 저장하고 uid와 추가정보가 필요하다는 결과값을 리턴한다.")
+    public void testNoGoogleUser() throws Exception{
+        //given
+        String googleUid = "123124141";
+        String email = "google@google.com";
+        String givenUid = "uid";
+
+        when(nanoIdProvider.createNanoId()).thenReturn(givenUid);
+
+
+        //when
+        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, email);
+
+        //then
+        User actual = userRepository.findByUid(givenUid).orElseThrow(RuntimeException::new);
+
+        assertThat(result).extracting("uid", "isAdditionalInfoNeed")
+                .contains(givenUid, true);
+        assertThat(actual.getEmail()).isEqualTo(email);
+        assertThat(actual.getGoogleOAuth2AuthInfo().getGoogleUid()).isEqualTo(googleUid);
+
+    }
+
+
+
     @Test
     @DisplayName("사용자의 이전 비밀번호와 변경하고자 하는 이름, 비밀번호, 주소, 프로필 이미지 정보를 회원 DB에 업데이트 할 수있다.")
-    void testUpdateUser() throws Exception{
+    void testUpdateUser() throws Exception {
         // given
         String username = "username";
         String password = "asdsadsad2132134!";
@@ -408,15 +524,27 @@ class UserServiceTest {
         userService.update(savedUid, updateDto);
 
         // then
-        clearEntityCache();
 
         User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
-
         assertThat(actual).extracting("uid", "email", "name", "profileImageUrl", "addressInfo")
                 .contains(savedUid, email, updatedName, updatedProfileImage, new AddressInfo(updatedAddress, updatedDetailAddress));
 
     }
 
+
+
+    private void saveGoogleUser(String uid, String email, String googleUid){
+        User newUser = createTestUser(uid, email);
+        newUser.setGoogleOAuth2AuthInfo(googleUid);
+        userRepository.save(newUser);
+
+    }
+
+    private void saveKakaoUser(String uid, String email, String kakaoUid){
+        User newUser = createTestUser(uid, email);
+        newUser.setKakaoOAuth2AuthInfo(kakaoUid);
+        userRepository.save(newUser);
+    }
 
     private String saveUser(String username, String password, String email) throws PasswordValidationException, AlreadyExistsUserException {
         String givenName = "givenName";
@@ -438,9 +566,21 @@ class UserServiceTest {
     }
 
 
-    private void clearEntityCache() {
-        em.flush();
-        em.clear();
-    }
 
+    private User createTestUser(String uid, String email) {
+        String givenName = "givenName";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
+
+        User newUser = new User(
+                uid,
+                email,
+                givenName,
+                imageUrl,
+                address,
+                detailedAddress
+        );
+        return newUser;
+    }
 }

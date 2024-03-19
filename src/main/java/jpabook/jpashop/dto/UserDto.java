@@ -116,5 +116,12 @@ public abstract class UserDto {
 
     }
 
+    @AllArgsConstructor
+    @Getter
+    public static class OAuthLoginResult {
+        private String uid;
+        private boolean isAdditionalInfoNeed;
+
+    }
 }
 

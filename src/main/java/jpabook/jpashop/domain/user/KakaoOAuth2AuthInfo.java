@@ -2,16 +2,14 @@ package jpabook.jpashop.domain.user;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Entity;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Objects;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
 @AllArgsConstructor
+@Getter
 public class KakaoOAuth2AuthInfo{
 
     private String kakaoUid;
