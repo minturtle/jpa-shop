@@ -662,6 +662,29 @@ class UserServiceTest {
     }
 
 
+    @Test
+    @DisplayName("사용자의 비밀번호를 업데이트 할때, 비밀번호의 조건(8자 이상, 영어,숫자,특수문자) 조건을 만족하지 못한다면 오류를 throw한다.")
+    void testUpdatePasswordInvalid() throws Exception{
+        // given
+        String username = "username";
+        String password = "asdsadsad2132134!";
+        String email = "email@email.com";
+        String updatedPassword = "aa!";
+
+        String savedUid = saveUser(username, password, email);
+        // when
+        ThrowableAssert.ThrowingCallable execute =
+                ()->userService.updatePassword(savedUid, new UserDto.UpdatePassword(password, updatedPassword));
+        // then
+        assertThatThrownBy(execute)
+                .isInstanceOf(PasswordValidationException.class)
+                .hasMessage(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
+
+
+    }
+
+
+
 
     private void saveGoogleUser(String uid, String email, String googleUid){
         User newUser = createTestUser(uid, email);

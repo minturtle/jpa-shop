@@ -43,7 +43,7 @@ public class UserService {
 
         validDuplicationEmail(registerInfo.getEmail());
         validDuplicationUsername(registerInfo.getUsername());
-        validPassword(registerInfo.getPassword());
+        validPasswordExpression(registerInfo.getPassword());
 
         byte[] salt = passwordUtils.createSalt();
         String encodedPassword = passwordUtils
@@ -220,7 +220,7 @@ public class UserService {
             throw new AuthenticateFailedException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
         }
 
-        validPassword(dto.getAfterPassword());
+        validPasswordExpression(dto.getAfterPassword());
 
 
 
@@ -258,9 +258,9 @@ public class UserService {
      * @param password 검증하고자 하는 비밀번호
      * @exception PasswordValidationException 비밀번호 검증 실패시
     */
-    private void validPassword(String password) throws PasswordValidationException {
+    private void validPasswordExpression(String password) throws PasswordValidationException {
         if(password.length() < 8){
-            throw new PasswordValidationException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
+            throw new PasswordValidationException(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
         }
         String passwordPattern = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}$";
 
@@ -268,7 +268,7 @@ public class UserService {
         Matcher matcher = pattern.matcher(password);
 
         if(!matcher.matches()){
-            throw new PasswordValidationException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
+            throw new PasswordValidationException(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
         }
     }
 
