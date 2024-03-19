@@ -643,10 +643,22 @@ class UserServiceTest {
     @DisplayName("사용자의 비밀번호를 업데이트 할때, 회원 DB의 비밀번호와 입력한 이전 비밀번호가 일치하지 않는 경우, 오류를 throw한다.")
     void testUpdatePasswordIncorrectPw() throws Exception{
         // given
+        String username = "username";
+        String password = "asdsadsad2132134!";
+        String incorrectPassword = "sadsaf21321@";
+        String email = "email@email.com";
+        String updatedPassword = "update123!";
 
+
+        String savedUid = saveUser(username, password, email);
         // when
+        ThrowableAssert.ThrowingCallable execute =
+                ()->userService.updatePassword(savedUid, new UserDto.UpdatePassword(incorrectPassword, updatedPassword));
 
         // then
+        assertThatThrownBy(execute)
+                .isInstanceOf(AuthenticateFailedException.class)
+                .hasMessage(UserExceptonMessages.INVALID_PASSWORD.getMessage());
     }
 
 
