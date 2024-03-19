@@ -19,6 +19,10 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     Optional<User> findByUid(String uid);
 
+
+    @Query("select u from User u join fetch u.accountList where u.uid = :uid")
+    Optional<User> findByUidJoinAccount(@Param("uid") String uid);
+
     List<User> findAll();
     @Query("select u from User u where u.usernamePasswordAuthInfo.username = :username")
     Optional<User> findByUsername(@Param("username") String username);

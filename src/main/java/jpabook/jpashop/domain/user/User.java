@@ -3,7 +3,6 @@ package jpabook.jpashop.domain.user;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.Cart;
 import jpabook.jpashop.domain.order.Order;
-import lombok.Builder;
 import lombok.Getter;
 
 import jakarta.persistence.*;
@@ -63,8 +62,8 @@ public class User extends BaseEntity {
     private List<Order> orderList = new ArrayList<>();
 
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
-    private Account account;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
+    private List<Account> accountList = new ArrayList<>();
 
     @Embedded
     private UsernamePasswordAuthInfo usernamePasswordAuthInfo;
@@ -101,6 +100,13 @@ public class User extends BaseEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
+
+
+    public void addAccount(Account account) {
+        this.accountList.add(account);
+        account.setUser(this);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -113,4 +119,5 @@ public class User extends BaseEntity {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }
