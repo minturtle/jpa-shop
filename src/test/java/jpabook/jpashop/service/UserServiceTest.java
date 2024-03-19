@@ -290,7 +290,7 @@ class UserServiceTest {
 
         //when & then
         assertThatThrownBy(() -> userService.login(incorrectUsername, password))
-                .isInstanceOf(LoginFailedException.class)
+                .isInstanceOf(AuthenticateFailedException.class)
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
 
     }
@@ -309,7 +309,7 @@ class UserServiceTest {
 
         //when & then
         assertThatThrownBy(() -> userService.login(username, incorrectPassword))
-                .isInstanceOf(LoginFailedException.class)
+                .isInstanceOf(AuthenticateFailedException.class)
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
     }
 
@@ -548,10 +548,11 @@ class UserServiceTest {
 
         String savedUid = saveUser(username, password, email);
 
-        // when
+
         for(String updateName : updatedNames){
             executorService.execute(()-> {
                 try {
+                    // when
                     userService.updateUserInfo(
                             savedUid,
                             new UserDto.UpdateDefaultUserInfo(updateName, updatedAddress, updatedDetailAddress, updatedProfileImage)
@@ -577,7 +578,27 @@ class UserServiceTest {
     }
 
 
+    @Test
+    @DisplayName("사용자의 이전 비밀번호와 새 비밀번호를 입력받아 새 비밀번호로 업데이트 할 수 있다.")
+    void testUpdatePassword() throws Exception{
+        // given
+        String username = "username";
+        String password = "asdsadsad2132134!";
+        String email = "email@email.com";
+        String updatedPassword = "update123!";
 
+
+        String savedUid = saveUser(username, password, email);
+        // when
+        userService.updatePassword(savedUid, new UserDto.UpdatePassword(password, updatedPassword));
+        // then
+        User user = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+
+        byte[] actualSalt = user.getUsernamePasswordAuthInfo().getSaltBytes();
+        String actualPassword = user.getUsernamePasswordAuthInfo().getPassword();
+
+        assertThat(passwordUtils.matches(updatedPassword, actualSalt, actualPassword)).isTrue();
+    }
 
 
 

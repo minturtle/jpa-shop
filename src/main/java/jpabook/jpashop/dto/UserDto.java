@@ -117,11 +117,23 @@ public abstract class UserDto {
     }
 
     @AllArgsConstructor
+    @Builder
+    @Data
+    public static class UpdatePassword {
+        @NotNull
+        private String beforePassword;
+
+        @NotNull
+        private String afterPassword;
+    }
+
+    @AllArgsConstructor
     @Getter
     public static class OAuthLoginResult {
         private String uid;
         private boolean isAdditionalInfoNeed;
 
     }
+
 }
 

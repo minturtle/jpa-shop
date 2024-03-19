@@ -76,14 +76,14 @@ public class UserService {
      * @return 인증된 사용자의 uid
      * @exception
     */
-    public String login(String username, String password) throws LoginFailedException{
+    public String login(String username, String password) throws AuthenticateFailedException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage()));
+                .orElseThrow(() -> new AuthenticateFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage()));
 
         UsernamePasswordAuthInfo usernamePasswordAuthInfo = user.getUsernamePasswordAuthInfo();
 
         if(!passwordUtils.matches(password, usernamePasswordAuthInfo.getSaltBytes(), usernamePasswordAuthInfo.getPassword())){
-            throw new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage());
+            throw new AuthenticateFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage());
         }
 
         return user.getUid();
@@ -185,15 +185,58 @@ public class UserService {
      * @throws CannotFindUserException 사용자의 고유식별자로 사용자를 조회할 수 없을 때
      * @throws OptimisticLockingFailureException 동시에 두 업데이트 요청이 들어와 업데이트에 실패한 경우
     */
+    @Transactional(rollbackFor = {CannotFindUserException.class, RuntimeException.class})
     public void updateUserInfo(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindUserException, OptimisticLockingFailureException {
-        User findUser = userRepository.findByUid(userUid)
-                .orElseThrow(() -> new CannotFindUserException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()
-                ));
+        User findUser = findUserByUidOrThrow(userUid);
 
         findUser.setName(dto.getUpdatedName());
         findUser.setAddressInfo(dto.getUpdatedAddress(), dto.getUpdatedDetailAddress());
         findUser.setProfileImageUrl(dto.getUpdatedProfileImageUrl());
     }
+
+
+
+    /**
+     * @description 사용자의 비밀번호를 업데이트 하는 메서드
+     * @author minseok kim
+     * @param userUid 사용자의 고유 식별자
+     * @param dto 비밀번호 업데이트에 필요한 정보
+     * @throws CannotFindUserException 사용자의 고유식별자로 사용자를 조회할 수 없는 경우
+     * @throws OptimisticLockingFailureException 동시에 두 업데이트 요청이 들어와 업데이트에 실패한 경우
+     * @throws UserAuthTypeException id/pw 정보가 존재하지 않는 유저인 경우
+     * @throws AuthenticateFailedException 이전 비밀번호가 일치하지 않는 경우
+     * @throws PasswordValidationException 새 비밀번호의 expression이 요구사항의 조건을 만족하지 못하는 경우
+    */
+    @Transactional(rollbackFor = {CannotFindUserException.class, RuntimeException.class})
+    public void updatePassword(String userUid, UserDto.UpdatePassword dto)
+            throws CannotFindUserException, UserAuthTypeException, OptimisticLockingFailureException, AuthenticateFailedException, PasswordValidationException {
+        User findUser = findUserByUidOrThrow(userUid);
+        UsernamePasswordAuthInfo authInfo = findUser.getUsernamePasswordAuthInfo();
+
+        if(authInfo == null){
+            throw new UserAuthTypeException(UserExceptonMessages.NO_USERNAME_PASSWORD_AUTH_INFO.getMessage());
+        }
+
+        if(!passwordUtils.matches(dto.getBeforePassword(), authInfo.getSaltBytes(), authInfo.getPassword())){
+            throw new AuthenticateFailedException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
+        }
+
+        validPassword(dto.getAfterPassword());
+
+
+
+        findUser.setUsernamePasswordAuthInfo(
+                authInfo.getUsername(),
+                passwordUtils.encodePassword(dto.getAfterPassword(), authInfo.getSaltBytes()),
+                authInfo.getSaltBytes()
+        );
+
+
+    }
+
+
+
+
 
 
 
@@ -255,6 +298,12 @@ public class UserService {
 
     private boolean doGoogleAuthenticate(String googleUid, GoogleOAuth2AuthInfo googleAuthInfo) {
         return googleAuthInfo != null && googleAuthInfo.getGoogleUid().equals(googleUid);
+    }
+
+    private User findUserByUidOrThrow(String userUid) throws CannotFindUserException {
+        return userRepository.findByUid(userUid)
+                .orElseThrow(() -> new CannotFindUserException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()
+                ));
     }
 
 }
