@@ -13,6 +13,7 @@ import jpabook.jpashop.util.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,6 +139,7 @@ public class UserService {
      * @return
      * @exception AlreadyExistsUserException 해당 메서드 실행 도중 해당 email로 회원가입이 완료된 경우
      */
+    @Transactional(rollbackFor = {AlreadyExistsUserException.class, RuntimeException.class})
     public UserDto.OAuthLoginResult loginGoogle(String googleUid,  String email) throws AlreadyExistsUserException {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
@@ -163,28 +165,30 @@ public class UserService {
         return new UserDto.OAuthLoginResult(uid, true);
     }
 
-    /*
-    * 사용자 마이페이지에 필요한 정보들을 제공
-    *
-    * @param userUid : User Entity의 uid값
-    * @return : 유저의 이름, 주소 정보가 담긴 Dto
-    * */
+    /**
+     * @description 사용자 정보 조회 API
+     * @author minseok kim
+     * @param userUid 사용자의 고유 식별자
+     * @throws
+    */
     @Transactional(readOnly = true)
     public UserDto.Detail getUserInfo(String userUid){
         return null;
     }
 
-    /*
-    * 사용자 정보 변경
-    *
-    * @param userUid : MemberEntity의 uid값
-    *
-    * */
-    public void update(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindUserException {
+
+    /**
+     * @description 사용자의 이름, 주소, 프로필 이미지를 변경하는 메서드
+     * @author minseok kim
+     * @param userUid 사용자의 고유 식별자
+     * @param dto : 업데이트된 유저 정보
+     * @throws CannotFindUserException 사용자의 고유식별자로 사용자를 조회할 수 없을 때
+     * @throws OptimisticLockingFailureException 동시에 두 업데이트 요청이 들어와 업데이트에 실패한 경우
+    */
+    public void updateUserInfo(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindUserException, OptimisticLockingFailureException {
         User findUser = userRepository.findByUid(userUid)
                 .orElseThrow(() -> new CannotFindUserException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()
                 ));
-
 
         findUser.setName(dto.getUpdatedName());
         findUser.setAddressInfo(dto.getUpdatedAddress(), dto.getUpdatedDetailAddress());
@@ -232,6 +236,15 @@ public class UserService {
             userRepository.save(newUser);
         }catch (DataIntegrityViolationException e){
             throw new AlreadyExistsUserException();
+        }
+    }
+
+
+    private void updateProcess(User updatedUser) throws UserUpdateFailureException {
+        try{
+            userRepository.save(updatedUser);
+        }catch (OptimisticLockingFailureException e){
+            throw new UserUpdateFailureException(UserExceptonMessages.UPDATE_FAILED.getMessage());
         }
     }
 

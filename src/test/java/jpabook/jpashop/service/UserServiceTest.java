@@ -1,13 +1,8 @@
 package jpabook.jpashop.service;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.dto.UserDto;
-import jpabook.jpashop.exception.user.AlreadyExistsUserException;
-import jpabook.jpashop.exception.user.LoginFailedException;
-import jpabook.jpashop.exception.user.PasswordValidationException;
-import jpabook.jpashop.exception.user.UserExceptonMessages;
+import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
@@ -20,8 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.List;
@@ -498,7 +493,7 @@ class UserServiceTest {
 
 
     @Test
-    @DisplayName("사용자의 이전 비밀번호와 변경하고자 하는 이름, 비밀번호, 주소, 프로필 이미지 정보를 회원 DB에 업데이트 할 수있다.")
+    @DisplayName("사용자의 변경하고자 하는 이름, 주소, 프로필 이미지 정보를 회원 DB에 업데이트 할 수있다.")
     void testUpdateUser() throws Exception {
         // given
         String username = "username";
@@ -521,7 +516,7 @@ class UserServiceTest {
                 .build();
 
 
-        userService.update(savedUid, updateDto);
+        userService.updateUserInfo(savedUid, updateDto);
 
         // then
 
@@ -530,6 +525,59 @@ class UserServiceTest {
                 .contains(savedUid, email, updatedName, updatedProfileImage, new AddressInfo(updatedAddress, updatedDetailAddress));
 
     }
+
+    @Test
+    @DisplayName("동시에 유저의 정보를 수정 요청하면 첫번째 요청의 정보만 DB에 반영되고, 두번째 요청은 실패한다.")
+    void testUpdateConcurrency() throws Exception{
+        // given
+        String username = "username";
+        String password = "asdsadsad2132134!";
+        String email = "email@email.com";
+
+        List<String> updatedNames = List.of("updatedName", "updatedName2");
+        String updatedAddress = "updatedAddress";
+        String updatedDetailAddress = "updatedDetailAddress";
+        String updatedProfileImage = "http://image.com/update.png";
+
+        int threadSize = 2;
+        CountDownLatch doneSignal = new CountDownLatch(threadSize);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadSize);
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+
+
+        String savedUid = saveUser(username, password, email);
+
+        // when
+        for(String updateName : updatedNames){
+            executorService.execute(()-> {
+                try {
+                    userService.updateUserInfo(
+                            savedUid,
+                            new UserDto.UpdateDefaultUserInfo(updateName, updatedAddress, updatedDetailAddress, updatedProfileImage)
+                    );
+                    successCount.getAndIncrement();
+                } catch (OptimisticLockingFailureException e) {
+                    failCount.getAndIncrement();
+                } catch (Exception e){
+                    e.printStackTrace();
+                    fail();
+                }finally {
+                    doneSignal.countDown();
+                }
+            });
+        }
+        doneSignal.await();
+        executorService.shutdown();
+
+        // then
+        assertAll("success and fail count assertion",
+                ()->assertThat(successCount.get()).isEqualTo(1),
+                ()->assertThat(failCount.get()).isEqualTo(1));
+    }
+
+
+
 
 
 
