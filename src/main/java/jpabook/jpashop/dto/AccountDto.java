@@ -13,6 +13,18 @@ public abstract class AccountDto {
     @Data
     public static class Create{
         private String uid;
+        private Long balance;
     }
+
+
+    @AllArgsConstructor
+    @Builder
+    @Data
+    public static class Transfer{
+        private String accountUid;
+        private long amount;
+    }
+
+
 
 }

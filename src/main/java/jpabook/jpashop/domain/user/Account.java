@@ -3,6 +3,8 @@ package jpabook.jpashop.domain.user;
 
 import jakarta.persistence.*;
 import jpabook.jpashop.domain.BaseEntity;
+import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
+import jpabook.jpashop.exception.user.account.NegativeBalanceException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,9 +14,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Account extends BaseEntity {
 
-
-    public Account(String uid) {
+    public Account(String uid, Long balance) {
         this.uid = uid;
+        this.balance = balance;
     }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,5 +37,13 @@ public class Account extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+
+    public void withdraw(Long amount) throws NegativeBalanceException {
+        if(balance <= amount){
+            throw new NegativeBalanceException(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
+        }
+        balance -= amount;
     }
 }

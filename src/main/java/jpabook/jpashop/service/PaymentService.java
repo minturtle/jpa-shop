@@ -6,6 +6,10 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.exception.user.CannotFindUserException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
+import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
+import jpabook.jpashop.exception.user.account.CannotFindAccountException;
+import jpabook.jpashop.exception.user.account.NegativeBalanceException;
+import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +22,46 @@ import org.springframework.transaction.annotation.Transactional;
 public class PaymentService {
 
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final NanoIdProvider nanoIdProvider;
 
-    public void addAccount(AccountDto.Create dto) throws CannotFindUserException {
+
+    /**
+     * @param dto Account 추가에 필요한 정보가 있는 dto
+     * @return 생성된 Account의 고유 식별자
+     * @throws CannotFindUserException 유저 정보를 조회할 수 없을때
+     * @author minseok kim
+     * @description User의 Account를 추가하는 메서드
+     */
+    public String addAccount(AccountDto.Create dto) throws CannotFindUserException {
         User user = findUserOrThrow(dto);
 
-        user.addAccount(new Account(nanoIdProvider.createNanoId()));
+        String accountUid = nanoIdProvider.createNanoId();
+        user.addAccount(new Account(accountUid, dto.getBalance()));
+
+
+        return accountUid;
+    }
+
+    /**
+     * @author minseok kim
+     * @description Account에 츨금하는 메서드
+     * @param dto 출금에 필요한 정보가 담긴 dto
+     * @exception CannotFindAccountException Account의 고유식별자로 account를 조회할 수 없을 때
+     * @exception NegativeBalanceException 출금금액이 잔고보다 클 때
+    */
+    public void withdraw(AccountDto.Transfer dto) throws CannotFindAccountException, NegativeBalanceException {
+        Account account = findAccountOrThrow(dto.getAccountUid());
+
+        account.withdraw(dto.getAmount());
 
     }
+
+    private Account findAccountOrThrow(String accountUid) throws CannotFindAccountException {
+        return accountRepository.findByUid(accountUid)
+                .orElseThrow(() -> new CannotFindAccountException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
+    }
+
 
     private User findUserOrThrow(AccountDto.Create dto) throws CannotFindUserException {
         return userRepository.findByUid(dto.getUid())

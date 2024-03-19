@@ -3,6 +3,7 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
+import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +27,9 @@ class PaymentServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
@@ -43,7 +47,7 @@ class PaymentServiceTest {
 
         userRepository.save(testUser);
         //when
-        paymentService.addAccount(new AccountDto.Create(givenUid));
+        paymentService.addAccount(new AccountDto.Create(givenUid, 0L));
 
         //then
         User actual = userRepository.findByUidJoinAccount(givenUid).orElseThrow(RuntimeException::new);
@@ -52,6 +56,29 @@ class PaymentServiceTest {
 
         assertThat(actualAccountList).hasSize(1);
         assertThat(actualAccountList.get(0).getBalance()).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("유저의 잔고에서 잔고의 금액보다 작은 금액을 출금할 수 있다.")
+    public void testWithdraw() throws Exception{
+        //given
+        String givenUserUid = "uid";
+        long givenBalance = 1000L;
+        long withdrawAmount = 500L;
+
+        User testUser = new User(
+                givenUserUid, "email@email.com", "name", "http://naver.com/image.png", "address", "detailedAddress"
+        );
+        userRepository.save(testUser);
+        String accountUid = paymentService.addAccount(new AccountDto.Create(givenUserUid, givenBalance));
+
+        //when
+        paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
+
+        //then
+        Account actual = accountRepository.findByUid(accountUid).orElseThrow(RuntimeException::new);
+        assertThat(actual.getBalance()).isEqualTo(givenBalance - withdrawAmount);
+
     }
 
 
