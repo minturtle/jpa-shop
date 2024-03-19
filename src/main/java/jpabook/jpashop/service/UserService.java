@@ -207,7 +207,6 @@ public class UserService {
      * @throws AuthenticateFailedException 이전 비밀번호가 일치하지 않는 경우
      * @throws PasswordValidationException 새 비밀번호의 expression이 요구사항의 조건을 만족하지 못하는 경우
     */
-    @Transactional(rollbackFor = {CannotFindUserException.class, RuntimeException.class})
     public void updatePassword(String userUid, UserDto.UpdatePassword dto)
             throws CannotFindUserException, UserAuthTypeException, OptimisticLockingFailureException, AuthenticateFailedException, PasswordValidationException {
         User findUser = findUserByUidOrThrow(userUid);
@@ -279,15 +278,6 @@ public class UserService {
             userRepository.save(newUser);
         }catch (DataIntegrityViolationException e){
             throw new AlreadyExistsUserException();
-        }
-    }
-
-
-    private void updateProcess(User updatedUser) throws UserUpdateFailureException {
-        try{
-            userRepository.save(updatedUser);
-        }catch (OptimisticLockingFailureException e){
-            throw new UserUpdateFailureException(UserExceptonMessages.UPDATE_FAILED.getMessage());
         }
     }
 

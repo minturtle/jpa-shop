@@ -7,6 +7,7 @@ import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -598,6 +599,54 @@ class UserServiceTest {
         String actualPassword = user.getUsernamePasswordAuthInfo().getPassword();
 
         assertThat(passwordUtils.matches(updatedPassword, actualSalt, actualPassword)).isTrue();
+    }
+
+
+    @Test
+    @DisplayName("사용자의 비밀번호를 업데이트 할때, 사용자의 정보가 조회되지 않는다면 오류를 출력한다.")
+    void testUpdatePasswordCannotFindUser() throws Exception{
+        // given
+        String givenUid = "uid";
+        String password = "asdsadsad2132134!";
+        String updatedPassword = "update123!";
+
+        // when
+        ThrowableAssert.ThrowingCallable execute =
+                ()->userService.updatePassword(givenUid, new UserDto.UpdatePassword(password, updatedPassword));
+        // then
+        assertThatThrownBy(execute)
+                .isInstanceOf(CannotFindUserException.class)
+                .hasMessage(UserExceptonMessages.CANNOT_FIND_USER.getMessage());
+    }
+
+    @Test
+    @DisplayName("사용자의 비밀번호를 업데이트 할때, ID/PW 인증 정보가 존재하지 않는다면 오류를 출력한다.")
+    void testUser() throws Exception{
+        // given
+        String givenUid = "uid";
+        String password = "asdsadsad2132134!";
+        String updatedPassword = "update123!";
+
+        userRepository.save(createTestUser(givenUid, "email@email.com"));
+
+        // when
+        ThrowableAssert.ThrowingCallable execute =
+                ()->userService.updatePassword(givenUid, new UserDto.UpdatePassword(password, updatedPassword));
+        // then
+        assertThatThrownBy(execute)
+                .isInstanceOf(UserAuthTypeException.class)
+                .hasMessage(UserExceptonMessages.NO_USERNAME_PASSWORD_AUTH_INFO.getMessage());
+    }
+
+
+    @Test
+    @DisplayName("사용자의 비밀번호를 업데이트 할때, 회원 DB의 비밀번호와 입력한 이전 비밀번호가 일치하지 않는 경우, 오류를 throw한다.")
+    void testUpdatePasswordIncorrectPw() throws Exception{
+        // given
+
+        // when
+
+        // then
     }
 
 
