@@ -710,7 +710,6 @@ class UserServiceTest {
         String imageUrl = "http://image.com/image.png";
 
 
-
         String savedUid = saveUser(username, password, email);
 
         // when
@@ -720,6 +719,22 @@ class UserServiceTest {
         assertThat(result).extracting("userUid", "name", "email", "address", "detailedAddress", "profileImage")
                 .contains(savedUid, givenName, email, address, detailedAddress, imageUrl);
     }
+
+    @Test
+    @DisplayName("사용자의 uid로 유저 정보를 조회할때 해당하는 uid가 없다면 오류를 throw한다.")
+    void testGetUserInfoInvalidUid() throws Exception{
+        // given
+        String invalidUid = "uid";
+
+        // when
+        ThrowableAssert.ThrowingCallable throwingCallable = ()->userService.getUserInfo(invalidUid);
+
+        // then
+        assertThatThrownBy(throwingCallable)
+                .isInstanceOf(CannotFindUserException.class)
+                .hasMessage(UserExceptonMessages.CANNOT_FIND_USER.getMessage());
+    }
+
 
 
     private void saveGoogleUser(String uid, String email, String googleUid){
