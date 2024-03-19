@@ -3,6 +3,7 @@ package jpabook.jpashop.domain.user;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.Cart;
 import jpabook.jpashop.domain.order.Order;
+import lombok.Builder;
 import lombok.Getter;
 
 import jakarta.persistence.*;
@@ -62,14 +63,8 @@ public class User extends BaseEntity {
     private List<Order> orderList = new ArrayList<>();
 
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
     private Account account;
-
-
-    @Version
-    private Integer version;
-
 
     @Embedded
     private UsernamePasswordAuthInfo usernamePasswordAuthInfo;

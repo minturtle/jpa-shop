@@ -13,6 +13,11 @@ public class Account extends BaseEntity {
     @Column(name = "account_id")
     private Long id;
 
-    private Long balance;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    private Long balance = 0L;
 
 }
