@@ -697,7 +697,29 @@ class UserServiceTest {
 
     }
 
+    @Test
+    @DisplayName("사용자의 uid로 이에 해당하는 이름, 이메일, 주소, 프로필 이미지 정보를 조회할 수 있다.")
+    void testGetUserInfo() throws Exception{
+        // given
+        String username = "username";
+        String password = "asdsadsad2132134!";
+        String email = "email@email.com";
+        String givenName = "givenName";
+        String address = "address";
+        String detailedAddress = "detailedAddress";
+        String imageUrl = "http://image.com/image.png";
 
+
+
+        String savedUid = saveUser(username, password, email);
+
+        // when
+        UserDto.Detail result = userService.getUserInfo(savedUid);
+
+        // then
+        assertThat(result).extracting("userUid", "name", "email", "address", "detailedAddress", "profileImage")
+                .contains(savedUid, givenName, email, address, detailedAddress, imageUrl);
+    }
 
 
     private void saveGoogleUser(String uid, String email, String googleUid){

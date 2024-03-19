@@ -169,11 +169,21 @@ public class UserService {
      * @description 사용자 정보 조회 API
      * @author minseok kim
      * @param userUid 사용자의 고유 식별자
-     * @throws
+     * @throws CannotFindUserException 고유 식별자로 유저 정보 조회에 실패했을 시
     */
     @Transactional(readOnly = true)
-    public UserDto.Detail getUserInfo(String userUid){
-        return null;
+    public UserDto.Detail getUserInfo(String userUid) throws CannotFindUserException {
+        User user = findUserByUidOrThrow(userUid);
+
+
+        return UserDto.Detail.builder()
+                .userUid(user.getUid())
+                .name(user.getName())
+                .email(user.getEmail())
+                .address(user.getAddressInfo().getAddress())
+                .detailedAddress(user.getAddressInfo().getDetailedAddress())
+                .profileImage(user.getProfileImageUrl())
+                .build();
     }
 
 

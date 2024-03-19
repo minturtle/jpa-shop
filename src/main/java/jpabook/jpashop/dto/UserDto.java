@@ -93,7 +93,12 @@ public abstract class UserDto {
     @Builder
     @Data
     public static class Detail{
-
+        private String userUid;
+        private String name;
+        private String email;
+        private String address;
+        private String detailedAddress;
+        private String profileImage;
     }
 
 
