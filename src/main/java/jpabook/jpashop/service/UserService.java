@@ -1,6 +1,5 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.domain.user.KakaoOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordAuthInfo;
 import jpabook.jpashop.exception.user.*;
@@ -126,6 +125,7 @@ public class UserService {
 
 
 
+    @Transactional(readOnly = true)
     public String login(String username, String password) throws LoginFailedException{
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new LoginFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage()));
@@ -153,11 +153,18 @@ public class UserService {
     /*
     * 사용자 정보 변경
     *
-    * @param userUid : MemberEntity의 ID값
-    * @param String modifiedName : 바꿀 이름
+    * @param userUid : MemberEntity의 uid값
+    *
     * */
-    public void update(String userUid, UserDto.Update dto){
+    public void update(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindUserException {
+        User findUser = userRepository.findByUid(userUid)
+                .orElseThrow(() -> new CannotFindUserException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()
+                ));
 
+
+        findUser.setName(dto.getUpdatedName());
+        findUser.setAddressInfo(dto.getUpdatedAddress(), dto.getUpdatedDetailAddress());
+        findUser.setProfileImageUrl(dto.getUpdatedProfileImageUrl());
     }
 
 

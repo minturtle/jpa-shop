@@ -1,5 +1,7 @@
 package jpabook.jpashop.service;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
@@ -49,6 +51,10 @@ class UserServiceTest {
 
     @SpyBean
     private PasswordUtils passwordUtils;
+
+    @PersistenceContext
+    private EntityManager em;
+
 
     @BeforeEach
     void setUp() {
@@ -328,6 +334,7 @@ class UserServiceTest {
         String username = "username";
 
         String savedUid = saveUser(username, password, "email@email.com");
+        clearEntityCache();
 
         //when
         String actualUid = userService.login(username, password);
@@ -347,6 +354,8 @@ class UserServiceTest {
 
 
         saveUser(username, password, "email@email.com");
+        clearEntityCache();
+
         //when & then
         assertThatThrownBy(()->userService.login(incorrectUsername, password))
                 .isInstanceOf(LoginFailedException.class)
@@ -364,14 +373,49 @@ class UserServiceTest {
 
 
         saveUser(username, password, "email@email.com");
+        clearEntityCache();
+
         //when & then
         assertThatThrownBy(()->userService.login(username, incorrectPassword))
                 .isInstanceOf(LoginFailedException.class)
                 .hasMessage(UserExceptonMessages.LOGIN_FAILED.getMessage());
     }
 
+    @Test
+    @DisplayName("사용자의 이전 비밀번호와 변경하고자 하는 이름, 비밀번호, 주소, 프로필 이미지 정보를 회원 DB에 업데이트 할 수있다.")
+    void testUpdateUser() throws Exception{
+        // given
+        String username = "username";
+        String password = "asdsadsad2132134!";
+        String email = "email@email.com";
+
+        String updatedName = "updatedName";
+        String updatedAddress = "updatedAddress";
+        String updatedDetailAddress = "updatedDetailAddress";
+        String updatedProfileImage = "http://image.com/update.png";
+
+        String savedUid = saveUser(username, password, email);
+
+        // when
+        UserDto.UpdateDefaultUserInfo updateDto = UserDto.UpdateDefaultUserInfo.builder()
+                .updatedName(updatedName)
+                .updatedAddress(updatedAddress)
+                .updatedDetailAddress(updatedDetailAddress)
+                .updatedProfileImageUrl(updatedProfileImage)
+                .build();
 
 
+        userService.update(savedUid, updateDto);
+
+        // then
+        clearEntityCache();
+
+        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+
+        assertThat(actual).extracting("uid", "email", "name", "profileImageUrl", "addressInfo")
+                .contains(savedUid, email, updatedName, updatedProfileImage, new AddressInfo(updatedAddress, updatedDetailAddress));
+
+    }
 
 
     private String saveUser(String username, String password, String email) throws PasswordValidationException, AlreadyExistsUserException {
@@ -393,5 +437,10 @@ class UserServiceTest {
         return userService.register(dto);
     }
 
+
+    private void clearEntityCache() {
+        em.flush();
+        em.clear();
+    }
 
 }

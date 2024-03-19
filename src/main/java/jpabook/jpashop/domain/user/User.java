@@ -67,6 +67,10 @@ public class User extends BaseEntity {
     private Account account;
 
 
+    @Version
+    private Integer version;
+
+
     @Embedded
     private UsernamePasswordAuthInfo usernamePasswordAuthInfo;
 
@@ -92,6 +96,14 @@ public class User extends BaseEntity {
 
     public void setGoogleOAuth2AuthInfo(String googleUid) {
         this.googleOAuth2AuthInfo = new GoogleOAuth2AuthInfo(googleUid);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package jpabook.jpashop.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 public abstract class UserDto {
@@ -96,7 +97,23 @@ public abstract class UserDto {
     }
 
 
-    public static class Update {
+    @AllArgsConstructor
+    @Builder
+    @Data
+    public static class UpdateDefaultUserInfo {
+
+
+        @NotNull
+        private String updatedName;
+
+        @NotNull
+        private String updatedAddress;
+
+        @NotNull
+        private String updatedDetailAddress;
+
+        private String updatedProfileImageUrl;
+
     }
 
 }
