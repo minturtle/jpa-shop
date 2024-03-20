@@ -50,6 +50,7 @@ public class PaymentService {
      * @exception CannotFindAccountException Account의 고유식별자로 account를 조회할 수 없을 때
      * @exception NegativeBalanceException 출금금액이 잔고보다 클 때
     */
+    @Transactional(rollbackFor = {CannotFindUserException.class, NegativeBalanceException.class})
     public void withdraw(AccountDto.Transfer dto) throws CannotFindAccountException, NegativeBalanceException {
         Account account = findAccountOrThrow(dto.getAccountUid());
 

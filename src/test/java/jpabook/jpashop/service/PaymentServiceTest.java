@@ -3,8 +3,12 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
+import jpabook.jpashop.exception.user.CannotFindUserException;
+import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
+import jpabook.jpashop.exception.user.account.NegativeBalanceException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,11 +70,7 @@ class PaymentServiceTest {
         long givenBalance = 1000L;
         long withdrawAmount = 500L;
 
-        User testUser = new User(
-                givenUserUid, "email@email.com", "name", "http://naver.com/image.png", "address", "detailedAddress"
-        );
-        userRepository.save(testUser);
-        String accountUid = paymentService.addAccount(new AccountDto.Create(givenUserUid, givenBalance));
+        String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         //when
         paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
@@ -79,6 +79,38 @@ class PaymentServiceTest {
         Account actual = accountRepository.findByUid(accountUid).orElseThrow(RuntimeException::new);
         assertThat(actual.getBalance()).isEqualTo(givenBalance - withdrawAmount);
 
+    }
+
+    @Test
+    @DisplayName("유저의 잔고보다 큰 금액을 출금시도할 시 오류를 throw한다.")
+    void testWithdrawFail() throws Exception{
+        // given
+        String givenUserUid = "uid";
+        long givenBalance = 500L;
+        long withdrawAmount = 1000L;
+
+        String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
+        // when
+        ThrowableAssert.ThrowingCallable throwingCallable =
+                ()-> paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
+
+        // then
+        assertThatThrownBy(throwingCallable)
+                .isInstanceOf(NegativeBalanceException.class)
+                .hasMessage(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
+
+    }
+
+    
+    
+
+    private String createTestUserAndAccount(String givenUserUid, long givenBalance) throws CannotFindUserException {
+        User testUser = new User(
+                givenUserUid, "email@email.com", "name", "http://naver.com/image.png", "address", "detailedAddress"
+        );
+        userRepository.save(testUser);
+        String accountUid = paymentService.addAccount(new AccountDto.Create(givenUserUid, givenBalance));
+        return accountUid;
     }
 
 
