@@ -13,12 +13,14 @@ import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class PaymentService {
 
     private final UserRepository userRepository;
@@ -52,14 +54,19 @@ public class PaymentService {
     */
     @Transactional(rollbackFor = {CannotFindUserException.class, NegativeBalanceException.class})
     public void withdraw(AccountDto.Transfer dto) throws CannotFindAccountException, NegativeBalanceException {
-        Account account = findAccountOrThrow(dto.getAccountUid());
-
+        Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
+        log.info("{}", account.getBalance());
         account.withdraw(dto.getAmount());
 
     }
 
     private Account findAccountOrThrow(String accountUid) throws CannotFindAccountException {
         return accountRepository.findByUid(accountUid)
+                .orElseThrow(() -> new CannotFindAccountException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
+    }
+
+    private Account findAccountWithPessimisticLockOrThrow(String accountUid)  throws CannotFindAccountException{
+        return accountRepository.findByUidWithLock(accountUid)
                 .orElseThrow(() -> new CannotFindAccountException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
     }
 

@@ -1,5 +1,7 @@
 package jpabook.jpashop.service;
 
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
@@ -9,16 +11,24 @@ import jpabook.jpashop.exception.user.account.NegativeBalanceException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 
 @SpringBootTest
@@ -76,10 +86,11 @@ class PaymentServiceTest {
         paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
 
         //then
-        Account actual = accountRepository.findByUid(accountUid).orElseThrow(RuntimeException::new);
+        Account actual = getAccount(accountUid);
         assertThat(actual.getBalance()).isEqualTo(givenBalance - withdrawAmount);
 
     }
+
 
     @Test
     @DisplayName("유저의 잔고보다 큰 금액을 출금시도할 시 오류를 throw한다.")
@@ -101,6 +112,57 @@ class PaymentServiceTest {
 
     }
 
+    @Test
+    @DisplayName("한 account에 동시에 출금을 시도할 시, 순차적으로 출금 요청이 수행된다.")
+    void testWithdrawConcurrency() throws Exception{
+        // given
+        String givenUserUid = "uid";
+        long givenBalance = 1000L;
+        long withdrawAmount = 200L;
+
+        String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
+
+
+        int threadSize = 2;
+
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadSize);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+
+
+        // when
+        for(int i = 0; i < threadSize; i++){
+            executorService.execute(()->{
+                try{
+                    paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
+                    successCount.getAndIncrement();
+                }catch (LockTimeoutException e){
+                    failCount.getAndIncrement();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Assertions.fail();
+                }finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        countDownLatch.await();
+        executorService.shutdown();
+
+        // then
+        Account actual = getAccount(accountUid);
+        long expectedBalance = givenBalance - (withdrawAmount * successCount.get());
+
+        assertAll("thread run count check",
+                ()->assertThat(successCount.get()).isEqualTo(2),
+                ()->assertThat(failCount.get()).isEqualTo(0));
+
+        assertThat(actual.getBalance()).isEqualTo(expectedBalance);
+    }
+    
     
     
 
@@ -113,5 +175,9 @@ class PaymentServiceTest {
         return accountUid;
     }
 
+    private Account getAccount(String accountUid) {
+        Account actual = accountRepository.findByUid(accountUid).orElseThrow(RuntimeException::new);
+        return actual;
+    }
 
 }
