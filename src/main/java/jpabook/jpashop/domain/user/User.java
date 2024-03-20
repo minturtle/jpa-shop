@@ -74,6 +74,9 @@ public class User extends BaseEntity {
     @Embedded
     private GoogleOAuth2AuthInfo googleOAuth2AuthInfo;
 
+    @Version
+    private Integer version;
+
 
     public void setAddressInfo(String address, String detailedAddress) {
         this.addressInfo = new AddressInfo(address, detailedAddress);

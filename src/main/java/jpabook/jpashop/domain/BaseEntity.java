@@ -22,6 +22,4 @@ public class BaseEntity {
     @Builder.Default
     private LocalDateTime modifiedAt = LocalDateTime.now();;
 
-    @Version
-    private Integer version;
 }
