@@ -8,7 +8,7 @@ import jpabook.jpashop.exception.user.CannotFindUserException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.CannotFindAccountException;
-import jpabook.jpashop.exception.user.account.NegativeBalanceException;
+import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
@@ -50,15 +50,23 @@ public class PaymentService {
      * @description Account에 츨금하는 메서드
      * @param dto 출금에 필요한 정보가 담긴 dto
      * @exception CannotFindAccountException Account의 고유식별자로 account를 조회할 수 없을 때
-     * @exception NegativeBalanceException 출금금액이 잔고보다 클 때
+     * @exception InvalidBalanceValueException 출금금액이 잔고보다 클 때
     */
-    @Transactional(rollbackFor = {CannotFindUserException.class, NegativeBalanceException.class})
-    public void withdraw(AccountDto.Transfer dto) throws CannotFindAccountException, NegativeBalanceException {
+    @Transactional(rollbackFor = {CannotFindUserException.class, InvalidBalanceValueException.class})
+    public void withdraw(AccountDto.WithdrawDeposit dto) throws CannotFindAccountException, InvalidBalanceValueException {
         Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
-        log.info("{}", account.getBalance());
         account.withdraw(dto.getAmount());
-
     }
+
+
+
+    @Transactional(rollbackFor = {CannotFindUserException.class, InvalidBalanceValueException.class})
+    public void deposit(AccountDto.WithdrawDeposit dto) throws CannotFindAccountException, InvalidBalanceValueException {
+        Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
+        account.deposit(dto.getAmount());
+    }
+
+
 
     private Account findAccountOrThrow(String accountUid) throws CannotFindAccountException {
         return accountRepository.findByUid(accountUid)

@@ -20,7 +20,7 @@ public abstract class AccountDto {
     @AllArgsConstructor
     @Builder
     @Data
-    public static class Transfer{
+    public static class WithdrawDeposit {
         private String accountUid;
         private long amount;
     }

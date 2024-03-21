@@ -4,7 +4,7 @@ package jpabook.jpashop.domain.user;
 import jakarta.persistence.*;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
-import jpabook.jpashop.exception.user.account.NegativeBalanceException;
+import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -40,10 +40,19 @@ public class Account extends BaseEntity {
     }
 
 
-    public void withdraw(Long amount) throws NegativeBalanceException {
+    public void withdraw(Long amount) throws InvalidBalanceValueException {
         if(balance <= amount){
-            throw new NegativeBalanceException(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
+            throw new InvalidBalanceValueException(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
         }
         balance -= amount;
+    }
+
+    public void deposit(long amount) throws InvalidBalanceValueException {
+        if(Long.MAX_VALUE - balance < amount){
+            throw new InvalidBalanceValueException(AccountExceptionMessages.BALANCE_OVERFLOW.getMessage());
+        }
+        balance += amount;
+
+
     }
 }

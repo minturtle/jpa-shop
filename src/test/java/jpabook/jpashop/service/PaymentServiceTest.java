@@ -1,13 +1,12 @@
 package jpabook.jpashop.service;
 
 import jakarta.persistence.LockTimeoutException;
-import jakarta.persistence.PessimisticLockException;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.exception.user.CannotFindUserException;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
-import jpabook.jpashop.exception.user.account.NegativeBalanceException;
+import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import org.assertj.core.api.ThrowableAssert;
@@ -17,8 +16,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -83,7 +80,7 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         //when
-        paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
+        paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, withdrawAmount));
 
         //then
         Account actual = getAccount(accountUid);
@@ -103,11 +100,11 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
-                ()-> paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
+                ()-> paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, withdrawAmount));
 
         // then
         assertThatThrownBy(throwingCallable)
-                .isInstanceOf(NegativeBalanceException.class)
+                .isInstanceOf(InvalidBalanceValueException.class)
                 .hasMessage(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
 
     }
@@ -136,7 +133,7 @@ class PaymentServiceTest {
         for(int i = 0; i < threadSize; i++){
             executorService.execute(()->{
                 try{
-                    paymentService.withdraw(new AccountDto.Transfer(accountUid, withdrawAmount));
+                    paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, withdrawAmount));
                     successCount.getAndIncrement();
                 }catch (LockTimeoutException e){
                     failCount.getAndIncrement();
@@ -163,8 +160,43 @@ class PaymentServiceTest {
         assertThat(actual.getBalance()).isEqualTo(expectedBalance);
     }
     
+    @Test
+    @DisplayName("특정 Account에 입금할 수 있다.")
+    void testDeposit() throws Exception{
+        // given
+        String givenUserUid = "uid";
+        long givenBalance = 1000L;
+        long depositAmount = 500L;
+
+        String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
+
+        // when
+        paymentService.deposit(new AccountDto.WithdrawDeposit(accountUid, depositAmount));
+        // then
+        Account actual = getAccount(accountUid);
+        assertThat(actual.getBalance()).isEqualTo(givenBalance + depositAmount);
+
+    }
     
-    
+    @Test
+    @DisplayName("특정 Account에 값이 MAX값보다 큰 경우, 오버플로우를 방지하기 위해 오류가 throw된다.")
+    void testAccountOverflowException() throws Exception{
+        // given
+        String givenUserUid = "uid";
+        long givenBalance = Long.MAX_VALUE - 1L;
+        long depositAmount = 500L;
+
+        String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
+        // when
+        ThrowableAssert.ThrowingCallable throwingCallable = ()->{
+            paymentService.deposit(new AccountDto.WithdrawDeposit(accountUid, depositAmount));
+        };
+        // then
+        assertThatThrownBy(throwingCallable)
+                .isInstanceOf(InvalidBalanceValueException.class)
+                .hasMessage(AccountExceptionMessages.BALANCE_OVERFLOW.getMessage());
+    }
+
 
     private String createTestUserAndAccount(String givenUserUid, long givenBalance) throws CannotFindUserException {
         User testUser = new User(
