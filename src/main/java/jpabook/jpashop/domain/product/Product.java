@@ -1,16 +1,28 @@
 package jpabook.jpashop.domain.product;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @Table(name = "products")
 @Inheritance(strategy = InheritanceType.JOINED)
+@NoArgsConstructor
 public abstract class Product {
+
+    public Product(String uid, String name, int price, int stockQuantity, String thumbnailImageUrl) {
+        this.uid = uid;
+        this.name = name;
+        this.price = price;
+        this.stockQuantity = stockQuantity;
+        this.thumbnailImageUrl = thumbnailImageUrl;
+    }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
@@ -28,8 +40,8 @@ public abstract class Product {
     private String thumbnailImageUrl;
 
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<ProductCategory> categories;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductCategory> categories = new ArrayList<>();
 
 
     public void addStock(int quantity){
@@ -43,5 +55,10 @@ public abstract class Product {
 
     private void checkIsOrderQuantityBiggerThanStock(int quantity) {
         if(stockQuantity < quantity) throw new IllegalArgumentException("주문한 수량이 남은 물건의 수량보다 많습니다.");
+    }
+
+    public void addCategory(Category category) {
+        ProductCategory productCategory = new ProductCategory(this, category);
+        this.categories.add(productCategory);
     }
 }

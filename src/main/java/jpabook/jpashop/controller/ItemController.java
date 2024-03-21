@@ -4,7 +4,7 @@ package jpabook.jpashop.controller;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.controller.response.ItemResponse;
 import jpabook.jpashop.enums.product.SortOption;
-import jpabook.jpashop.service.ItemService;
+import jpabook.jpashop.service.ProductService;
 import lombok.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ItemController {
 
-    private final ItemService itemService;
+    private final ProductService productService;
 
     @GetMapping("/")
     public PaginationListDto<ItemResponse.Preview> search(
