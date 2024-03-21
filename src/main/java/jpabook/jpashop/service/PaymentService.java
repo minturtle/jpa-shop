@@ -9,6 +9,7 @@ import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.CannotFindAccountException;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
+import jpabook.jpashop.exception.user.account.TransferFailedException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
@@ -52,21 +53,43 @@ public class PaymentService {
      * @exception CannotFindAccountException Account의 고유식별자로 account를 조회할 수 없을 때
      * @exception InvalidBalanceValueException 출금금액이 잔고보다 클 때
     */
-    @Transactional(rollbackFor = {CannotFindUserException.class, InvalidBalanceValueException.class})
+    @Transactional(rollbackFor = {CannotFindAccountException.class, InvalidBalanceValueException.class})
     public void withdraw(AccountDto.WithdrawDeposit dto) throws CannotFindAccountException, InvalidBalanceValueException {
         Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
         account.withdraw(dto.getAmount());
     }
 
 
-
-    @Transactional(rollbackFor = {CannotFindUserException.class, InvalidBalanceValueException.class})
+    /**
+     * @author minseok kim
+     * @description Account에 입금하는 메서드
+     * @param dto 입금에 필요한 정보가 담긴 dto
+     * @exception CannotFindAccountException Account의 고유식별자로 account를 조회할 수 없을 때
+     * @exception InvalidBalanceValueException 입금 후 금액이 시스템에서 정의한 계좌 최고액보다 클 때
+     */
+    @Transactional(rollbackFor = {CannotFindAccountException.class, InvalidBalanceValueException.class})
     public void deposit(AccountDto.WithdrawDeposit dto) throws CannotFindAccountException, InvalidBalanceValueException {
         Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
         account.deposit(dto.getAmount());
     }
 
+    /**
+     * @description 송금 메서드
+     * @author Account to Account 송금 메서드
+     * @param dto 송금에 필요한 정보가 담긴 DTO
+     * @throws
+    */
+    // TODO : 데드락 처리 필요
+    @Transactional(rollbackFor = {TransferFailedException.class})
+    public void transfer(AccountDto.Transfer dto) throws TransferFailedException {
+        try{
+            withdraw(new AccountDto.WithdrawDeposit(dto.getFromAccountUid(), dto.getAmount()));
+            deposit(new AccountDto.WithdrawDeposit(dto.getToAccountUid(), dto.getAmount()));
+        }catch (CannotFindAccountException | InvalidBalanceValueException e){
+            throw new TransferFailedException(e.getMessage(), e);
+        }
 
+    }
 
     private Account findAccountOrThrow(String accountUid) throws CannotFindAccountException {
         return accountRepository.findByUid(accountUid)
@@ -80,7 +103,7 @@ public class PaymentService {
 
 
     private User findUserOrThrow(AccountDto.Create dto) throws CannotFindUserException {
-        return userRepository.findByUid(dto.getUid())
+        return userRepository.findByUid(dto.getUserUid())
                 .orElseThrow(()->new CannotFindUserException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
     }
 }
