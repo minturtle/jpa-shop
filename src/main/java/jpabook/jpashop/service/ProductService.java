@@ -2,7 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.dto.ProductDto;
-import jpabook.jpashop.repository.ProductRepository;
+import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;

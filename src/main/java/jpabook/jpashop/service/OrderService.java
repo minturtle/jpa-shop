@@ -1,6 +1,6 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.repository.ProductRepository;
+import jpabook.jpashop.repository.product.ProductRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.dto.OrderDto;
