@@ -39,7 +39,17 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
     }
 
 
-    private void setUpWherePredicationQueries(JPAQuery<Product> query, ProductDto.SearchCondition searchCondition) {
+    @Override
+    public Long getCount(ProductDto.SearchCondition searchCondition) {
+        JPAQuery<Long> query = jpaQueryFactory.select(product.count())
+                .from(product);
+
+        setUpWherePredicationQueries(query, searchCondition);
+
+        return query.fetchOne();
+    }
+
+    private void setUpWherePredicationQueries(JPAQuery query, ProductDto.SearchCondition searchCondition) {
         if(searchCondition.getName().isPresent()){
             String searchName = searchCondition.getName().get();
 
@@ -64,7 +74,7 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
         }
     }
 
-    private void setUpPagenationQuries(JPAQuery<Product> query, Pageable pageable, SortOption sortOption) {
+    private void setUpPagenationQuries(JPAQuery query, Pageable pageable, SortOption sortOption) {
         query.offset(pageable.getOffset());
         query.limit(pageable.getPageSize());
 

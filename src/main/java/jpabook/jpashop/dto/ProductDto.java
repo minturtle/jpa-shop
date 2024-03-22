@@ -7,6 +7,7 @@ import jpabook.jpashop.enums.product.SortOption;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Optional;
 
@@ -44,6 +45,7 @@ public abstract class ProductDto {
     @Data
     @AllArgsConstructor
     @Builder
+    @NoArgsConstructor
     public static class Preview{
         private String uid;
         private String name;

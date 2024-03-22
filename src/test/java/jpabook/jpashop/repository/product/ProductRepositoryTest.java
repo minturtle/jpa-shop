@@ -222,6 +222,33 @@ class ProductRepositoryTest {
 
     }
 
+    @Test
+    @DisplayName("물품 검색시 페이지네이션이 적용되지 않은 검색 결과 물품의 총 갯수를 알 수 있다.")
+    public void testCountSearch() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        int searchSize = 10;
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                SortOption.BY_NAME,
+                ProductType.ALL
+        );
+
+        //when
+        Long result = productRepository.getCount(searchCondition);
+        //then
+        assertThat(result).isEqualTo(3L);
+
+    }
+
+
 
 
     public void saveTestProducts(Category movieCategory, Category albumCategory, Category bookCategory) throws InterruptedException {

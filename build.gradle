@@ -50,6 +50,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
 	implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
+	implementation 'org.modelmapper:modelmapper:3.2.0'
 
 
 

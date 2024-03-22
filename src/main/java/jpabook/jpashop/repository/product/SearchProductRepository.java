@@ -10,4 +10,6 @@ public interface SearchProductRepository {
 
     List<Product> search(ProductDto.SearchCondition searchCondition, Pageable pageable);
 
+    Long getCount(ProductDto.SearchCondition searchCondition);
+
 }
