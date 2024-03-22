@@ -45,7 +45,7 @@ class ProductRepositoryTest {
 
         saveTestProducts(movieCategory, albumCategory, bookCategory);
 
-        int searchSize = 2;
+        int searchSize = 10;
         ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
                 Optional.empty(),
                 Optional.empty(),
@@ -63,9 +63,42 @@ class ProductRepositoryTest {
         assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
                 .containsExactly(
                         tuple("movie-001", "Inception", 15000, "http://example.com/inception.jpg"),
-                        tuple("album-001", "The Dark Side of the Moon", 20000, "http://example.com/darkside.jpg")
+                        tuple("album-001", "The Dark Side of the Moon", 20000, "http://example.com/darkside.jpg"),
+                        tuple("book-001", "The Great Gatsby", 10000, "http://example.com/gatsby.jpg")
                 );
     }
+
+    @Test
+    @DisplayName("이미 저장된 물품의 이름을 기준으로 검색할 수 있다")
+    public void testSearchByName() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        int searchSize = 10;
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.of("The"),
+                Optional.empty(),
+                Optional.empty(),
+                SortOption.BY_NAME,
+                ProductType.ALL
+        );
+
+
+        //when
+        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+
+        //then
+        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+                .containsExactly(
+                        tuple("album-001", "The Dark Side of the Moon", 20000, "http://example.com/darkside.jpg"),
+                        tuple("book-001", "The Great Gatsby", 10000, "http://example.com/gatsby.jpg")
+                );
+    }
+
 
     public void saveTestProducts(Category movieCategory, Category albumCategory, Category bookCategory){
         Movie movie = Movie.builder()
