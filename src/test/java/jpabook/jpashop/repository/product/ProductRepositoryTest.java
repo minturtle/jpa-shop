@@ -99,6 +99,70 @@ class ProductRepositoryTest {
                 );
     }
 
+    @Test
+    @DisplayName("이미 저장된 물품의 카테고리 식별자로 검색할 수 있다.")
+    public void testSearchByCategoryUid() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        int searchSize = 10;
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.of(bookCategory.getUid()),
+                SortOption.BY_NAME,
+                ProductType.ALL
+        );
+
+        //when
+        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+
+
+        //then
+        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+                .containsExactly(
+                        tuple("book-001", "The Great Gatsby", 10000, "http://example.com/gatsby.jpg")
+                );
+    }
+
+    @Test
+    @DisplayName("저장된 물건의 가격범위로 물건을 검색할 수 있다")
+    public void testSearchByPriceRange() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        int searchSize = 10;
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.empty(),
+                Optional.of(new ProductDto.PriceRange(15000, 20000)),
+                Optional.empty(),
+                SortOption.BY_NAME,
+                ProductType.ALL
+        );
+        //when
+        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+
+
+        //then
+        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+                .containsExactly(
+                        tuple("movie-001", "Inception", 15000, "http://example.com/inception.jpg"),
+                        tuple("album-001", "The Dark Side of the Moon", 20000, "http://example.com/darkside.jpg")
+                );
+    }
+
+
+
+
+
 
     public void saveTestProducts(Category movieCategory, Category albumCategory, Category bookCategory){
         Movie movie = Movie.builder()

@@ -11,8 +11,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
-import static jpabook.jpashop.domain.product.QProduct.product;
 import static jpabook.jpashop.domain.QBaseEntity.baseEntity;
+import static jpabook.jpashop.domain.product.QProduct.product;
+import static jpabook.jpashop.domain.product.QProductCategory.productCategory;
+import static jpabook.jpashop.domain.product.QCategory.category;
 
 
 @Repository
@@ -28,25 +30,51 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
         JPAQuery<Product> query = jpaQueryFactory.select(product)
                 .from(product);
 
-        if(searchCondition.getName().isPresent()){
-            String searchName = searchCondition.getName().get();
+        setUpWherePredicationQueries(query, searchCondition);
 
-            query.where(product.name.contains(searchName));
-        }
-
-
-        query.offset(pageable.getOffset());
-        query.limit(pageable.getPageSize());
-
-
-        switch (searchCondition.getSortOption()){
-            case BY_DATE -> query.orderBy(baseEntity.createdAt.desc());
-            case BY_NAME -> query.orderBy(product.name.asc());
-            case BY_PRICE -> query.orderBy(product.price.asc());
-        }
+        setUpPagenationQuries(query, pageable, searchCondition.getSortOption());
 
         return query.fetch();
 
 
     }
+
+
+    private void setUpWherePredicationQueries(JPAQuery<Product> query, ProductDto.SearchCondition searchCondition) {
+        if(searchCondition.getName().isPresent()){
+            String searchName = searchCondition.getName().get();
+
+            query.where(product.name.contains(searchName));
+        }
+        if(searchCondition.getCategoryUid().isPresent()){
+            String searchCategoryUid = searchCondition.getCategoryUid().get();
+
+
+            // category의 uid를 한번에 조회하기 위해 productCategory와 category를 left join
+            query
+                    .leftJoin(product.categories, productCategory)
+                    .leftJoin(productCategory.category, category);
+
+            query.where(category.uid.eq(searchCategoryUid));
+
+        }if(searchCondition.getPriceRange().isPresent()){
+            ProductDto.PriceRange priceRange = searchCondition.getPriceRange().get();
+            query.where(product.price.goe(priceRange.getMinPrice()));
+            query.where(product.price.loe(priceRange.getMaxPrice()));
+
+        }
+    }
+
+    private void setUpPagenationQuries(JPAQuery<Product> query, Pageable pageable, SortOption sortOption) {
+        query.offset(pageable.getOffset());
+        query.limit(pageable.getPageSize());
+
+
+        switch (sortOption){
+            case BY_DATE -> query.orderBy(baseEntity.createdAt.desc());
+            case BY_NAME -> query.orderBy(product.name.asc());
+            case BY_PRICE -> query.orderBy(product.price.asc());
+        }
+    }
+
 }
