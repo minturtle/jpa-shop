@@ -192,6 +192,36 @@ class ProductRepositoryTest {
     }
 
 
+    @Test
+    @DisplayName("저장된 물픔에 동시에 여러 검색 조건으로 물품을 검색할 수 있다.")
+    public void testSearchCondtionMultiple() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        int searchSize = 10;
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.of("Inception"),
+                Optional.of(new ProductDto.PriceRange(15000, 20000)),
+                Optional.of(movieCategory.getUid()),
+                SortOption.BY_NAME,
+                ProductType.ALL
+        );
+        //when
+        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+
+
+        //then
+        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+                .containsExactly(
+                        tuple("movie-001", "Inception", 15000, "http://example.com/inception.jpg")
+                );
+
+    }
+
 
 
     public void saveTestProducts(Category movieCategory, Category albumCategory, Category bookCategory) throws InterruptedException {
