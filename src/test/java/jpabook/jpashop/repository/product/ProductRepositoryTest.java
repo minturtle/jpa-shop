@@ -232,7 +232,6 @@ class ProductRepositoryTest {
 
         saveTestProducts(movieCategory, albumCategory, bookCategory);
 
-        int searchSize = 10;
         ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
                 Optional.empty(),
                 Optional.empty(),

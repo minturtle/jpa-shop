@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class PaginationListDto<T>{
-    private Integer count;
+    private Number count;
     private List<T> data;
 
 }

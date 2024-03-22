@@ -60,7 +60,7 @@ class ProductServiceTest {
         PaginationListDto<ProductDto.Preview> actual = productService.search(searchCondition, PageRequest.of(0, searchSize));
 
         // then
-        assertThat(actual.getCount()).isEqualTo(3);
+        assertThat(actual.getCount()).isEqualTo(3L);
         assertThat(actual.getData()).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple("movie-001", "Inception", 15000, "http://example.com/inception.jpg"),
