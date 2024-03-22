@@ -26,12 +26,6 @@ public abstract class ProductDto {
         private Optional<String> categoryUid;
 
         @NotNull
-        private int page;
-
-        @NotNull
-        private int size;
-
-        @NotNull
         private SortOption sortOption;
 
         @NotNull

@@ -51,8 +51,6 @@ class ProductServiceTest {
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
-                0,
-                searchSize,
                 SortOption.BY_NAME,
                 ProductType.ALL
         );

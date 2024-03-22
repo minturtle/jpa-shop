@@ -26,10 +26,16 @@ public class QMovie extends EntityPathBase<Movie> {
     //inherited
     public final ListPath<ProductCategory, QProductCategory> categories = _super.categories;
 
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
     public final StringPath director = createString("director");
 
     //inherited
     public final NumberPath<Long> id = _super.id;
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
     //inherited
     public final StringPath name = _super.name;

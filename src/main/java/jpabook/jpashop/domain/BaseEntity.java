@@ -10,7 +10,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseEntity {

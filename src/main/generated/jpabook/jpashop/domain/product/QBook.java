@@ -27,9 +27,15 @@ public class QBook extends EntityPathBase<Book> {
     public final ListPath<ProductCategory, QProductCategory> categories = _super.categories;
 
     //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final StringPath isbn = createString("isbn");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
     //inherited
     public final StringPath name = _super.name;

@@ -1,10 +1,13 @@
 package jpabook.jpashop.domain.product;
 
+import jpabook.jpashop.domain.BaseEntity;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +17,10 @@ import java.util.List;
 @Table(name = "products")
 @Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
-public abstract class Product {
+@SuperBuilder
+public abstract class Product extends BaseEntity {
+
+
 
     public Product(String uid, String name, int price, int stockQuantity, String thumbnailImageUrl) {
         this.uid = uid;
@@ -41,6 +47,7 @@ public abstract class Product {
 
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<ProductCategory> categories = new ArrayList<>();
 
 

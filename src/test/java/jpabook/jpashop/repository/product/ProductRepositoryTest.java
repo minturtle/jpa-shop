@@ -1,5 +1,8 @@
 package jpabook.jpashop.repository.product;
 
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jpabook.jpashop.domain.product.*;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.enums.product.ProductType;
@@ -9,6 +12,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +25,7 @@ import static org.assertj.core.api.Assertions.tuple;
 
 
 @DataJpaTest
+@Import(ProductRepositoryTest.TestConfig.class)
 class ProductRepositoryTest {
 
     @Autowired
@@ -42,19 +50,17 @@ class ProductRepositoryTest {
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
-                0,
-                searchSize,
                 SortOption.BY_NAME,
                 ProductType.ALL
         );
 
 
         // when
-        List<Product> result = productRepository.search(searchCondition);
+        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
 
 
         // then
-        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
+        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
                 .containsExactly(
                         tuple("movie-001", "Inception", 15000, "http://example.com/inception.jpg"),
                         tuple("album-001", "The Dark Side of the Moon", 20000, "http://example.com/darkside.jpg")
@@ -108,6 +114,22 @@ class ProductRepositoryTest {
                 .name(name)
                 .build();
         return categoryRepository.save(category);
+    }
+
+
+    @TestConfiguration
+    public static class TestConfig{
+
+        @PersistenceContext
+        EntityManager em;
+
+
+        @Bean
+        public JPAQueryFactory jpaQueryFactory(){
+            return new JPAQueryFactory(em);
+        }
+
+
     }
 
 }
