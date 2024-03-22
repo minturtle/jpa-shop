@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
-import static jpabook.jpashop.domain.QBaseEntity.baseEntity;
 import static jpabook.jpashop.domain.product.QProduct.product;
 import static jpabook.jpashop.domain.product.QProductCategory.productCategory;
 import static jpabook.jpashop.domain.product.QCategory.category;
@@ -71,7 +70,7 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
 
 
         switch (sortOption){
-            case BY_DATE -> query.orderBy(baseEntity.createdAt.desc());
+            case BY_DATE -> query.orderBy(product.createdAt.desc());
             case BY_NAME -> query.orderBy(product.name.asc());
             case BY_PRICE -> query.orderBy(product.price.asc());
         }

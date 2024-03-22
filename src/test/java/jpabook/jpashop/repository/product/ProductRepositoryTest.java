@@ -10,6 +10,8 @@ import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.repository.CategoryRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -159,12 +161,40 @@ class ProductRepositoryTest {
                 );
     }
 
+    @ParameterizedTest
+    @CsvSource(value = {"BY_NAME,movie-001:album-001:book-001", "BY_DATE,book-001:album-001:movie-001", "BY_PRICE,book-001:movie-001:album-001"})
+    @DisplayName("다양한 정렬기준을 통해 물품 검색 결과를 정렬할 수 있다.")
+    public void testOrder(SortOption sortOption, String expectedUidListString) throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        int searchSize = 10;
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                sortOption,
+                ProductType.ALL
+        );
+        //when
+        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+
+        //then
+        String[] expectedUidList = expectedUidListString.split(":");
+
+        assertThat(result)
+                .extracting("uid")
+                .containsExactly(expectedUidList);
+    }
 
 
 
 
-
-    public void saveTestProducts(Category movieCategory, Category albumCategory, Category bookCategory){
+    public void saveTestProducts(Category movieCategory, Category albumCategory, Category bookCategory) throws InterruptedException {
         Movie movie = Movie.builder()
                 .uid("movie-001")
                 .name("Inception")
@@ -176,7 +206,7 @@ class ProductRepositoryTest {
                 .build();
 
         movie.addCategory(movieCategory);
-
+        Thread.sleep(10);
 
         Album album = Album.builder()
                 .uid("album-001")
@@ -190,6 +220,8 @@ class ProductRepositoryTest {
 
         album.addCategory(albumCategory);
 
+        Thread.sleep(10);
+
         Book book = Book.builder()
                 .uid("book-001")
                 .name("The Great Gatsby")
@@ -202,7 +234,9 @@ class ProductRepositoryTest {
 
         book.addCategory(bookCategory);
 
-        productRepository.saveAll(List.of(movie, album, book));
+        productRepository.save(movie);
+        productRepository.save(album);
+        productRepository.save(book);
     }
 
     public Category saveCategory(String categoryUid, String name){
