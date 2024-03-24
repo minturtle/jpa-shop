@@ -69,6 +69,17 @@ public abstract class ProductDto {
     }
 
 
+    @Data
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class BookDetail extends Detail{
+        private String author;
+        private String isbn;
+
+    }
+
+
 
     @Data
     @AllArgsConstructor

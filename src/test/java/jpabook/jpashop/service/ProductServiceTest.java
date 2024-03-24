@@ -100,6 +100,7 @@ class ProductServiceTest {
         //given
         Category bookCategory = saveCategory("c1", "bookCategory");
         Category albumCategory = saveCategory("c2", "albumCategory");
+
         Category movieCategory = saveCategory("c3", "MovieCategory");
 
         saveTestProducts(movieCategory, albumCategory, bookCategory);
@@ -115,6 +116,31 @@ class ProductServiceTest {
 
         assertThat(result).extracting("uid", "name", "thumbnailUrl", "description", "price", "stockQuantity", "artist", "etc")
                 .contains(givenUid, "The Dark Side of the Moon", "http://example.com/darkside.jpg", "album description", 20000, 50,"Pink Floyd","1973, Progressive rock" );
+
+    }
+
+    @Test
+    @DisplayName("이미 저장된 책 상품의 상세 정보를 상품의 고유 식별자로 조회할 수 있다.")
+    public void testFindBookByUid() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        String givenUid = "book-001";
+        //when
+        ProductDto.Detail result = productService.findByUid(givenUid);
+        //then
+        if(!(result instanceof ProductDto.BookDetail)){
+            fail("Product DTO는 Book 정보를 포함해서 담고 있어야 한다.");
+            return;
+        }
+
+        assertThat(result).extracting("uid", "name", "thumbnailUrl", "description", "price", "stockQuantity", "author", "isbn")
+                .contains(givenUid, "The Great Gatsby", "http://example.com/gatsby.jpg", "book description", 10000, 100,"F. Scott Fitzgerald", "978-3-16-148410-0" );
 
     }
 

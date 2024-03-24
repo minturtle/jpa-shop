@@ -8,8 +8,8 @@ import lombok.Getter;
 @Getter
 public enum ProductExceptionMessages {
 
-    CANNOT_FIND_PRODUCT("상품 정보를 조회할 수 없습니다.");
-
+    CANNOT_FIND_PRODUCT("상품 정보를 조회할 수 없습니다."),
+    PRODUCT_TYPE_MAPPAING_FAILED("상품 정보 매핑에 실패했습니다.");
     private String message;
 
 }

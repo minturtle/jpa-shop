@@ -2,11 +2,13 @@ package jpabook.jpashop.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import jpabook.jpashop.domain.product.Album;
+import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.common.InternalErrorException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -54,9 +56,10 @@ public class ProductService {
      * @description 상품의 고유식별자로 상품의 상세 정보를 조회하는 메서드
      * @param givenUid 상품의 고유식별자
      * @return 상품의 상세정보
-     * @exception
+     * @exception CannotFindEntityException 고유식별자로 상품 조회에 실패한 경우
+     * @exception InternalErrorException 상품의 타입이 올바르게 매핑되지 않은 경우
     */
-    public ProductDto.Detail findByUid(String givenUid) throws CannotFindEntityException {
+    public ProductDto.Detail findByUid(String givenUid) throws CannotFindEntityException, InternalErrorException {
         Product product = productRepository.findByUid(givenUid)
                 .orElseThrow(()->new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
 
@@ -66,8 +69,11 @@ public class ProductService {
         else if(product instanceof Album){
             return modelMapper.map(product, ProductDto.AlbumDetail.class);
         }
+        else if(product instanceof Book){
+            return modelMapper.map(product, ProductDto.BookDetail.class);
+        }
 
-        return null;
+        throw new InternalErrorException(ProductExceptionMessages.PRODUCT_TYPE_MAPPAING_FAILED.getMessage());
     }
     
     
