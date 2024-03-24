@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.dto.PaginationListDto;
@@ -62,7 +63,9 @@ public class ProductService {
         if(product instanceof Movie){
             return modelMapper.map(product, ProductDto.MovieDetail.class);
         }
-
+        else if(product instanceof Album){
+            return modelMapper.map(product, ProductDto.AlbumDetail.class);
+        }
 
         return null;
     }

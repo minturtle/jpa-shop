@@ -59,8 +59,14 @@ public abstract class ProductDto {
 
     }
 
-
-
+    @Data
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AlbumDetail extends Detail{
+        private String artist;
+        private String etc;
+    }
 
 
 
@@ -83,4 +89,5 @@ public abstract class ProductDto {
         private int minPrice;
         private int maxPrice;
     }
+
 }

@@ -70,7 +70,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("이미 저장된 영화 상품의 상세 정보를 상품의 고유식별자로 조회할 수 있다.")
-    public void testFindByProductUid() throws Exception{
+    public void testFindMovieByProductUid() throws Exception{
         //given
         Category bookCategory = saveCategory("c1", "bookCategory");
         Category albumCategory = saveCategory("c2", "albumCategory");
@@ -83,15 +83,39 @@ class ProductServiceTest {
         //when
         ProductDto.Detail result = productService.findByUid(givenUid);
 
+        //then
         if(!(result instanceof ProductDto.MovieDetail)){
             fail("Product DTO는 Movie 정보를 포함해서 담고 있어야 한다.");
             return;
         }
 
 
-        //then
         assertThat(result).extracting("uid", "name", "thumbnailUrl", "description", "price", "stockQuantity", "actor", "director")
                 .contains(givenUid, "Inception", "http://example.com/inception.jpg", "movie description", 15000, 100, "Leonardo DiCaprio", "Christopher Nolan");
+    }
+
+    @Test
+    @DisplayName("이미 저장된 앨범 상품의 상세 정보를 상품의 고유 식별자로 조회할 수 있다.")
+    public void testFindByAlbumProductUid() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        String givenUid = "album-001";
+        //when
+        ProductDto.Detail result = productService.findByUid(givenUid);
+        //then
+        if(!(result instanceof ProductDto.AlbumDetail)){
+            fail("Product DTO는 Album 정보를 포함해서 담고 있어야 한다.");
+            return;
+        }
+
+        assertThat(result).extracting("uid", "name", "thumbnailUrl", "description", "price", "stockQuantity", "artist", "etc")
+                .contains(givenUid, "The Dark Side of the Moon", "http://example.com/darkside.jpg", "album description", 20000, 50,"Pink Floyd","1973, Progressive rock" );
+
     }
 
 
