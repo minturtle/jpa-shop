@@ -27,7 +27,7 @@ public class QProduct extends EntityPathBase<Product> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final StringPath descrption = createString("descrption");
+    public final StringPath description = createString("description");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

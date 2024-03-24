@@ -30,7 +30,7 @@ public class QMovie extends EntityPathBase<Movie> {
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     //inherited
-    public final StringPath descrption = _super.descrption;
+    public final StringPath description = _super.description;
 
     public final StringPath director = createString("director");
 

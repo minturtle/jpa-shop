@@ -30,7 +30,7 @@ public class QAlbum extends EntityPathBase<Album> {
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     //inherited
-    public final StringPath descrption = _super.descrption;
+    public final StringPath description = _super.description;
 
     public final StringPath etc = createString("etc");
 

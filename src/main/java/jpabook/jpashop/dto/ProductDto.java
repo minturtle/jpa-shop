@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Optional;
 
@@ -35,11 +36,32 @@ public abstract class ProductDto {
 
 
     @Data
+    @SuperBuilder
+    @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
-    public static class Detail{
+    public static abstract class Detail{
+        private String uid;
+        private String name;
+        private int price;
+        private String thumbnailUrl;
+        private String description;
+        private int stockQuantity;
+    }
+
+
+    @Data
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MovieDetail extends Detail{
+        private String director;
+        private String actor;
 
     }
+
+
+
+
 
 
     @Data

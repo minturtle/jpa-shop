@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.dto.ProductDto;
@@ -58,7 +59,9 @@ public class ProductService {
         Product product = productRepository.findByUid(givenUid)
                 .orElseThrow(()->new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
 
-
+        if(product instanceof Movie){
+            return modelMapper.map(product, ProductDto.MovieDetail.class);
+        }
 
 
         return null;
