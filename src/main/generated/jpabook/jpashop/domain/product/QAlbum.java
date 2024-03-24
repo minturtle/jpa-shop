@@ -29,6 +29,9 @@ public class QAlbum extends EntityPathBase<Album> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
+    //inherited
+    public final StringPath descrption = _super.descrption;
+
     public final StringPath etc = createString("etc");
 
     //inherited

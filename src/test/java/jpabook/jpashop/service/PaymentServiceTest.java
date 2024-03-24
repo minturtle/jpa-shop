@@ -4,7 +4,7 @@ import jakarta.persistence.LockTimeoutException;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
-import jpabook.jpashop.exception.user.CannotFindUserException;
+import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.AccountRepository;
@@ -221,7 +221,7 @@ class PaymentServiceTest {
     }
 
 
-    private String createTestUserAndAccount(String givenUserUid, long givenBalance) throws CannotFindUserException {
+    private String createTestUserAndAccount(String givenUserUid, long givenBalance) throws CannotFindEntityException {
         User testUser = new User(
                 givenUserUid, "email@email.com", "name", "http://naver.com/image.png", "address", "detailedAddress"
         );

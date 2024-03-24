@@ -37,7 +37,7 @@ class ProductServiceTest {
     private ProductRepository productRepository;
 
     @Test
-    @DisplayName("이미 저장된 상품의 검색 필터링 없이 리스트를 조회할 수 있다.")
+    @DisplayName("이미 저장된 상품의 특정 검색 조건 없이 리스트를 조회해, 조회된 물품의 정보와 갯수를 알 수 있다.")
     void testGetProductListWithoutSearchCondition() throws Exception{
         // given
         Category bookCategory = saveCategory("c1", "bookCategory");
@@ -68,6 +68,27 @@ class ProductServiceTest {
                 );
     }
 
+    @Test
+    @DisplayName("이미 저장된 상품의 상세 정보를 상품의 고유식별자로 조회할 수 있다.")
+    public void testFindByProductUid() throws Exception{
+        //given
+        Category bookCategory = saveCategory("c1", "bookCategory");
+        Category albumCategory = saveCategory("c2", "albumCategory");
+        Category movieCategory = saveCategory("c3", "MovieCategory");
+
+        saveTestProducts(movieCategory, albumCategory, bookCategory);
+
+        String givenUid = "movie-001";
+
+        //when
+        ProductDto.Detail result = productService.findByUid(givenUid);
+
+        //then
+        assertThat(result).extracting("uid", "name", "thumbnailUrl", "description", "price", "stockQuantity")
+                .contains(givenUid, "Inception", "http://example.com/inception.jpg", "movie description", 15000, 100);
+    }
+
+
 
     public void saveTestProducts(Category movieCategory, Category albumCategory, Category bookCategory){
         Movie movie = Movie.builder()
@@ -75,6 +96,7 @@ class ProductServiceTest {
                 .name("Inception")
                 .price(15000)
                 .stockQuantity(100)
+                .descrption("movie description")
                 .thumbnailImageUrl("http://example.com/inception.jpg")
                 .director("Christopher Nolan")
                 .actor("Leonardo DiCaprio")
@@ -88,6 +110,7 @@ class ProductServiceTest {
                 .name("The Dark Side of the Moon")
                 .price(20000)
                 .stockQuantity(50)
+                .descrption("album description")
                 .thumbnailImageUrl("http://example.com/darkside.jpg")
                 .artist("Pink Floyd")
                 .etc("1973, Progressive rock")
@@ -100,6 +123,7 @@ class ProductServiceTest {
                 .name("The Great Gatsby")
                 .price(10000)
                 .stockQuantity(100)
+                .descrption("book description")
                 .thumbnailImageUrl("http://example.com/gatsby.jpg")
                 .author("F. Scott Fitzgerald")
                 .isbn("978-3-16-148410-0")

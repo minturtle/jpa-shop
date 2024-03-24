@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.user.GoogleOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.KakaoOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordAuthInfo;
+import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.dto.UserDto;
@@ -169,10 +170,10 @@ public class UserService {
      * @description 사용자 정보 조회 API
      * @author minseok kim
      * @param userUid 사용자의 고유 식별자
-     * @throws CannotFindUserException 고유 식별자로 유저 정보 조회에 실패했을 시
+     * @throws CannotFindEntityException 고유 식별자로 유저 정보 조회에 실패했을 시
     */
     @Transactional(readOnly = true)
-    public UserDto.Detail getUserInfo(String userUid) throws CannotFindUserException {
+    public UserDto.Detail getUserInfo(String userUid) throws CannotFindEntityException {
         User user = findUserByUidOrThrow(userUid);
 
 
@@ -192,11 +193,11 @@ public class UserService {
      * @author minseok kim
      * @param userUid 사용자의 고유 식별자
      * @param dto : 업데이트된 유저 정보
-     * @throws CannotFindUserException 사용자의 고유식별자로 사용자를 조회할 수 없을 때
+     * @throws CannotFindEntityException 사용자의 고유식별자로 사용자를 조회할 수 없을 때
      * @throws OptimisticLockingFailureException 동시에 두 업데이트 요청이 들어와 업데이트에 실패한 경우
     */
-    @Transactional(rollbackFor = {CannotFindUserException.class, RuntimeException.class})
-    public void updateUserInfo(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindUserException, OptimisticLockingFailureException {
+    @Transactional(rollbackFor = {CannotFindEntityException.class, RuntimeException.class})
+    public void updateUserInfo(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindEntityException, OptimisticLockingFailureException {
         User findUser = findUserByUidOrThrow(userUid);
 
         findUser.setName(dto.getUpdatedName());
@@ -211,14 +212,14 @@ public class UserService {
      * @author minseok kim
      * @param userUid 사용자의 고유 식별자
      * @param dto 비밀번호 업데이트에 필요한 정보
-     * @throws CannotFindUserException 사용자의 고유식별자로 사용자를 조회할 수 없는 경우
+     * @throws CannotFindEntityException 사용자의 고유식별자로 사용자를 조회할 수 없는 경우
      * @throws OptimisticLockingFailureException 동시에 두 업데이트 요청이 들어와 업데이트에 실패한 경우
      * @throws UserAuthTypeException id/pw 정보가 존재하지 않는 유저인 경우
      * @throws AuthenticateFailedException 이전 비밀번호가 일치하지 않는 경우
      * @throws PasswordValidationException 새 비밀번호의 expression이 요구사항의 조건을 만족하지 못하는 경우
     */
     public void updatePassword(String userUid, UserDto.UpdatePassword dto)
-            throws CannotFindUserException, UserAuthTypeException, OptimisticLockingFailureException, AuthenticateFailedException, PasswordValidationException {
+            throws CannotFindEntityException, UserAuthTypeException, OptimisticLockingFailureException, AuthenticateFailedException, PasswordValidationException {
         User findUser = findUserByUidOrThrow(userUid);
         UsernamePasswordAuthInfo authInfo = findUser.getUsernamePasswordAuthInfo();
 
@@ -300,9 +301,9 @@ public class UserService {
         return googleAuthInfo != null && googleAuthInfo.getGoogleUid().equals(googleUid);
     }
 
-    private User findUserByUidOrThrow(String userUid) throws CannotFindUserException {
+    private User findUserByUidOrThrow(String userUid) throws CannotFindEntityException {
         return userRepository.findByUid(userUid)
-                .orElseThrow(() -> new CannotFindUserException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()
+                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()
                 ));
     }
 

@@ -30,6 +30,9 @@ public class QBook extends EntityPathBase<Book> {
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     //inherited
+    public final StringPath descrption = _super.descrption;
+
+    //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final StringPath isbn = createString("isbn");

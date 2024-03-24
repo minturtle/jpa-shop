@@ -1,8 +1,11 @@
 package jpabook.jpashop.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.dto.ProductDto;
+import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -40,4 +44,25 @@ public class ProductService {
                 .data(dtoList)
                 .build();
     }
+
+
+
+    /**
+     * @author minseok kim
+     * @description 상품의 고유식별자로 상품의 상세 정보를 조회하는 메서드
+     * @param givenUid 상품의 고유식별자
+     * @return 상품의 상세정보
+     * @exception
+    */
+    public ProductDto.Detail findByUid(String givenUid) throws CannotFindEntityException {
+        Product product = productRepository.findByUid(givenUid)
+                .orElseThrow(()->new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
+
+
+
+
+        return null;
+    }
+    
+    
 }

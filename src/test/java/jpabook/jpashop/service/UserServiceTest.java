@@ -2,6 +2,7 @@ package jpabook.jpashop.service;
 
 import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
@@ -629,7 +630,7 @@ class UserServiceTest {
                 ()->userService.updatePassword(givenUid, new UserDto.UpdatePassword(password, updatedPassword));
         // then
         assertThatThrownBy(throwingCallable)
-                .isInstanceOf(CannotFindUserException.class)
+                .isInstanceOf(CannotFindEntityException.class)
                 .hasMessage(UserExceptonMessages.CANNOT_FIND_USER.getMessage());
     }
 
@@ -731,7 +732,7 @@ class UserServiceTest {
 
         // then
         assertThatThrownBy(throwingCallable)
-                .isInstanceOf(CannotFindUserException.class)
+                .isInstanceOf(CannotFindEntityException.class)
                 .hasMessage(UserExceptonMessages.CANNOT_FIND_USER.getMessage());
     }
 

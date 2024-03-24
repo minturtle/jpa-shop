@@ -22,12 +22,13 @@ public abstract class Product extends BaseEntity {
 
 
 
-    public Product(String uid, String name, int price, int stockQuantity, String thumbnailImageUrl) {
+    public Product(String uid, String name, int price, int stockQuantity, String thumbnailImageUrl, String descrption) {
         this.uid = uid;
         this.name = name;
         this.price = price;
         this.stockQuantity = stockQuantity;
         this.thumbnailImageUrl = thumbnailImageUrl;
+        this.descrption = descrption;
     }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +45,10 @@ public abstract class Product extends BaseEntity {
     private int stockQuantity;
 
     private String thumbnailImageUrl;
+
+
+    @Lob
+    private String descrption;
 
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
