@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.OptimisticLockException;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -110,7 +112,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    @DisplayName("한 account에 동시에 출금을 시도할 시, 순차적으로 출금 요청이 수행된다.")
+    @DisplayName("한 account에 동시에 출금을 시도할 시, 첫번째 출금 요청만 성공한다.")
     void testWithdrawConcurrency() throws Exception{
         // given
         String givenUserUid = "uid";
@@ -135,7 +137,7 @@ class PaymentServiceTest {
                 try{
                     paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, withdrawAmount));
                     successCount.getAndIncrement();
-                }catch (LockTimeoutException e){
+                }catch (OptimisticLockingFailureException e){
                     failCount.getAndIncrement();
                 }catch (Exception e){
                     e.printStackTrace();
@@ -154,8 +156,8 @@ class PaymentServiceTest {
         long expectedBalance = givenBalance - (withdrawAmount * successCount.get());
 
         assertAll("thread run count check",
-                ()->assertThat(successCount.get()).isEqualTo(2),
-                ()->assertThat(failCount.get()).isEqualTo(0));
+                ()->assertThat(successCount.get()).isEqualTo(1),
+                ()->assertThat(failCount.get()).isEqualTo(1));
 
         assertThat(actual.getBalance()).isEqualTo(expectedBalance);
     }

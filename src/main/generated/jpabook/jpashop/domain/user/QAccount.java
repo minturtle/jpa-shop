@@ -38,6 +38,8 @@ public class QAccount extends EntityPathBase<Account> {
 
     public final QUser user;
 
+    public final NumberPath<Integer> version = createNumber("version", Integer.class);
+
     public QAccount(String variable) {
         this(Account.class, forVariable(variable), INITS);
     }

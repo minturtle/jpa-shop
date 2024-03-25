@@ -52,7 +52,9 @@ public class Account extends BaseEntity {
             throw new InvalidBalanceValueException(AccountExceptionMessages.BALANCE_OVERFLOW.getMessage());
         }
         balance += amount;
-
-
     }
+
+
+    @Version
+    private int version;
 }

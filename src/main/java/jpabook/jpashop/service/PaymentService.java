@@ -14,6 +14,7 @@ import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,10 +52,11 @@ public class PaymentService {
      * @param dto 출금에 필요한 정보가 담긴 dto
      * @exception CannotFindEntityException Account의 고유식별자로 account를 조회할 수 없을 때
      * @exception InvalidBalanceValueException 출금금액이 잔고보다 클 때
+     * @exception OptimisticLockingFailureException 동시에 입/출금요청이 들어와 업데이트 된 경우
     */
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class})
-    public void withdraw(AccountDto.WithdrawDeposit dto) throws CannotFindEntityException, InvalidBalanceValueException {
-        Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
+    public void withdraw(AccountDto.WithdrawDeposit dto) throws CannotFindEntityException, InvalidBalanceValueException, OptimisticLockingFailureException {
+        Account account = findAccountWithOptimisticLockOrThrow(dto.getAccountUid());
         account.withdraw(dto.getAmount());
     }
 
@@ -95,9 +97,15 @@ public class PaymentService {
                 .orElseThrow(() -> new CannotFindEntityException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
     }
 
-    private Account findAccountWithPessimisticLockOrThrow(String accountUid)  throws CannotFindEntityException{
-        return accountRepository.findByUidWithLock(accountUid)
+    private Account findAccountWithPessimisticLockOrThrow(String accountUid) throws CannotFindEntityException{
+        return accountRepository.findByUidWithPessimisticLock(accountUid)
                 .orElseThrow(() -> new CannotFindEntityException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
+    }
+
+    private Account findAccountWithOptimisticLockOrThrow(String accountUid) throws CannotFindEntityException{
+        return accountRepository.findByUidWithOptimisticLock(accountUid)
+                .orElseThrow(() -> new CannotFindEntityException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
+
     }
 
 
