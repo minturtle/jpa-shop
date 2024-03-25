@@ -36,6 +36,8 @@ public class QCart extends EntityPathBase<Cart> {
 
     public final NumberPath<Integer> quantity = createNumber("quantity", Integer.class);
 
+    public final StringPath uid = createString("uid");
+
     public final jpabook.jpashop.domain.user.QUser user;
 
     public QCart(String variable) {

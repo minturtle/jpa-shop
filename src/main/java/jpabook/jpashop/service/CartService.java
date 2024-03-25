@@ -10,6 +10,7 @@ import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
+import jpabook.jpashop.util.NanoIdProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,7 @@ public class CartService {
 
     private final ProductRepository productRepository;
 
-
+    private final NanoIdProvider nanoIdProvider;
     /**
      * @description 상품을 장바구니에 추가하는 메서드
      * @author minseok kim
@@ -43,6 +44,7 @@ public class CartService {
 
 
             Cart cart = Cart.builder()
+                    .uid(nanoIdProvider.createNanoId())
                     .product(product)
                     .quantity(dto.getQuantity())
                     .build();
@@ -68,6 +70,7 @@ public class CartService {
         for(Cart cart : user.getCartList()){
             Product product = cart.getProduct();
             CartDto.Detail dto = new CartDto.Detail(
+                    cart.getUid(),
                     product.getUid(),
                     product.getName(),
                     product.getThumbnailImageUrl(),

@@ -19,6 +19,8 @@ public abstract class CartDto {
     @AllArgsConstructor
     @Getter
     public static class Detail {
+
+        private String cartUid;
         private String productUid;
         private String productName;
         private String productImageUrl;

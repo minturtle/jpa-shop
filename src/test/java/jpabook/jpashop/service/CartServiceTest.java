@@ -79,6 +79,7 @@ class CartServiceTest {
                         tuple(testBook, 3)
                 );
 
+        assertThat(user.getCartList()).extracting("uid").doesNotContainNull();
     }
 
 
@@ -93,13 +94,12 @@ class CartServiceTest {
         List<CartDto.Detail> result = cartService.findCartByUserUid(TEST_USER_UID);
 
         // then
-        assertThat(result).extracting("productUid", "productName", "productImageUrl", "price", "quantity")
+        assertThat(result).extracting("cartUid", "productUid", "productName", "productImageUrl", "price", "quantity")
                 .contains(
-                        tuple("movie-001", "Inception", "http://example.com/inception.jpg", 15000, 1),
-                        tuple("album-001", "The Dark Side of the Moon", "http://example.com/darkside.jpg", 20000, 2),
-                        tuple("book-001", "The Great Gatsby", "http://example.com/gatsby.jpg", 10000, 3)
+                        tuple("cart-001", "movie-001", "Inception", "http://example.com/inception.jpg", 15000, 1),
+                        tuple("cart-002", "album-001", "The Dark Side of the Moon", "http://example.com/darkside.jpg", 20000, 2),
+                        tuple("cart-003", "book-001", "The Great Gatsby", "http://example.com/gatsby.jpg", 10000, 3)
                 );
-
     }
 
 
@@ -179,18 +179,21 @@ class CartServiceTest {
                 .orElseThrow(RuntimeException::new);
 
         Cart cart1 = Cart.builder()
+                .uid("cart-001")
                 .user(user)
                 .product(testMovie)
                 .quantity(1)
                 .build();
 
         Cart cart2 = Cart.builder()
+                .uid("cart-002")
                 .user(user)
                 .product(testAlbum)
                 .quantity(2)
                 .build();
 
         Cart cart3 = Cart.builder()
+                .uid("cart-003")
                 .user(user)
                 .product(testBook)
                 .quantity(3)
