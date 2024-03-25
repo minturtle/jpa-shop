@@ -24,8 +24,9 @@ public abstract class OrderDto {
     @Data
     @AllArgsConstructor
     @Builder
-    public static class OrderItemDetail{
-
+    public static class ProductInfo{
+        private String productUid;
+        private int quantity;
     }
 
 }

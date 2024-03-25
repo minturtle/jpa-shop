@@ -2,6 +2,7 @@ package jpabook.jpashop.domain.product;
 
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.Cart;
+import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,13 +67,9 @@ public abstract class Product extends BaseEntity {
         this.stockQuantity += quantity;
     }
 
-    public void removeStock(int quantity)throws IllegalArgumentException{
+    public void removeStock(int quantity) throws InvalidStockQuantityException {
         checkIsOrderQuantityBiggerThanStock(quantity); //주문양이 재고보다 많으면 예외발생
         this.stockQuantity -= quantity;
-    }
-
-    private void checkIsOrderQuantityBiggerThanStock(int quantity) {
-        if(stockQuantity < quantity) throw new IllegalArgumentException("주문한 수량이 남은 물건의 수량보다 많습니다.");
     }
 
     public void addCategory(Category category) {
@@ -91,5 +88,10 @@ public abstract class Product extends BaseEntity {
     @Override
     public int hashCode() {
         return Objects.hash(id, uid);
+    }
+
+
+    private void checkIsOrderQuantityBiggerThanStock(int quantity) throws InvalidStockQuantityException {
+        if(stockQuantity < quantity) throw new InvalidStockQuantityException("주문한 수량이 남은 물건의 수량보다 많습니다.");
     }
 }
