@@ -20,7 +20,6 @@ public abstract class CartDto {
     @Getter
     public static class Detail {
 
-        private String cartUid;
         private String productUid;
         private String productName;
         private String productImageUrl;
