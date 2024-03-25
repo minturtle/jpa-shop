@@ -4,11 +4,12 @@ package jpabook.jpashop.service;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
+import jpabook.jpashop.enums.user.account.CashFlowStatus;
+import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
-import jpabook.jpashop.exception.user.account.TransferFailedException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
@@ -17,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -55,9 +58,17 @@ public class PaymentService {
      * @exception OptimisticLockingFailureException 동시에 입/출금요청이 들어와 업데이트 된 경우
     */
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class})
-    public void withdraw(AccountDto.WithdrawDeposit dto) throws CannotFindEntityException, InvalidBalanceValueException, OptimisticLockingFailureException {
+    public AccountDto.CashFlowResult withdraw(AccountDto.CashFlowRequest dto) throws CannotFindEntityException, InvalidBalanceValueException, OptimisticLockingFailureException {
         Account account = findAccountWithOptimisticLockOrThrow(dto.getAccountUid());
         account.withdraw(dto.getAmount());
+
+        return new AccountDto.CashFlowResult(
+                dto.getAccountUid(),
+                dto.getAmount(),
+                LocalDateTime.now(),
+                CashFlowType.WITHDRAW,
+                CashFlowStatus.DONE
+        );
     }
 
 
@@ -69,9 +80,18 @@ public class PaymentService {
      * @exception InvalidBalanceValueException 입금 후 금액이 시스템에서 정의한 계좌 최고액보다 클 때
      */
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class})
-    public void deposit(AccountDto.WithdrawDeposit dto) throws CannotFindEntityException, InvalidBalanceValueException {
+    public AccountDto.CashFlowResult deposit(AccountDto.CashFlowRequest dto) throws CannotFindEntityException, InvalidBalanceValueException {
         Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
         account.deposit(dto.getAmount());
+
+        return new AccountDto.CashFlowResult(
+                dto.getAccountUid(),
+                dto.getAmount(),
+                LocalDateTime.now(),
+                CashFlowType.DEPOSIT,
+                CashFlowStatus.DONE
+        );
+
     }
 
 

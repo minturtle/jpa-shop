@@ -1,10 +1,10 @@
 package jpabook.jpashop.service;
 
-import jakarta.persistence.LockTimeoutException;
-import jakarta.persistence.OptimisticLockException;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
+import jpabook.jpashop.enums.user.account.CashFlowStatus;
+import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
@@ -82,9 +82,12 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         //when
-        paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, withdrawAmount));
+        AccountDto.CashFlowResult result = paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
 
         //then
+        assertThat(result).extracting("accountUid", "amount", "type", "status")
+                .contains(accountUid, withdrawAmount, CashFlowType.WITHDRAW, CashFlowStatus.DONE);
+
         Account actual = getAccount(accountUid);
         assertThat(actual.getBalance()).isEqualTo(givenBalance - withdrawAmount);
 
@@ -102,7 +105,7 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
-                ()-> paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, withdrawAmount));
+                ()-> paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
 
         // then
         assertThatThrownBy(throwingCallable)
@@ -135,7 +138,7 @@ class PaymentServiceTest {
         for(int i = 0; i < threadSize; i++){
             executorService.execute(()->{
                 try{
-                    paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, withdrawAmount));
+                    paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
                     successCount.getAndIncrement();
                 }catch (OptimisticLockingFailureException e){
                     failCount.getAndIncrement();
@@ -173,8 +176,12 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         // when
-        paymentService.deposit(new AccountDto.WithdrawDeposit(accountUid, depositAmount));
+        AccountDto.CashFlowResult result = paymentService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
+
         // then
+        assertThat(result).extracting("accountUid", "amount", "type", "status")
+                .contains(accountUid, depositAmount, CashFlowType.DEPOSIT, CashFlowStatus.DONE);
+
         Account actual = getAccount(accountUid);
         assertThat(actual.getBalance()).isEqualTo(givenBalance + depositAmount);
 
@@ -191,7 +198,7 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable = ()->{
-            paymentService.deposit(new AccountDto.WithdrawDeposit(accountUid, depositAmount));
+            paymentService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
         };
         // then
         assertThatThrownBy(throwingCallable)

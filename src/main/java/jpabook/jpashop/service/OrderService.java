@@ -50,7 +50,7 @@ public class OrderService {
 
 
 
-        paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, totalPrice));
+        paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, totalPrice));
         return null;
     }
 
