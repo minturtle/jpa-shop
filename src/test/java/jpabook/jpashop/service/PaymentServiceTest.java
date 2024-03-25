@@ -199,28 +199,6 @@ class PaymentServiceTest {
                 .hasMessage(AccountExceptionMessages.BALANCE_OVERFLOW.getMessage());
     }
 
-    @Test
-    @DisplayName("특정 Account에서 다른 Account로 송금이 가능하다.")
-    void testTransfer() throws Exception{
-        // given
-        String givenUserUid = "uid";
-        long givenBalance = 1000L;
-        long transferAmount = 500L;
-
-        String fromAccountUid = createTestUserAndAccount(givenUserUid, givenBalance);
-        String toAccountUid = paymentService.addAccount(new AccountDto.Create(givenUserUid, givenBalance));
-
-        // when
-        paymentService.transfer(new AccountDto.Transfer(fromAccountUid, toAccountUid, transferAmount));
-        // then
-        Account fromAccount = getAccount(fromAccountUid);
-        Account toAccount = getAccount(toAccountUid);
-
-        assertThat(fromAccount.getBalance()).isEqualTo(givenBalance - transferAmount);
-        assertThat(toAccount.getBalance()).isEqualTo(givenBalance + transferAmount);
-
-
-    }
 
 
     private String createTestUserAndAccount(String givenUserUid, long givenBalance) throws CannotFindEntityException {

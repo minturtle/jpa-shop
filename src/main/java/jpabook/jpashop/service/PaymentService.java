@@ -74,23 +74,6 @@ public class PaymentService {
         account.deposit(dto.getAmount());
     }
 
-    /**
-     * @description 송금 메서드
-     * @author Account to Account 송금 메서드
-     * @param dto 송금에 필요한 정보가 담긴 DTO
-     * @throws
-    */
-    // TODO : 데드락 처리 필요
-    @Transactional(rollbackFor = {TransferFailedException.class})
-    public void transfer(AccountDto.Transfer dto) throws TransferFailedException {
-        try{
-            withdraw(new AccountDto.WithdrawDeposit(dto.getFromAccountUid(), dto.getAmount()));
-            deposit(new AccountDto.WithdrawDeposit(dto.getToAccountUid(), dto.getAmount()));
-        }catch (CannotFindEntityException | InvalidBalanceValueException e){
-            throw new TransferFailedException(e.getMessage(), e);
-        }
-
-    }
 
     private Account findAccountOrThrow(String accountUid) throws CannotFindEntityException {
         return accountRepository.findByUid(accountUid)

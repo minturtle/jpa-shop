@@ -1,5 +1,6 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.Cart;
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -80,7 +82,25 @@ class CartServiceTest {
     }
 
 
+    @Test
+    @DisplayName("사용자가 이전에 저장한 카트 정보를 사용자의 고유식별자를 통해 조회할 수 있다.")
+    @Transactional
+    void testGetCartListByUserUid() throws Exception{
+        // given
+        saveTestCarts();
 
+        // when
+        List<CartDto.Detail> result = cartService.findCartByUserUid(TEST_USER_UID);
+
+        // then
+        assertThat(result).extracting("productUid", "productName", "productImageUrl", "price", "quantity")
+                .contains(
+                        tuple("movie-001", "Inception", "http://example.com/inception.jpg", 15000, 1),
+                        tuple("album-001", "The Dark Side of the Moon", "http://example.com/darkside.jpg", 20000, 2),
+                        tuple("book-001", "The Great Gatsby", "http://example.com/gatsby.jpg", 10000, 3)
+                );
+
+    }
 
 
     private User getUserWithFetchJoinProduct() {
@@ -153,5 +173,34 @@ class CartServiceTest {
 
         productRepository.saveAll(List.of(testMovie, testAlbum, testBook));
     }
+
+    public void saveTestCarts() {
+        User user = userRepository.findByUid(TEST_USER_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Cart cart1 = Cart.builder()
+                .user(user)
+                .product(testMovie)
+                .quantity(1)
+                .build();
+
+        Cart cart2 = Cart.builder()
+                .user(user)
+                .product(testAlbum)
+                .quantity(2)
+                .build();
+
+        Cart cart3 = Cart.builder()
+                .user(user)
+                .product(testBook)
+                .quantity(3)
+                .build();
+
+        user.addCart(cart1);
+        user.addCart(cart2);
+        user.addCart(cart3);
+
+    }
+
 
 }

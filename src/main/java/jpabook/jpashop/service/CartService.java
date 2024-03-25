@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -52,6 +53,35 @@ public class CartService {
 
     }
 
+
+    /**
+     * @description 현재 유저가 담은 장바구니 리스트를 조회하는 메서드
+     * @author minseok kim
+     * @param userUid 유저의 고유식별자
+     * @throws
+    */
+    public List<CartDto.Detail> findCartByUserUid(String userUid) throws CannotFindEntityException {
+        User user = getUserWithProduct(userUid);
+
+        List<CartDto.Detail> resultList = new ArrayList<>(user.getCartList().size());
+
+        for(Cart cart : user.getCartList()){
+            Product product = cart.getProduct();
+            CartDto.Detail dto = new CartDto.Detail(
+                    product.getUid(),
+                    product.getName(),
+                    product.getThumbnailImageUrl(),
+                    product.getPrice(),
+                    cart.getQuantity()
+            );
+
+            resultList.add(dto);
+        }
+
+
+        return resultList;
+    }
+
     private Product getProductOrThrow(String productUid) throws CannotFindEntityException {
         Product product = productRepository.findByUid(productUid)
                 .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
@@ -62,4 +92,12 @@ public class CartService {
         return userRepository.findByUid(userUid)
                 .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
     }
+
+    private User getUserWithProduct(String userUid) throws CannotFindEntityException {
+        return userRepository.findByUidJoinCartProduct(userUid)
+                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
+
+    }
+
+
 }
