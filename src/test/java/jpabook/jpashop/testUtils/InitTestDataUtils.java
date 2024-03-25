@@ -16,9 +16,11 @@ import java.util.List;
 
 @Transactional
 @RequiredArgsConstructor
-public class InitDbUtils {
+public class InitTestDataUtils {
 
     public static final String USER_UID = "userUid";
+    public static final String ACCOUNT_UID = "accountUid";
+
     public static final String MOVIE_UID = "movie-001";
     public static final String ALBUM_UID = "album-001";
     public static final String BOOK_UID = "book-001";
@@ -50,10 +52,10 @@ public class InitDbUtils {
         userRepository.save(newUser);
     }
 
-    public void saveAccount() {
+    public void saveAccount(Long balance) {
         User user = userRepository.findByUid(USER_UID).orElseThrow(RuntimeException::new);
 
-        Account account = new Account(USER_UID, 1000000L);
+        Account account = new Account(ACCOUNT_UID, balance);
         user.addAccount(account);
     }
 

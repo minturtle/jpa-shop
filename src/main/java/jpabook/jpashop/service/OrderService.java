@@ -7,7 +7,6 @@ import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.product.ProductRepository;
-import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.dto.OrderDto;
 import lombok.RequiredArgsConstructor;
@@ -37,11 +36,11 @@ public class OrderService {
      * @throws InvalidStockQuantityException 상품의 수량이 주문수량보다 모자랄 경우
      * @throws InvalidBalanceValueException 총 결제금액이 Account의 잔액보다 작은 경우
     */
-    public void order(String accountUid, List<OrderDto.ProductInfo> productDtoList)
+    public OrderDto.Detail order(String accountUid, List<OrderDto.OrderProductRequestInfo> productDtoList)
             throws CannotFindEntityException, InvalidStockQuantityException, InvalidBalanceValueException {
         int totalPrice = 0;
 
-        for(OrderDto.ProductInfo productOrderInfo : productDtoList){
+        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
             Product product = productRepository.findByUid(productOrderInfo.getProductUid())
                     .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
 
@@ -52,6 +51,7 @@ public class OrderService {
 
 
         paymentService.withdraw(new AccountDto.WithdrawDeposit(accountUid, totalPrice));
+        return null;
     }
 
 

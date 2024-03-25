@@ -1,17 +1,9 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.domain.product.Album;
-import jpabook.jpashop.domain.product.Book;
-import jpabook.jpashop.domain.product.Movie;
-import jpabook.jpashop.domain.product.Product;
-import jpabook.jpashop.domain.user.Account;
-import jpabook.jpashop.domain.user.User;
-import jpabook.jpashop.dto.AccountDto;
-import jpabook.jpashop.exception.common.CannotFindEntityException;
-import jpabook.jpashop.repository.AccountRepository;
+import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
-import jpabook.jpashop.testUtils.InitDbUtils;
+import jpabook.jpashop.testUtils.InitTestDataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,9 +16,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-
 
 
 @SpringBootTest
@@ -35,28 +27,40 @@ import static org.assertj.core.api.Assertions.*;
 class OrderServiceTest {
 
     @Autowired
-    private InitDbUtils initDbUtils;
+    private InitTestDataUtils initTestDataUtils;
+
+    @Autowired
+    private OrderService orderService;
 
 
     @BeforeEach
     @Transactional
     void setUp(){
-        initDbUtils.saveKakaoUser();
-        initDbUtils.saveAccount();
-        initDbUtils.saveTestProducts();
+        initTestDataUtils.saveKakaoUser();
+        initTestDataUtils.saveTestProducts();
     }
 
     @AfterEach
     void tearDown() {
-        initDbUtils.deleteAll();
+        initTestDataUtils.deleteAll();
     }
 
     @Test
     @DisplayName("Account에 주문 금액 이상의 잔고를 가진 유저가 특정 상품들에 대해 주문을 수행할 수 있다.")
     void testOrder() throws Exception{
         // given
+        Long givenBalance = 1000000L;
+        initTestDataUtils.saveAccount(givenBalance);
+
+        List<OrderDto.OrderProductRequestInfo> orderList = List.of();
 
         // when
+
+
+        OrderDto.Detail result = orderService.order(initTestDataUtils.ACCOUNT_UID, orderList);
+
+        assertThat(result);
+
 
         // then
     }
@@ -66,11 +70,11 @@ class OrderServiceTest {
 
 
         @Bean
-        public InitDbUtils initDbUtils(
+        public InitTestDataUtils initDbUtils(
                 UserRepository userRepository,
                 ProductRepository productRepository
         ){
-            return new InitDbUtils(productRepository, userRepository);
+            return new InitTestDataUtils(productRepository, userRepository);
         }
     }
 
