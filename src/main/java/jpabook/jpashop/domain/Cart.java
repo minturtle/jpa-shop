@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
@@ -12,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "carts")
 @NoArgsConstructor
 @SuperBuilder
+@Getter
 public class Cart extends BaseEntity{
 
 

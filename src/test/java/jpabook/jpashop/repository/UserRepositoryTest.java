@@ -1,38 +1,43 @@
-package jpabook.jpashop.service;
+package jpabook.jpashop.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceUnitUtil;
+import jpabook.jpashop.config.QueryDslConfig;
+import jpabook.jpashop.domain.Cart;
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
-import jpabook.jpashop.dto.CartDto;
-import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
-class CartServiceTest {
 
-    @Autowired
-    private ProductRepository productRepository;
+@DataJpaTest
+@ActiveProfiles("test")
+@Import(QueryDslConfig.class)
+class UserRepositoryTest {
+
 
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
-    private CartService cartService;
+    private ProductRepository productRepository;
 
+    @PersistenceContext
+    private EntityManager em;
 
     private final String TEST_USER_UID = "userUid";
     private Product testMovie;
@@ -40,11 +45,18 @@ class CartServiceTest {
     private Product testBook;
 
 
+
+
     @BeforeEach
     void setUp() {
-        saveKakaoUser();
+        User user = saveKakaoUser();
         saveTestProducts();
+        saveTestCarts(user);
+
+        em.flush();
+        em.clear();
     }
+
 
     @AfterEach
     void tearDown() {
@@ -53,44 +65,38 @@ class CartServiceTest {
     }
 
     @Test
-    @DisplayName("특정 유저가 상품의 식별자와 갯수를 입력해 해당 상품을 장바구니에 추가해 저장할 수 있다.")
-    void testAddCarts() throws Exception{
+    @DisplayName("유저의 Cart 정보 조회시, fetchJoin을 사용해 추가적인 쿼리 없이 Product의 정보를 가져올 수 있다.")
+    void testfindUserCart() throws Exception{
         // given
+            // User, Cart, Product 데이터가 설정되어 있고, 영속성 컨텍스트가 비어있는 초기상태.
 
-        List<CartDto.Add> dtoList = List.of(
-                new CartDto.Add("movie-001", 1),
-                new CartDto.Add("album-001", 2),
-                new CartDto.Add("book-001", 3)
-        );
+        boolean[] isProductsProxy = {true, true, true};
 
         // when
-        cartService.addCarts(TEST_USER_UID, dtoList);
-
-        // then
-        User user = getUserWithFetchJoinProduct();
-
-        assertThat(user.getCartList())
-                .extracting("product", "quantity")
-                .contains(
-                        tuple(testMovie, 1),
-                        tuple(testAlbum, 2),
-                        tuple(testBook, 3)
-                );
-
-    }
-
-
-
-
-
-    private User getUserWithFetchJoinProduct() {
-
-        return userRepository.findByUidJoinCartProduct(TEST_USER_UID)
+        User user = userRepository.findByUidJoinCartProduct(TEST_USER_UID)
                 .orElseThrow(RuntimeException::new);
+        // then
+        List<Cart> cartList = user.getCartList();
+        boolean isCartListProxy = isProxy(cartList);
+        for(int i = 0; i < 3; i++){
+            isProductsProxy[i] = isProxy(cartList.get(i).getProduct());
+        }
+
+        assertThat(isCartListProxy).isFalse();
+        assertThat(isProductsProxy).contains(false, false, false);
+
+    }
+    
+
+
+    private boolean isProxy(Object entity){
+        PersistenceUnitUtil util = em.getEntityManagerFactory().getPersistenceUnitUtil();
+
+        return !util.isLoaded(entity);
     }
 
 
-    private void saveKakaoUser(){
+    private User saveKakaoUser(){
         String email ="email@email.com";
         String givenName = "givenName";
         String address = "address";
@@ -109,10 +115,9 @@ class CartServiceTest {
 
         newUser.setKakaoOAuth2AuthInfo(kakaoUid);
         userRepository.save(newUser);
+
+        return newUser;
     }
-
-
-
 
     private void saveTestProducts(){
         testMovie = Movie.builder()
@@ -154,4 +159,28 @@ class CartServiceTest {
         productRepository.saveAll(List.of(testMovie, testAlbum, testBook));
     }
 
+    private void saveTestCarts(User user) {
+        Cart cart1 = Cart.builder()
+                .user(user)
+                .product(testMovie)
+                .quantity(1)
+                .build();
+
+        Cart cart2 = Cart.builder()
+                .user(user)
+                .product(testAlbum)
+                .quantity(2)
+                .build();
+
+        Cart cart3 = Cart.builder()
+                .user(user)
+                .product(testBook)
+                .quantity(3)
+                .build();
+
+        user.addCart(cart1);
+        user.addCart(cart2);
+        user.addCart(cart3);
+
+    }
 }
