@@ -25,6 +25,12 @@ public class InitTestDataUtils {
     public static final String ALBUM_UID = "album-001";
     public static final String BOOK_UID = "book-001";
 
+    public static final int MOVIE_PRICE = 15000;
+
+    public static final int ALBUM_PRICE = 20000;
+
+    public static final int BOOK_PRICE = 10000;
+
 
 
     private final ProductRepository productRepository;
@@ -63,7 +69,7 @@ public class InitTestDataUtils {
         Product movie = Movie.builder()
                 .uid(MOVIE_UID)
                 .name("Inception")
-                .price(15000)
+                .price(MOVIE_PRICE)
                 .stockQuantity(100)
                 .description("movie description")
                 .thumbnailImageUrl("http://example.com/inception.jpg")
@@ -76,7 +82,7 @@ public class InitTestDataUtils {
         Product album  = Album.builder()
                 .uid(ALBUM_UID)
                 .name("The Dark Side of the Moon")
-                .price(20000)
+                .price(ALBUM_PRICE)
                 .stockQuantity(50)
                 .description("album description")
                 .thumbnailImageUrl("http://example.com/darkside.jpg")
@@ -88,7 +94,7 @@ public class InitTestDataUtils {
         Product book  = Book.builder()
                 .uid(BOOK_UID)
                 .name("The Great Gatsby")
-                .price(10000)
+                .price(BOOK_PRICE)
                 .stockQuantity(100)
                 .description("book description")
                 .thumbnailImageUrl("http://example.com/gatsby.jpg")

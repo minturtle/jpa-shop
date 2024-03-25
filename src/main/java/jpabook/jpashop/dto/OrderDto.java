@@ -29,6 +29,7 @@ public abstract class OrderDto {
         private int totalPrice;
         private LocalDateTime orderTime;
         private OrderStatus orderStatus;
+
     }
 
 
@@ -41,7 +42,7 @@ public abstract class OrderDto {
         private String productImageUrl;
         private int unitPrice; //물건당 가격
         private int quantity;
-        private int price;
+        private int totalPrice;
     }
 
 

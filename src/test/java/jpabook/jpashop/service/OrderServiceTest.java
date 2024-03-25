@@ -1,5 +1,7 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.domain.order.OrderStatus;
+import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
@@ -19,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-
+import static jpabook.jpashop.testUtils.InitTestDataUtils.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -32,6 +34,8 @@ class OrderServiceTest {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     @Transactional
@@ -52,17 +56,48 @@ class OrderServiceTest {
         Long givenBalance = 1000000L;
         initTestDataUtils.saveAccount(givenBalance);
 
-        List<OrderDto.OrderProductRequestInfo> orderList = List.of();
+        int movieOrderQuantity = 1;
+        int albumOrderQuantity = 2;
+        int bookOrderQuantity = 3;
+
+        List<OrderDto.OrderProductRequestInfo> orderList = List.of(
+                new OrderDto.OrderProductRequestInfo(MOVIE_UID , movieOrderQuantity),
+                new OrderDto.OrderProductRequestInfo(ALBUM_UID, albumOrderQuantity),
+                new OrderDto.OrderProductRequestInfo(BOOK_UID, bookOrderQuantity)
+        );
 
         // when
 
 
         OrderDto.Detail result = orderService.order(initTestDataUtils.ACCOUNT_UID, orderList);
 
-        assertThat(result);
-
 
         // then
+        int expectedTotalPrice = MOVIE_PRICE * movieOrderQuantity + ALBUM_PRICE * albumOrderQuantity + BOOK_PRICE * bookOrderQuantity;
+
+
+        assertThat(result).extracting("totalPrice", "orderStatus")
+                .contains(expectedTotalPrice, OrderStatus.ORDERED);
+
+        assertThat(result).extracting("orderUid", "orderTime").doesNotContainNull();
+
+        assertThat(result.getOrderProducts()).extracting("productUid", "productName","productImageUrl","unitPrice","quantity", "totalPrice")
+                .contains(
+                        tuple(MOVIE_UID, "Inception", "http://example.com/inception.jpg", MOVIE_PRICE, movieOrderQuantity, MOVIE_PRICE * movieOrderQuantity),
+                        tuple(ALBUM_UID, "The Dark Side of the Moon", "http://example.com/darkside.jpg", ALBUM_PRICE, albumOrderQuantity, ALBUM_PRICE * albumOrderQuantity),
+                        tuple(BOOK_UID, "The Great Gatsby", "http://example.com/gatsby.jpg", BOOK_PRICE, bookOrderQuantity, BOOK_PRICE * bookOrderQuantity)
+                );
+
+
+        Account account = getAccountByUser();
+
+        assertThat(account.getBalance()).isEqualTo(givenBalance - expectedTotalPrice);
+    }
+
+    private Account getAccountByUser() {
+        Account account = userRepository.findByUidJoinAccount(USER_UID).orElseThrow(RuntimeException::new)
+                .getAccountList().get(0);
+        return account;
     }
 
     @TestConfiguration
