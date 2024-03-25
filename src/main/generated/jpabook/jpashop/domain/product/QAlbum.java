@@ -24,6 +24,9 @@ public class QAlbum extends EntityPathBase<Album> {
     public final StringPath artist = createString("artist");
 
     //inherited
+    public final ListPath<jpabook.jpashop.domain.Cart, jpabook.jpashop.domain.QCart> cartList = _super.cartList;
+
+    //inherited
     public final ListPath<ProductCategory, QProductCategory> categories = _super.categories;
 
     //inherited

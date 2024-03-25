@@ -1,6 +1,7 @@
 package jpabook.jpashop.domain.product;
 
 import jpabook.jpashop.domain.BaseEntity;
+import jpabook.jpashop.domain.Cart;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -56,6 +58,10 @@ public abstract class Product extends BaseEntity {
     private List<ProductCategory> categories = new ArrayList<>();
 
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
+    private List<Cart> cartList = new ArrayList<>();
+
+
     public void addStock(int quantity){
         this.stockQuantity += quantity;
     }
@@ -72,5 +78,18 @@ public abstract class Product extends BaseEntity {
     public void addCategory(Category category) {
         ProductCategory productCategory = new ProductCategory(this, category);
         this.categories.add(productCategory);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Product product = (Product) o;
+        return Objects.equals(id, product.id) && Objects.equals(uid, product.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, uid);
     }
 }

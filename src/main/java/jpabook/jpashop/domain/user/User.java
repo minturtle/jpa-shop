@@ -54,7 +54,7 @@ public class User extends BaseEntity {
     @Embedded
     private AddressInfo addressInfo;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true, mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
     private List<Cart> cartList = new ArrayList<>();
 
 
@@ -109,6 +109,13 @@ public class User extends BaseEntity {
         this.accountList.add(account);
         account.setUser(this);
     }
+
+
+    public void addCart(Cart cart) {
+        this.cartList.add(cart);
+        cart.setUser(this);
+    }
+
 
     @Override
     public boolean equals(Object o) {

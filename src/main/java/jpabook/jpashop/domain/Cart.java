@@ -4,9 +4,14 @@ package jpabook.jpashop.domain;
 import jakarta.persistence.*;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "carts")
+@NoArgsConstructor
+@SuperBuilder
 public class Cart extends BaseEntity{
 
 
@@ -25,4 +30,7 @@ public class Cart extends BaseEntity{
 
     private int quantity;
 
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
