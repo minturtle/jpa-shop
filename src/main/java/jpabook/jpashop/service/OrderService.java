@@ -53,68 +53,19 @@ public class OrderService {
     */
     public OrderDto.Detail order(String userUid, String accountUid, List<OrderDto.OrderProductRequestInfo> productDtoList)
             throws CannotFindEntityException, InvalidStockQuantityException, InvalidBalanceValueException {
-        int totalPrice = 0;
 
-        User orderUser = userRepository.findByUid(userUid)
-                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
-
-
-        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
-            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
-                    .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
-
-            product.removeStock(productOrderInfo.getQuantity());
-            totalPrice += product.getPrice() * productOrderInfo.getQuantity();
-        }
-
+        int totalPrice = decreaseProductStock(productDtoList);
 
         AccountDto.CashFlowResult cashflowResult = accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, totalPrice));
 
-        Account account = accountRepository.findByUid(cashflowResult.getAccountUid())
-                .orElseThrow(() -> new CannotFindEntityException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
-
-        Order order = Order.builder()
-                .uid(nanoIdProvider.createNanoId())
-                .user(orderUser)
-                .deliveryInfo(new AddressInfo(orderUser.getAddressInfo()))
-                .payment(new Payment(account, cashflowResult.getAmount()))
-                .build();
-
-        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
-            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
-                    .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
-
-            order.addOrderProduct(new OrderProduct(product, productOrderInfo.getQuantity(), product.getPrice()));
-        }
+        Order order = createOrderEntity(cashflowResult, userUid, productDtoList);
         orderRepository.save(order);
 
-        OrderDto.Detail result = OrderDto.Detail.builder()
-                .orderUid(order.getUid())
-                .orderTime(cashflowResult.getCreatedAt())
-                .orderStatus(OrderStatus.ORDERED)
-                .orderPaymentDetail(new OrderDto.OrderPaymentDetail(accountUid, totalPrice))
-                .build();
 
-        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
-            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
-                    .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
+        return createOrderResult(productDtoList, order);
 
 
-            OrderDto.OrderedProductDetail detail = new OrderDto.OrderedProductDetail(
-                    product.getUid(),
-                    product.getName(),
-                    product.getThumbnailImageUrl(),
-                    product.getPrice(),
-                    productOrderInfo.getQuantity(),
-                    product.getPrice() * productOrderInfo.getQuantity()
-            );
-            result.addOrderProduct(detail);
-        }
-
-
-        return result;
     }
-
 
     /**
      * @description 주문 취소 메서드
@@ -148,6 +99,68 @@ public class OrderService {
         return null;
     }
 
+
+    private int decreaseProductStock(List<OrderDto.OrderProductRequestInfo> productDtoList) throws CannotFindEntityException, InvalidStockQuantityException {
+        int totalPrice = 0;
+
+        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
+            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
+                    .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
+
+            product.removeStock(productOrderInfo.getQuantity());
+            totalPrice += product.getPrice() * productOrderInfo.getQuantity();
+        }
+        return totalPrice;
+    }
+
+    private Order createOrderEntity(AccountDto.CashFlowResult cashflowResult, String userUid, List<OrderDto.OrderProductRequestInfo> productDtoList) throws CannotFindEntityException {
+        User orderUser = userRepository.findByUid(userUid)
+                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
+
+
+        Account account = accountRepository.findByUid(cashflowResult.getAccountUid())
+                .orElseThrow(() -> new CannotFindEntityException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
+
+        Order order = Order.builder()
+                .uid(nanoIdProvider.createNanoId())
+                .user(orderUser)
+                .deliveryInfo(new AddressInfo(orderUser.getAddressInfo()))
+                .payment(new Payment(account, cashflowResult.getAmount()))
+                .build();
+
+        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
+            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
+                    .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
+
+            order.addOrderProduct(new OrderProduct(product, productOrderInfo.getQuantity(), product.getPrice()));
+        }
+
+        return order;
+    }
+
+    private OrderDto.Detail createOrderResult(List<OrderDto.OrderProductRequestInfo> productDtoList, Order order) throws CannotFindEntityException {
+        OrderDto.Detail result = OrderDto.Detail.builder()
+                .orderUid(order.getUid())
+                .orderTime(order.getCreatedAt())
+                .orderStatus(order.getStatus())
+                .orderPaymentDetail(new OrderDto.OrderPaymentDetail(order.getPayment().getAccount().getUid(), order.getPayment().getAmount()))
+                .build();
+
+        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
+            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
+                    .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
+            OrderDto.OrderedProductDetail detail = new OrderDto.OrderedProductDetail(
+                    product.getUid(),
+                    product.getName(),
+                    product.getThumbnailImageUrl(),
+                    product.getPrice(),
+                    productOrderInfo.getQuantity(),
+                    product.getPrice() * productOrderInfo.getQuantity()
+            );
+            result.addOrderProduct(detail);
+        }
+        return result;
+    }
 
 
 }
