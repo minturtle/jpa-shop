@@ -37,6 +37,10 @@ public class Order extends BaseEntity {
     @Embedded
     private AddressInfo deliveryInfo;
 
+    @Embedded
+    private Payment payment;
+
+
     @Enumerated(value = EnumType.STRING)
     @Column(name="order_status")
     private OrderStatus status;
