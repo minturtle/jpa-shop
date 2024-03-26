@@ -3,9 +3,12 @@ package jpabook.jpashop.domain.order;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
+import lombok.Builder;
 import lombok.Getter;
 
 import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,8 @@ import java.util.List;
 @Entity
 @Table(name = "orders")
 @Getter
+@SuperBuilder
+@NoArgsConstructor
 public class Order extends BaseEntity {
 
 
@@ -43,13 +48,15 @@ public class Order extends BaseEntity {
 
     @Enumerated(value = EnumType.STRING)
     @Column(name="order_status")
-    private OrderStatus status;
+    @Builder.Default
+    private OrderStatus status = OrderStatus.ORDERED;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OrderProduct> orderProducts = new ArrayList<>();
 
 
-    public void addOrderItem(OrderProduct orderProduct){
+    public void addOrderProduct(OrderProduct orderProduct){
         orderProducts.add(orderProduct);
         orderProduct.setOrder(this);
     }

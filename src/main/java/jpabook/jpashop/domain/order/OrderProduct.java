@@ -4,12 +4,19 @@ import jpabook.jpashop.domain.product.Product;
 import lombok.Getter;
 
 import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @Table(name = "order_products")
+@NoArgsConstructor
 public class OrderProduct {
 
+    public OrderProduct(Product product, int count, int itemPrice) {
+        this.product = product;
+        this.count = count;
+        this.itemPrice = itemPrice;
+    }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_item_id")

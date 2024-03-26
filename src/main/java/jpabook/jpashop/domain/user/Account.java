@@ -8,6 +8,8 @@ import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "accounts")
 @Getter
@@ -57,4 +59,18 @@ public class Account extends BaseEntity {
 
     @Version
     private int version;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(id, account.id) && Objects.equals(uid, account.uid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, uid);
+    }
 }

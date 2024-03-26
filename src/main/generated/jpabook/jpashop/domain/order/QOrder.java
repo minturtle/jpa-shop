@@ -36,6 +36,8 @@ public class QOrder extends EntityPathBase<Order> {
 
     public final ListPath<OrderProduct, QOrderProduct> orderProducts = this.<OrderProduct, QOrderProduct>createList("orderProducts", OrderProduct.class, QOrderProduct.class, PathInits.DIRECT2);
 
+    public final QPayment payment;
+
     public final EnumPath<OrderStatus> status = createEnum("status", OrderStatus.class);
 
     public final StringPath uid = createString("uid");
@@ -61,6 +63,7 @@ public class QOrder extends EntityPathBase<Order> {
     public QOrder(Class<? extends Order> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.deliveryInfo = inits.isInitialized("deliveryInfo") ? new jpabook.jpashop.domain.user.QAddressInfo(forProperty("deliveryInfo")) : null;
+        this.payment = inits.isInitialized("payment") ? new QPayment(forProperty("payment"), inits.get("payment")) : null;
         this.user = inits.isInitialized("user") ? new jpabook.jpashop.domain.user.QUser(forProperty("user"), inits.get("user")) : null;
     }
 

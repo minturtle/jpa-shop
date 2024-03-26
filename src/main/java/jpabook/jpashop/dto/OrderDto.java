@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class OrderDto {
@@ -24,11 +25,17 @@ public abstract class OrderDto {
     public static class Detail{
         private String orderUid;
 
-        private List<OrderedProductDetail> orderProducts;
+        @Builder.Default
+        private List<OrderedProductDetail> orderProducts = new ArrayList<>();
 
-        private int totalPrice;
+        private OrderPaymentDetail orderPaymentDetail;
+
         private LocalDateTime orderTime;
         private OrderStatus orderStatus;
+
+        public void addOrderProduct(OrderedProductDetail orderedProductDetail){
+            orderProducts.add(orderedProductDetail);
+        }
 
     }
 
@@ -45,9 +52,16 @@ public abstract class OrderDto {
         private int totalPrice;
     }
 
-
-
     @Data
+    @AllArgsConstructor
+    @Builder
+    public static class OrderPaymentDetail {
+        private String accountUid;
+        private int totalPrice;
+    }
+
+
+        @Data
     @AllArgsConstructor
     @Builder
     public static class OrderProductRequestInfo {
