@@ -31,7 +31,11 @@ public class InitTestDataUtils {
 
     public static final int BOOK_PRICE = 10000;
 
+    public static final Integer MOVIE_INIT_STOCK = 100;
 
+    public static final Integer ALBUM_INIT_STOCK = 50;
+
+    public static final Integer BOOK_INIT_STOCK = 100;
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
@@ -70,7 +74,7 @@ public class InitTestDataUtils {
                 .uid(MOVIE_UID)
                 .name("Inception")
                 .price(MOVIE_PRICE)
-                .stockQuantity(100)
+                .stockQuantity(MOVIE_INIT_STOCK)
                 .description("movie description")
                 .thumbnailImageUrl("http://example.com/inception.jpg")
                 .director("Christopher Nolan")
@@ -83,7 +87,7 @@ public class InitTestDataUtils {
                 .uid(ALBUM_UID)
                 .name("The Dark Side of the Moon")
                 .price(ALBUM_PRICE)
-                .stockQuantity(50)
+                .stockQuantity(ALBUM_INIT_STOCK)
                 .description("album description")
                 .thumbnailImageUrl("http://example.com/darkside.jpg")
                 .artist("Pink Floyd")
@@ -95,7 +99,7 @@ public class InitTestDataUtils {
                 .uid(BOOK_UID)
                 .name("The Great Gatsby")
                 .price(BOOK_PRICE)
-                .stockQuantity(100)
+                .stockQuantity(BOOK_INIT_STOCK)
                 .description("book description")
                 .thumbnailImageUrl("http://example.com/gatsby.jpg")
                 .author("F. Scott Fitzgerald")

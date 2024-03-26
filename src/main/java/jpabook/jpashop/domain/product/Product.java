@@ -3,6 +3,7 @@ package jpabook.jpashop.domain.product;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.Cart;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
+import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -92,6 +93,6 @@ public abstract class Product extends BaseEntity {
 
 
     private void checkIsOrderQuantityBiggerThanStock(int quantity) throws InvalidStockQuantityException {
-        if(stockQuantity < quantity) throw new InvalidStockQuantityException("주문한 수량이 남은 물건의 수량보다 많습니다.");
+        if(stockQuantity < quantity) throw new InvalidStockQuantityException(ProductExceptionMessages.NOT_ENOUGH_STOCK.getMessage());
     }
 }
