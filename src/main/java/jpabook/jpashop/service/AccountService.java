@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
-public class PaymentService {
+public class AccountService {
 
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;

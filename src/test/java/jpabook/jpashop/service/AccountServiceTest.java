@@ -32,10 +32,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class PaymentServiceTest {
+class AccountServiceTest {
 
     @Autowired
-    private PaymentService paymentService;
+    private AccountService accountService;
 
     @Autowired
     private UserRepository userRepository;
@@ -60,7 +60,7 @@ class PaymentServiceTest {
 
         userRepository.save(testUser);
         //when
-        paymentService.addAccount(new AccountDto.Create(givenUid, 0L));
+        accountService.addAccount(new AccountDto.Create(givenUid, 0L));
 
         //then
         User actual = userRepository.findByUidJoinAccount(givenUid).orElseThrow(RuntimeException::new);
@@ -82,7 +82,7 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         //when
-        AccountDto.CashFlowResult result = paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
+        AccountDto.CashFlowResult result = accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
 
         //then
         assertThat(result).extracting("accountUid", "amount", "type", "status")
@@ -105,7 +105,7 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
-                ()-> paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
+                ()-> accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
 
         // then
         assertThatThrownBy(throwingCallable)
@@ -138,7 +138,7 @@ class PaymentServiceTest {
         for(int i = 0; i < threadSize; i++){
             executorService.execute(()->{
                 try{
-                    paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
+                    accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
                     successCount.getAndIncrement();
                 }catch (OptimisticLockingFailureException e){
                     failCount.getAndIncrement();
@@ -176,7 +176,7 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         // when
-        AccountDto.CashFlowResult result = paymentService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
+        AccountDto.CashFlowResult result = accountService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
 
         // then
         assertThat(result).extracting("accountUid", "amount", "type", "status")
@@ -198,7 +198,7 @@ class PaymentServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable = ()->{
-            paymentService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
+            accountService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
         };
         // then
         assertThatThrownBy(throwingCallable)
@@ -213,7 +213,7 @@ class PaymentServiceTest {
                 givenUserUid, "email@email.com", "name", "http://naver.com/image.png", "address", "detailedAddress"
         );
         userRepository.save(testUser);
-        String accountUid = paymentService.addAccount(new AccountDto.Create(givenUserUid, givenBalance));
+        String accountUid = accountService.addAccount(new AccountDto.Create(givenUserUid, givenBalance));
         return accountUid;
     }
 

@@ -24,7 +24,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-    private final PaymentService paymentService;
+    private final AccountService accountService;
 
 
     /**
@@ -50,7 +50,7 @@ public class OrderService {
 
 
 
-        paymentService.withdraw(new AccountDto.CashFlowRequest(accountUid, totalPrice));
+        accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, totalPrice));
         return null;
     }
 
