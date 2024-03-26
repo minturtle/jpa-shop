@@ -105,7 +105,7 @@ public class OrderService {
         int totalPrice = 0;
 
         for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
-            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
+            Product product = productRepository.findByUidWithPessimisticLock(productOrderInfo.getProductUid())
                     .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
 
             product.removeStock(productOrderInfo.getQuantity());

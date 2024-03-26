@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.dto.OrderDto;
+import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
@@ -27,6 +28,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
 import static jpabook.jpashop.testUtils.InitTestDataUtils.*;
@@ -205,6 +210,63 @@ class OrderServiceTest {
                 ()->assertThat(movie.getStockQuantity()).isEqualTo(MOVIE_INIT_STOCK),
                 ()->assertThat(album.getStockQuantity()).isEqualTo(ALBUM_INIT_STOCK),
                 ()->assertThat(book.getStockQuantity()).isEqualTo(BOOK_INIT_STOCK));
+    }
+
+
+    @Test
+    @DisplayName("동시에 여러개의 주문 요청을 보낼 시, 동시성이 보장되어 물품의 갯수가 알맞게 유지되어야 한다.")
+    void testOrderMultithread() throws Exception{
+        // given
+        Long givenBalance = 1000000000L;
+
+        initTestDataUtils.saveAccount(givenBalance);
+
+        int movieOrderQuantity = 1;
+        int albumOrderQuantity = 1;
+        int bookOrderQuantity = 1;
+
+        List<OrderDto.OrderProductRequestInfo> orderList = List.of(
+                new OrderDto.OrderProductRequestInfo(MOVIE_UID , movieOrderQuantity),
+                new OrderDto.OrderProductRequestInfo(ALBUM_UID, albumOrderQuantity),
+                new OrderDto.OrderProductRequestInfo(BOOK_UID, bookOrderQuantity)
+        );
+
+        int threadSize = 50;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadSize);
+        CountDownLatch countDownLatch = new CountDownLatch(threadSize);
+        // when
+        for(int i = 0 ; i < threadSize; i++){
+            executorService.execute(()-> {
+                try {
+                    orderService.order(USER_UID, ACCOUNT_UID, orderList);
+                } catch (Exception e){
+                    fail("모든 요청이 정상수행되어야 한다.");
+                }finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+        countDownLatch.await();
+        executorService.shutdown();
+
+
+        // then
+        Account account = getAccountByUser();
+        Product movie = productRepository.findByUid(MOVIE_UID)
+                .orElseThrow(RuntimeException::new);
+        Product album = productRepository.findByUid(ALBUM_UID)
+                .orElseThrow(RuntimeException::new);
+        Product book = productRepository.findByUid(BOOK_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Long expectedBalance = givenBalance - (MOVIE_PRICE + ALBUM_PRICE + BOOK_PRICE) * threadSize;
+        assertThat(account.getBalance()).isEqualTo(expectedBalance);
+
+        assertAll("각 상품은 결제되기 전 초기의 수량을 가지고 있어야 한다.",
+                ()->assertThat(movie.getStockQuantity()).isEqualTo(MOVIE_INIT_STOCK - threadSize),
+                ()->assertThat(album.getStockQuantity()).isEqualTo(ALBUM_INIT_STOCK- threadSize),
+                ()->assertThat(book.getStockQuantity()).isEqualTo(BOOK_INIT_STOCK - threadSize));
+
     }
 
 
