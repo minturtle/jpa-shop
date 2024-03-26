@@ -7,6 +7,8 @@ import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
+import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
+import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
@@ -163,6 +165,47 @@ class OrderServiceTest {
                 ()->assertThat(book.getStockQuantity()).isEqualTo(BOOK_INIT_STOCK));
     }
 
+
+    @Test
+    @DisplayName("상품 주문시 계좌의 잔고가 부족하다면 오류를 throw하며 상품의 갯수와 계좌의 잔고가 줄어들지 않는다.")
+    void testOrderNotEnoughMoney() throws Exception{
+        // given
+        Long givenBalance = 1L;
+        initTestDataUtils.saveAccount(givenBalance);
+
+        int movieOrderQuantity = 1;
+        int albumOrderQuantity = 2;
+        int bookOrderQuantity = 3;
+
+        List<OrderDto.OrderProductRequestInfo> orderList = List.of(
+                new OrderDto.OrderProductRequestInfo(MOVIE_UID , movieOrderQuantity),
+                new OrderDto.OrderProductRequestInfo(ALBUM_UID, albumOrderQuantity),
+                new OrderDto.OrderProductRequestInfo(BOOK_UID, bookOrderQuantity)
+        );
+        // when
+        ThrowableAssert.ThrowingCallable throwingCallable = ()->orderService.order(USER_UID, ACCOUNT_UID, orderList);
+
+        // then
+        assertThatThrownBy(throwingCallable)
+                .isInstanceOf(InvalidBalanceValueException.class)
+                .hasMessage(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
+
+        Account account = getAccountByUser();
+        Product movie = productRepository.findByUid(MOVIE_UID)
+                .orElseThrow(RuntimeException::new);
+        Product album = productRepository.findByUid(ALBUM_UID)
+                .orElseThrow(RuntimeException::new);
+        Product book = productRepository.findByUid(BOOK_UID)
+                .orElseThrow(RuntimeException::new);
+
+
+        assertThat(account.getBalance()).isEqualTo(givenBalance);
+
+        assertAll("각 상품은 결제되기 전 초기의 수량을 가지고 있어야 한다.",
+                ()->assertThat(movie.getStockQuantity()).isEqualTo(MOVIE_INIT_STOCK),
+                ()->assertThat(album.getStockQuantity()).isEqualTo(ALBUM_INIT_STOCK),
+                ()->assertThat(book.getStockQuantity()).isEqualTo(BOOK_INIT_STOCK));
+    }
 
 
     private Account getAccountByUser() {
