@@ -28,13 +28,8 @@ public interface UserRepository extends CrudRepository<User, Long> {
     Optional<User> findByUidJoinCartProduct(@Param("uid") String uid);
 
     List<User> findAll();
+
+
     @Query("select u from User u where u.usernamePasswordAuthInfo.username = :username")
     Optional<User> findByUsername(@Param("username") String username);
-
-
-
-    @Lock(LockModeType.PESSIMISTIC_READ)
-    @Query("select u from User u where u.usernamePasswordAuthInfo.username = :username")
-    Optional<User> findByUsernameWithLock(@Param("username") String username);
-
 }

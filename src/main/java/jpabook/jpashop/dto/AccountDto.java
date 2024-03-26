@@ -26,7 +26,7 @@ public abstract class AccountDto {
     @Data
     public static class CashFlowRequest {
         private String accountUid;
-        private long amount;
+        private int amount;
     }
 
 
@@ -35,7 +35,7 @@ public abstract class AccountDto {
     @Data
     public static class CashFlowResult {
         private String accountUid;
-        private long amount;
+        private int amount;
         private LocalDateTime createdAt;
         private CashFlowType type;
         private CashFlowStatus status;

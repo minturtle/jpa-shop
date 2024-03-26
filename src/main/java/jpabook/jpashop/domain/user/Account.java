@@ -42,15 +42,15 @@ public class Account extends BaseEntity {
     }
 
 
-    public void withdraw(Long amount) throws InvalidBalanceValueException {
+    public void withdraw(int amount) throws InvalidBalanceValueException {
         if(balance <= amount){
             throw new InvalidBalanceValueException(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
         }
         balance -= amount;
     }
 
-    public void deposit(long amount) throws InvalidBalanceValueException {
-        if(Long.MAX_VALUE - balance < amount){
+    public void deposit(int amount) throws InvalidBalanceValueException {
+        if(Integer.MAX_VALUE - balance < amount){
             throw new InvalidBalanceValueException(AccountExceptionMessages.BALANCE_OVERFLOW.getMessage());
         }
         balance += amount;

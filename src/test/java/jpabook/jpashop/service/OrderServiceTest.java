@@ -104,7 +104,7 @@ class OrderServiceTest {
 
         assertAll("주문 정보를 모두 DB에 저장해야 한다.",
                 ()->assertThat(order.getDeliveryInfo()).extracting("address", "detailedAddress").contains("address", "detailedAddress"),
-                ()->assertThat(order.getPayment()).extracting("account", "amount").contains(account, Integer.toUnsignedLong(expectedTotalPrice)),
+                ()->assertThat(order.getPayment()).extracting("account", "amount").contains(account, expectedTotalPrice),
                 ()->assertThat(order.getOrderProducts()).extracting("product").doesNotContainNull(),
                 ()->assertThat(order.getOrderProducts()).extracting("count", "itemPrice").contains(
                         tuple(1, 15000),

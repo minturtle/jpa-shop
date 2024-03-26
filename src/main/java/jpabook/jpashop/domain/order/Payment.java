@@ -7,6 +7,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jpabook.jpashop.domain.user.Account;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.Objects;
 @Embeddable
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class Payment{
 
 
@@ -21,7 +23,7 @@ public class Payment{
     @JoinColumn(name = "account_id")
     private Account account;
 
-    private Long amount;
+    private Integer amount;
 
     @Override
     public boolean equals(Object o) {

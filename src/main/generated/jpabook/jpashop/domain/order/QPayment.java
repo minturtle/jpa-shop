@@ -24,7 +24,7 @@ public class QPayment extends BeanPath<Payment> {
 
     public final jpabook.jpashop.domain.user.QAccount account;
 
-    public final NumberPath<Long> amount = createNumber("amount", Long.class);
+    public final NumberPath<Integer> amount = createNumber("amount", Integer.class);
 
     public QPayment(String variable) {
         this(Payment.class, forVariable(variable), INITS);

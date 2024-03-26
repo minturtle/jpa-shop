@@ -76,8 +76,8 @@ class AccountServiceTest {
     public void testWithdraw() throws Exception{
         //given
         String givenUserUid = "uid";
-        long givenBalance = 1000L;
-        long withdrawAmount = 500L;
+        int givenBalance = 1000;
+        int withdrawAmount = 500;
 
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
@@ -99,8 +99,8 @@ class AccountServiceTest {
     void testWithdrawFail() throws Exception{
         // given
         String givenUserUid = "uid";
-        long givenBalance = 500L;
-        long withdrawAmount = 1000L;
+        int givenBalance = 500;
+        int withdrawAmount = 1000;
 
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
@@ -119,8 +119,8 @@ class AccountServiceTest {
     void testWithdrawConcurrency() throws Exception{
         // given
         String givenUserUid = "uid";
-        long givenBalance = 1000L;
-        long withdrawAmount = 200L;
+        int givenBalance = 1000;
+        int withdrawAmount = 200;
 
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
@@ -170,8 +170,8 @@ class AccountServiceTest {
     void testDeposit() throws Exception{
         // given
         String givenUserUid = "uid";
-        long givenBalance = 1000L;
-        long depositAmount = 500L;
+        int givenBalance = 1000;
+        int depositAmount = 500;
 
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
@@ -192,8 +192,8 @@ class AccountServiceTest {
     void testAccountOverflowException() throws Exception{
         // given
         String givenUserUid = "uid";
-        long givenBalance = Long.MAX_VALUE - 1L;
-        long depositAmount = 500L;
+        int givenBalance = Integer.MAX_VALUE - 1;
+        int depositAmount = 500;
 
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
