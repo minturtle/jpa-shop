@@ -12,10 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OrderProduct {
 
-    public OrderProduct(Product product, int count, int itemPrice) {
+    public OrderProduct(Product product, int count) {
         this.product = product;
         this.count = count;
-        this.itemPrice = itemPrice;
+        this.itemPrice = product.getPrice();
     }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

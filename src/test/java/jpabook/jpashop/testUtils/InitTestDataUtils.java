@@ -1,12 +1,20 @@
 package jpabook.jpashop.testUtils;
 
 
+import jpabook.jpashop.domain.order.Order;
+import jpabook.jpashop.domain.order.OrderProduct;
+import jpabook.jpashop.domain.order.Payment;
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
+import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.exception.product.InvalidStockQuantityException;
+import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
+import jpabook.jpashop.repository.AccountRepository;
+import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +33,7 @@ public class InitTestDataUtils {
     public static final String ALBUM_UID = "album-001";
     public static final String BOOK_UID = "book-001";
 
+    public static final String ORDER_UID = "order-001";
     public static final int MOVIE_PRICE = 15000;
 
     public static final int ALBUM_PRICE = 20000;
@@ -39,7 +48,8 @@ public class InitTestDataUtils {
 
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
-
+    private final OrderRepository orderRepository;
+    private final AccountRepository accountRepository;
 
     public void saveKakaoUser(){
         String email ="email@email.com";
@@ -110,8 +120,47 @@ public class InitTestDataUtils {
     }
 
 
+    public void saveOrder() throws InvalidBalanceValueException, InvalidStockQuantityException {
+        User user = userRepository.findByUidJoinAccount(USER_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Product movie = productRepository.findByUid(MOVIE_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Product album = productRepository.findByUid(ALBUM_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Product book = productRepository.findByUid(BOOK_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Account account = user.getAccountList().get(0);
+
+        Order order = Order.builder()
+                .uid(ORDER_UID)
+                .payment(new Payment(account, MOVIE_PRICE + ALBUM_PRICE + BOOK_PRICE))
+                .deliveryInfo(new AddressInfo("address", "detailedAddress"))
+                .user(user)
+                .build();
+
+        order.addOrderProduct(new OrderProduct(movie, 1));
+        order.addOrderProduct(new OrderProduct(album, 1));
+        order.addOrderProduct(new OrderProduct(book, 1));
+
+        movie.removeStock(1);
+        album.removeStock(1);
+        book.removeStock(1);
+
+
+        account.withdraw(MOVIE_PRICE + ALBUM_PRICE + BOOK_PRICE);
+        orderRepository.save(order);
+    }
+
+
     public void deleteAll(){
+        accountRepository.deleteAll();
         userRepository.deleteAll();
+        orderRepository.deleteAll();
         productRepository.deleteAll();
     }
+
 }

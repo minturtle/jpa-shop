@@ -5,11 +5,11 @@ import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.dto.OrderDto;
-import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
+import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.*;
 import static jpabook.jpashop.testUtils.InitTestDataUtils.*;
@@ -94,7 +93,7 @@ class OrderServiceTest {
 
         // then
         Account account = getAccountByUser();
-        Order order = orderRepository.findByUidWithJoin(result.getOrderUid()).orElseThrow(RuntimeException::new);
+        Order order = orderRepository.findByUidWithJoinProductAccount(result.getOrderUid()).orElseThrow(RuntimeException::new);
 
 
         int expectedTotalPrice = MOVIE_PRICE * movieOrderQuantity + ALBUM_PRICE * albumOrderQuantity + BOOK_PRICE * bookOrderQuantity;
@@ -269,6 +268,46 @@ class OrderServiceTest {
 
     }
 
+    @Test
+    @DisplayName("주문을 취소할시 주문되었던 금액과 상품의 갯수가 다시 반환되고, 주문의 Status가 CANCELED로 변경된다.")
+    void testOrderCancel() throws Exception{
+        // given
+        Long givenBalance = 100000L;
+
+        initTestDataUtils.saveAccount(givenBalance);
+
+        // MOVIE, ALBUM, BOOK을 각 한개씩 주문했다고 가정
+        initTestDataUtils.saveOrder();
+        // when
+        orderService.cancel(ORDER_UID);
+        // then
+        Order order = orderRepository.findByUidWithJoinProductAccount(ORDER_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Product movie = productRepository.findByUid(MOVIE_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Product album = productRepository.findByUid(ALBUM_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Product book = productRepository.findByUid(BOOK_UID)
+                .orElseThrow(RuntimeException::new);
+
+        Account account = userRepository.findByUidJoinAccount(USER_UID)
+                .orElseThrow(RuntimeException::new).getAccountList().get(0);
+
+        assertAll("상품의 갯수는 초기상태를 유지해야 한다.",
+                ()->assertThat(movie.getStockQuantity()).isEqualTo(MOVIE_INIT_STOCK),
+                ()->assertThat(album.getStockQuantity()).isEqualTo(ALBUM_INIT_STOCK),
+                ()->assertThat(book.getStockQuantity()).isEqualTo(BOOK_INIT_STOCK)
+        );
+
+        assertThat(account.getBalance()).isEqualTo(givenBalance);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
+
+    }
+
+
 
     private Account getAccountByUser() {
         Account account = userRepository.findByUidJoinAccount(USER_UID).orElseThrow(RuntimeException::new)
@@ -283,9 +322,11 @@ class OrderServiceTest {
         @Bean
         public InitTestDataUtils initDbUtils(
                 UserRepository userRepository,
-                ProductRepository productRepository
+                ProductRepository productRepository,
+                OrderRepository orderRepository,
+                AccountRepository accountRepository
         ){
-            return new InitTestDataUtils(productRepository, userRepository);
+            return new InitTestDataUtils(productRepository, userRepository, orderRepository, accountRepository);
         }
     }
 

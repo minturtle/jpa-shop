@@ -10,6 +10,8 @@ import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.common.InternalErrorException;
+import jpabook.jpashop.exception.order.OrderExceptionMessage;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
@@ -63,7 +65,7 @@ public class OrderService {
         orderRepository.save(order);
 
 
-        return createOrderResult(productDtoList, order);
+        return createOrderResult(order);
 
 
     }
@@ -72,12 +74,20 @@ public class OrderService {
      * @description 주문 취소 메서드
      * @author minseok kim
      * @param orderUid 주문 식별자
-     * @throws
+     * @throws CannotFindEntityException Order 정보를 UID로 조회하지 못한 경우
+     * @throws InvalidBalanceValueException 계좌의 Balance가 최댓값을 넘은 경우
+     * @throws InternalErrorException Order과 Product 또는 Account가 잘 설정되어 있지 않은 경우
     */
-    public void cancel(String orderUid){
+    @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class, InternalErrorException.class})
+    public void cancel(String orderUid) throws CannotFindEntityException, InvalidBalanceValueException, InternalErrorException {
+        Order order = orderRepository.findByUidWithJoinProductAccount(orderUid)
+                .orElseThrow(() -> new CannotFindEntityException(OrderExceptionMessage.CANNOT_FIND_ORDER.getMessage()));
+
+        increaseProductStock(order.getOrderProducts());
+        refundPayment(order.getPayment());
+        order.setStatus(OrderStatus.CANCELED);
 
     }
-
 
     /**
      * @description 주문 상세 조회 메서드
@@ -101,6 +111,54 @@ public class OrderService {
     }
 
 
+    /**
+     * @description 결제 취소 메서드
+     * @author minseok kim
+     * @param payment 결제 정보
+     * @throws InvalidBalanceValueException 계좌의 잔고가 최댓값을 초과한 경우
+     * @throws InternalErrorException Account 조회에 실패한 경우
+     *
+    */
+    private void refundPayment(Payment payment) throws InvalidBalanceValueException, InternalErrorException {
+        try {
+            String accountUid = payment.getAccount().getUid();
+            Integer amount = payment.getAmount();
+
+            accountService.deposit(new AccountDto.CashFlowRequest(accountUid, amount));
+
+        }catch (CannotFindEntityException e){
+            throw new InternalErrorException(AccountExceptionMessages.ENTITY_ACCOUNT_MAPPING_FAILED.getMessage());
+        }
+    }
+
+
+
+    /**
+     * @description 주문 취소로 인해 상품의 갯수를 늘리는 메서드
+     * @author minseok kim
+     * @param orderProducts 주문 상품 리스트
+     * @throws InternalErrorException 상품 정보 조회 실패시
+    */
+    private void increaseProductStock(List<OrderProduct> orderProducts) throws InternalErrorException {
+        try{
+            for(OrderProduct orderProduct : orderProducts){
+                Product product = productRepository.findByUidWithPessimisticLock(orderProduct.getProduct().getUid())
+                        .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
+
+                product.addStock(orderProduct.getCount());
+            }
+        }catch (CannotFindEntityException e){
+            throw new InternalErrorException(ProductExceptionMessages.ENTITY_PRODUCT_MAPPING_FAILED.getMessage());
+        }
+    }
+
+
+    /**
+     * @description 주문으로 인해 상품의 갯수를 줄이는 메서드
+     * @author minseok kim
+     * @param productDtoList 주문 상품 리스트
+     * @throws CannotFindEntityException 상품 조회 실패시
+    */
     private int decreaseProductStock(List<OrderDto.OrderProductRequestInfo> productDtoList) throws CannotFindEntityException, InvalidStockQuantityException {
         int totalPrice = 0;
 
@@ -114,6 +172,14 @@ public class OrderService {
         return totalPrice;
     }
 
+    /**
+     * @description 주문 정보 저장을 위한 주문 정보 엔티티 생성 메서드
+     * @author minseok kim
+     * @param cashflowResult 결제 완료 정보
+     * @param userUid 주문자
+     * @param productDtoList 주문 상품 리스트
+     * @throws CannotFindEntityException Account / User 고유 식별자 조회 실패시
+    */
     private Order createOrderEntity(AccountDto.CashFlowResult cashflowResult, String userUid, List<OrderDto.OrderProductRequestInfo> productDtoList) throws CannotFindEntityException {
         User orderUser = userRepository.findByUid(userUid)
                 .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
@@ -133,13 +199,19 @@ public class OrderService {
             Product product = productRepository.findByUid(productOrderInfo.getProductUid())
                     .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
 
-            order.addOrderProduct(new OrderProduct(product, productOrderInfo.getQuantity(), product.getPrice()));
+            order.addOrderProduct(new OrderProduct(product, productOrderInfo.getQuantity()));
         }
 
         return order;
     }
 
-    private OrderDto.Detail createOrderResult(List<OrderDto.OrderProductRequestInfo> productDtoList, Order order) throws CannotFindEntityException {
+    /**
+     * @param
+     * @throws
+     * @description 주문 결과정보를 생성하는 메서드
+     * @author minseok kim
+     */
+    private OrderDto.Detail createOrderResult(Order order) {
         OrderDto.Detail result = OrderDto.Detail.builder()
                 .orderUid(order.getUid())
                 .orderTime(order.getCreatedAt())
@@ -147,16 +219,16 @@ public class OrderService {
                 .orderPaymentDetail(new OrderDto.OrderPaymentDetail(order.getPayment().getAccount().getUid(), order.getPayment().getAmount()))
                 .build();
 
-        for(OrderDto.OrderProductRequestInfo productOrderInfo : productDtoList){
-            Product product = productRepository.findByUid(productOrderInfo.getProductUid())
-                    .orElseThrow(() -> new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
+        for(OrderProduct orderProduct : order.getOrderProducts()){
+            Product product = orderProduct.getProduct();
+
             OrderDto.OrderedProductDetail detail = new OrderDto.OrderedProductDetail(
                     product.getUid(),
                     product.getName(),
                     product.getThumbnailImageUrl(),
                     product.getPrice(),
-                    productOrderInfo.getQuantity(),
-                    product.getPrice() * productOrderInfo.getQuantity()
+                    orderProduct.getCount(),
+                    product.getPrice() * orderProduct.getCount()
             );
             result.addOrderProduct(detail);
         }
