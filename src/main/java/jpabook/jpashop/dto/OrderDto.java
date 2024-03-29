@@ -16,7 +16,11 @@ public abstract class OrderDto {
     @AllArgsConstructor
     @Builder
     public static class Preview{
-
+        private String orderUid;
+        private String name;
+        private int totalPrice;
+        private LocalDateTime orderTime;
+        private OrderStatus orderStatus;
     }
 
     @Data

@@ -106,8 +106,18 @@ public class OrderService {
      * @param
      * @throws
     */
-    public List<OrderDto> findByUser(String userUid) throws EntityNotFoundException{
-        return null;
+    public List<OrderDto.Preview> findByUser(String userUid) throws EntityNotFoundException{
+        List<Order> orderList = orderRepository.findByUser(userUid);
+
+        return orderList.stream().map(o->{
+            return new OrderDto.Preview(
+                    o.getUid(),
+                    o.getOrderProducts().get(0).getProduct().getName() + "외 " + (o.getOrderProducts().size()-1) + "건",
+                    o.getPayment().getAmount(),
+                    o.getCreatedAt(),
+                    o.getStatus()
+            );
+        }).toList();
     }
 
 

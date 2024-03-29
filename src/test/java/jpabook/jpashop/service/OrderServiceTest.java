@@ -307,6 +307,22 @@ class OrderServiceTest {
 
     }
 
+    @Test
+    @DisplayName("사용자의 주문 리스트 조회시 사용자가 주문했던 리스트가 조회된다.")
+    void testFindUsersOrder() throws Exception{
+        // given
+        initTestDataUtils.saveAccount(100000L);
+        initTestDataUtils.saveOrder();
+        // when
+        List<OrderDto.Preview> result = orderService.findByUser(USER_UID);
+        // then
+        assertAll("주문 리스트 정보는 UID, 물품 요약, 총액, 상태, 주문시간 정보를 모두 담고 있어야 한다.",
+                ()->assertThat(result).extracting("orderUid",  "totalPrice", "orderStatus")
+                        .contains(tuple("order-001", 45000, OrderStatus.ORDERED)),
+                ()->assertThat(result.get(0).getOrderTime()).isNotNull(),
+                ()->assertThat(result.get(0).getName()).contains("외 2건")
+        );
+    }
 
 
     private Account getAccountByUser() {
