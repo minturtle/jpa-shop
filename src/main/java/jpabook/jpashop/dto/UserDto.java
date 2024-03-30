@@ -8,6 +8,7 @@ public abstract class UserDto {
 
     @AllArgsConstructor
     @Data
+    @NoArgsConstructor
     public abstract static class RegisterInfo{
         private String name;
         private String email;
@@ -16,6 +17,9 @@ public abstract class UserDto {
         private String profileImageUrl;
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
     public static class UsernamePasswordUserRegisterInfo extends RegisterInfo{
 
         @Builder
