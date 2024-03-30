@@ -44,6 +44,9 @@ class CartServiceTest {
 
     @BeforeEach
     void setUp() {
+
+        userRepository.deleteAll();
+        productRepository.deleteAll();
         saveKakaoUser();
         saveTestProducts();
     }

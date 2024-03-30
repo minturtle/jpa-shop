@@ -17,7 +17,7 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
 
     Optional<Order> findByUid(String uid);
 
-    @Query("select o from Order o join fetch o.orderProducts op join fetch o.payment.account where o.uid = :uid")
+    @Query("select o from Order o join fetch o.orderProducts op join fetch op.product join fetch o.payment.account where o.uid = :uid")
     Optional<Order> findByUidWithJoinProductAccount(@Param("uid") String uid);
 
     @Query("select o from Order o join o.user u where u.uid = :userUid")

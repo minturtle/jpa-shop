@@ -47,6 +47,7 @@ public abstract class ProductDto {
 
 
     @Getter
+    @Setter
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -57,6 +58,7 @@ public abstract class ProductDto {
     }
 
     @Getter
+    @Setter
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -67,6 +69,7 @@ public abstract class ProductDto {
 
 
     @Getter
+    @Setter
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
