@@ -4,10 +4,7 @@ package jpabook.jpashop.dto;
 import jakarta.validation.constraints.NotNull;
 import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Optional;
@@ -49,7 +46,7 @@ public abstract class ProductDto {
     }
 
 
-    @Data
+    @Getter
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -59,7 +56,7 @@ public abstract class ProductDto {
 
     }
 
-    @Data
+    @Getter
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor
@@ -69,7 +66,7 @@ public abstract class ProductDto {
     }
 
 
-    @Data
+    @Getter
     @SuperBuilder
     @NoArgsConstructor
     @AllArgsConstructor

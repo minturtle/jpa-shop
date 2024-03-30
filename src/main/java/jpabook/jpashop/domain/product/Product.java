@@ -61,6 +61,7 @@ public abstract class Product extends BaseEntity {
 
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.REMOVE)
+    @Builder.Default
     private List<Cart> cartList = new ArrayList<>();
 
 
