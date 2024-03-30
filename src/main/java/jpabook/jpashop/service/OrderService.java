@@ -93,10 +93,13 @@ public class OrderService {
      * @description 주문 상세 조회 메서드
      * @author minseok kim
      * @param orderUid 주문 데이터 식별자
-     * @throws
+     * @throws CannotFindEntityException UID 조회 실패시
     */
-    public OrderDto findByOrderId(String orderUid){
-        return null;
+    public OrderDto.Detail findByOrderId(String orderUid) throws CannotFindEntityException {
+        Order findOrder = orderRepository.findByUid(orderUid)
+                .orElseThrow(() -> new CannotFindEntityException(OrderExceptionMessage.CANNOT_FIND_ORDER.getMessage()));
+
+        return createOrderResult(findOrder);
     }
 
 
@@ -109,16 +112,10 @@ public class OrderService {
     public List<OrderDto.Preview> findByUser(String userUid) throws EntityNotFoundException{
         List<Order> orderList = orderRepository.findByUser(userUid);
 
-        return orderList.stream().map(o->{
-            return new OrderDto.Preview(
-                    o.getUid(),
-                    o.getOrderProducts().get(0).getProduct().getName() + "외 " + (o.getOrderProducts().size()-1) + "건",
-                    o.getPayment().getAmount(),
-                    o.getCreatedAt(),
-                    o.getStatus()
-            );
-        }).toList();
+        return orderList.stream().map(this::createOrderPreview).toList();
     }
+
+
 
 
     /**
@@ -245,5 +242,17 @@ public class OrderService {
         return result;
     }
 
+        private  OrderDto.Preview createOrderPreview(Order o) {
+            String firstProductName = o.getOrderProducts().get(0).getProduct().getName();
+            int productCount = o.getOrderProducts().size() - 1;
+            String name = firstProductName + "외 " + productCount + "건";
 
+            return new OrderDto.Preview(
+                    o.getUid(),
+                    name,
+                    o.getPayment().getAmount(),
+                    o.getCreatedAt(),
+                    o.getStatus()
+            );
+        }
 }

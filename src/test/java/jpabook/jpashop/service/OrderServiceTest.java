@@ -324,6 +324,35 @@ class OrderServiceTest {
         );
     }
 
+    @Test
+    @DisplayName("ORDER의 고유식별자로 ORDER의 상세정보를 조회할 수 있다.")
+    public void testFindByOrderUid() throws Exception{
+        //given
+
+        int orderedQuantity= 1;
+        initTestDataUtils.saveAccount(1000000L);
+        initTestDataUtils.saveOrder();
+
+        //when
+        OrderDto.Detail result = orderService.findByOrderId(ORDER_UID);
+
+        //then
+        int expectedTotalPrice = MOVIE_PRICE + ALBUM_PRICE + BOOK_PRICE;
+
+        assertAll("result는 주문에 관련한 정보를 모두 담고 있어야 한다.",
+                ()->assertThat(result.getOrderStatus()).isEqualTo(OrderStatus.ORDERED),
+                ()->assertThat(result.getOrderPaymentDetail()).extracting("accountUid", "totalPrice")
+                        .contains(ACCOUNT_UID, expectedTotalPrice),
+                ()->assertThat(result).extracting("orderUid", "orderTime").doesNotContainNull(),
+                ()-> assertThat(result.getOrderProducts()).extracting("productUid", "productName","productImageUrl","unitPrice","quantity", "totalPrice")
+                        .contains(
+                                tuple(MOVIE_UID, "Inception", "http://example.com/inception.jpg", MOVIE_PRICE, orderedQuantity, MOVIE_PRICE * orderedQuantity),
+                                tuple(ALBUM_UID, "The Dark Side of the Moon", "http://example.com/darkside.jpg", ALBUM_PRICE, orderedQuantity, ALBUM_PRICE * orderedQuantity),
+                                tuple(BOOK_UID, "The Great Gatsby", "http://example.com/gatsby.jpg", BOOK_PRICE, orderedQuantity, BOOK_PRICE * orderedQuantity)
+                        )
+        );
+    }
+
 
     private Account getAccountByUser() {
         Account account = userRepository.findByUidJoinAccount(USER_UID).orElseThrow(RuntimeException::new)
