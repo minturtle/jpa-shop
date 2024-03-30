@@ -27,3 +27,9 @@ logging:
             JdbcTemplate: debug
             StatementCreatorUtils: trace
         transaction: trace
+
+server:
+  servlet:
+    encoding:
+      force-response: true
+      charset: UTF-8

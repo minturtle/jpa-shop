@@ -2,10 +2,13 @@ package jpabook.jpashop.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.request.UserRequest;
+import jpabook.jpashop.controller.response.ErrorResponse;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.PasswordUtils;
+import org.apache.logging.log4j.util.Chars;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -80,6 +85,36 @@ class UserControllerTest {
                 ()->assertThat(isPasswordMatches).isTrue());
 
     }
+
+    @Test
+    @DisplayName("Username/Password로 회원가입을 수행할 때 비밀번호가 조건에 만족하지 못한다면 400 코드를 반환하며 회원가입에 실패한다.")
+    public void testRegisterInvalidPassword() throws Exception{
+        //given
+        UserRequest.Create createForm = new UserRequest.Create(
+                "name",
+                "email@email.com",
+                "address",
+                "detailedAddress",
+                "http://example.com/image.png",
+                "username",
+                "1234"
+        );
+        String createFormString = objectMapper.writeValueAsString(createForm);
+        //when
+        MvcResult mvcResponse = mockMvc.perform(post("/api/user/new")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createFormString)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print()).andExpect(status().isBadRequest())
+                .andReturn();
+        //then
+        ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);
+
+        assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
+
+
+    }
+
 
 
 }
