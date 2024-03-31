@@ -1,8 +1,11 @@
 package jpabook.jpashop.controller;
 
+import jpabook.jpashop.controller.argumentResolvers.annotations.LoginedUserUid;
 import jpabook.jpashop.controller.request.UserRequest;
 import jpabook.jpashop.controller.response.UserResponse;
+import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
@@ -38,8 +41,16 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public UserResponse.Detail getMemberDetail(){
-        return null;
+    public UserResponse.Detail getMemberDetail(@LoginedUserUid String uid) throws CannotFindEntityException {
+        UserDto.Detail userInfo = userService.getUserInfo(uid);
+
+        return new UserResponse.Detail(
+                userInfo.getUserUid(),
+                userInfo.getName(),
+                new AddressInfo(userInfo.getAddress(), userInfo.getDetailedAddress()),
+                userInfo.getEmail(),
+                userInfo.getProfileImage()
+        );
     }
 
     @PutMapping("")

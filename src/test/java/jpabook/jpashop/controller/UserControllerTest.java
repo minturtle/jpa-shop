@@ -52,6 +52,7 @@ class UserControllerTest {
     @Autowired
     private PasswordUtils passwordUtils;
 
+    @Autowired
     private JwtTokenProvider tokenProvider;
 
     @Test

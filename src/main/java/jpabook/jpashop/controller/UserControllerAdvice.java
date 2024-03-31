@@ -17,16 +17,13 @@ import java.util.Arrays;
 @RestControllerAdvice
 public class UserControllerAdvice {
 
-
-
-
     @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, JwtException.class})
     public ResponseEntity<ErrorResponse> badRequest(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.BAD_REQUEST);
     }
 
 
-    @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, ExpiredJwtException.class})
+    @ExceptionHandler({ExpiredJwtException.class})
     public ResponseEntity<ErrorResponse> UnAuthorized(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.UNAUTHORIZED);
     }
