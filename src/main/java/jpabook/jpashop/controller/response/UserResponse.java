@@ -1,6 +1,7 @@
 package jpabook.jpashop.controller.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jpabook.jpashop.domain.user.AddressInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,8 +16,11 @@ public abstract class UserResponse {
     @Getter
     @Setter
     public static class Detail{
+        private String uid;
         private String name;
-        private String address;
+        private AddressInfo addressInfo;
+        private String email;
+        private String profileImageUrl;
     }
 
     @NoArgsConstructor

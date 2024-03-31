@@ -37,7 +37,7 @@ public class UserController {
         return new UserResponse.Login(uid, jwtTokenProvider.sign(uid, new Date()));
     }
 
-    @GetMapping("/detail")
+    @GetMapping("/info")
     public UserResponse.Detail getMemberDetail(){
         return null;
     }

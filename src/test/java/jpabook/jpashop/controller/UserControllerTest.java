@@ -8,12 +8,14 @@ import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.util.JwtTokenProvider;
 import jpabook.jpashop.util.PasswordUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -49,7 +52,7 @@ class UserControllerTest {
     @Autowired
     private PasswordUtils passwordUtils;
 
-
+    private JwtTokenProvider tokenProvider;
 
     @Test
     @DisplayName("Username/Password로 회원가입을 수행해 DB에 저장할 수 있다.")
@@ -190,6 +193,26 @@ class UserControllerTest {
                 ()->assertThat(result.getUid()).isEqualTo("user-001"),
                 ()->assertThat(isJwtToken(result.getAccessToken())).isTrue());
     }
+
+    @Test
+    @DisplayName("access Token을 가지고 있는 유저의 이름, 이메일, 주소, 프로필 이미지를 조회할 수 있다.")
+    public void testGetUserDetail() throws Exception{
+        //given
+        String givenToken = tokenProvider.sign("user-001", new Date());
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/user/info")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print()).andExpect(status().isOk())
+                .andReturn();
+        //then
+        UserResponse.Detail result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), UserResponse.Detail.class);
+
+        assertThat(result).extracting("uid", "name", "addressInfo", "email", "profileImageUrl")
+                .contains("user-001", "홍길동", new AddressInfo("서울시 강남구", "역삼동 123-45"), "http://example.com/profiles/hong.png");
+
+    }
+
 
 
     /**
