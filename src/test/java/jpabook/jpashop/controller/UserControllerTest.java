@@ -8,8 +8,6 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.PasswordUtils;
-import org.apache.logging.log4j.util.Chars;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +117,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("username이 이미 가입되어 있다면 400오류를 throw하며 회원가입에 실패한다.")
+    @DisplayName("이미 가입되어 있는 username이라면 400오류를 throw하며 회원가입에 실패한다.")
     public void testDuplicateUsername() throws Exception{
         //given
         UserRequest.Create createForm = new UserRequest.Create(
@@ -142,7 +140,32 @@ class UserControllerTest {
         //then
         ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
+    }
 
+    @Test
+    @DisplayName("이미 가입되어 있는 email이라면 400오류를 throw하며 회원가입에 실패한다.")
+    public void testDuplicatedEmail() throws Exception{
+        //given
+        UserRequest.Create createForm = new UserRequest.Create(
+                "name",
+                "user@example.com",
+                "address",
+                "detailedAddress",
+                "http://example.com/image.png",
+                "username",
+                "1234"
+        );
+        String createFormString = objectMapper.writeValueAsString(createForm);
+        //when
+        MvcResult mvcResponse = mockMvc.perform(post("/api/user/new")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createFormString)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print()).andExpect(status().isBadRequest())
+                .andReturn();
+        //then
+        ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);
+        assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.ALREADY_EXISTS_EMAIL.getMessage());
     }
 
 
