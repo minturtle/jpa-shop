@@ -53,15 +53,11 @@ public class UserController {
         );
     }
 
-    @PutMapping("")
-    public void update(@RequestBody UserRequest.Update req){
+    @PutMapping("/info")
+    public void update(@LoginedUserUid String uid, @RequestBody UserRequest.Update req){
 
     }
 
-    @PostMapping("/logout")
-    public void logout() {
-
-    }
 
 }
 

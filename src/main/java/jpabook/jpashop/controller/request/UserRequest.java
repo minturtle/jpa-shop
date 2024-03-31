@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jpabook.jpashop.domain.user.AddressInfo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,11 +45,13 @@ public abstract class UserRequest {
 
 
     @NoArgsConstructor
+    @AllArgsConstructor
     @Getter
     @Setter
     public static class Update {
         private String name;
-        private String password;
+        private AddressInfo addressInfo;
+        private String profileImageUrl;
     }
 
 

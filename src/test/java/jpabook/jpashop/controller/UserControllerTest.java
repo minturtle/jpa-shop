@@ -214,6 +214,42 @@ class UserControllerTest {
 
     }
 
+    @Test
+    @DisplayName("access Token을 가지고 있는 유저의 이름, 주소, 프로필 이미지를 수정해 DB에 반영할 수 있다.")
+    public void testUpdateUserInfo() throws Exception{
+        //given
+        String givenUid = "user-001";
+        String givenToken = tokenProvider.sign(givenUid, new Date());
+
+        String updatedName = "updatedName";
+        AddressInfo updatedAddressInfo = new AddressInfo("updatedAddress", "updatedDetail");
+        String updatedProfileImage = "http://example.com/update.png";
+
+        UserRequest.Update updatedForm = new UserRequest.Update(
+                updatedName,
+                updatedAddressInfo,
+                updatedProfileImage);
+
+
+        String updateFormString = objectMapper.writeValueAsString(updatedForm);
+        //when
+         mockMvc.perform(put("/api/user/info")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateFormString))
+                .andDo(print()).andExpect(status().isOk());
+
+        //then
+        User user = userRepository.findByUid(givenUid)
+                .orElseThrow(RuntimeException::new);
+
+        assertThat(user).extracting("uid", "name", "addressInfo", "profileImageUrl")
+                .contains(givenUid, updatedName, updatedAddressInfo, updatedProfileImage);
+
+    }
+    
+    
 
 
     /**
