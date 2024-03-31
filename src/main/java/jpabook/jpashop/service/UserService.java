@@ -1,10 +1,7 @@
 package jpabook.jpashop.service;
 
 
-import jpabook.jpashop.domain.user.GoogleOAuth2AuthInfo;
-import jpabook.jpashop.domain.user.KakaoOAuth2AuthInfo;
-import jpabook.jpashop.domain.user.User;
-import jpabook.jpashop.domain.user.UsernamePasswordAuthInfo;
+import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
@@ -199,10 +196,17 @@ public class UserService {
     @Transactional(rollbackFor = {CannotFindEntityException.class, RuntimeException.class})
     public void updateUserInfo(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindEntityException, OptimisticLockingFailureException {
         User findUser = findUserByUidOrThrow(userUid);
+        AddressInfo savedAddressInfo = findUser.getAddressInfo();
 
-        findUser.setName(dto.getUpdatedName());
-        findUser.setAddressInfo(dto.getUpdatedAddress(), dto.getUpdatedDetailAddress());
-        findUser.setProfileImageUrl(dto.getUpdatedProfileImageUrl());
+
+        findUser.setName(dto.getUpdatedName().orElse(findUser.getName()));
+
+        findUser.setAddressInfo(
+                dto.getUpdatedAddress().orElse(savedAddressInfo.getAddress()),
+                dto.getUpdatedDetailAddress().orElse(savedAddressInfo.getDetailedAddress())
+        );
+
+        findUser.setProfileImageUrl(dto.getUpdatedProfileImageUrl().orElse(findUser.getProfileImageUrl()));
     }
 
 

@@ -3,6 +3,8 @@ package jpabook.jpashop.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.util.Optional;
+
 public abstract class UserDto {
 
 
@@ -112,16 +114,13 @@ public abstract class UserDto {
     public static class UpdateDefaultUserInfo {
 
 
-        @NotNull
-        private String updatedName;
+        private Optional<String> updatedName;
 
-        @NotNull
-        private String updatedAddress;
+        private Optional<String> updatedAddress;
 
-        @NotNull
-        private String updatedDetailAddress;
+        private Optional<String> updatedDetailAddress;
 
-        private String updatedProfileImageUrl;
+        private Optional<String> updatedProfileImageUrl;
 
     }
 

@@ -17,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,10 +57,10 @@ public class UserController {
     @PutMapping("/info")
     public void update(@LoginedUserUid String uid, @RequestBody UserRequest.Update req) throws CannotFindEntityException {
         userService.updateUserInfo(uid, new UserDto.UpdateDefaultUserInfo(
-                req.getName(),
-                req.getAddressInfo().getAddress(),
-                req.getAddressInfo().getDetailedAddress(),
-                req.getProfileImageUrl())
+                Optional.ofNullable(req.getName()),
+                Optional.ofNullable(req.getAddressInfo().getAddress()),
+                Optional.ofNullable(req.getAddressInfo().getDetailedAddress()),
+                Optional.ofNullable(req.getProfileImageUrl()))
         );
     }
 

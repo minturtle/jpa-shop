@@ -22,6 +22,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -525,10 +526,10 @@ class UserServiceTest {
 
         // when
         UserDto.UpdateDefaultUserInfo updateDto = UserDto.UpdateDefaultUserInfo.builder()
-                .updatedName(updatedName)
-                .updatedAddress(updatedAddress)
-                .updatedDetailAddress(updatedDetailAddress)
-                .updatedProfileImageUrl(updatedProfileImage)
+                .updatedName(Optional.of(updatedName))
+                .updatedAddress(Optional.of(updatedAddress))
+                .updatedDetailAddress(Optional.of(updatedDetailAddress))
+                .updatedProfileImageUrl(Optional.of(updatedProfileImage))
                 .build();
 
 
@@ -550,10 +551,17 @@ class UserServiceTest {
         String password = "asdsadsad2132134!";
         String email = "email@email.com";
 
-        List<String> updatedNames = List.of("updatedName", "updatedName2");
+        String updatedName = "updatedName";
         String updatedAddress = "updatedAddress";
         String updatedDetailAddress = "updatedDetailAddress";
         String updatedProfileImage = "http://image.com/update.png";
+
+        UserDto.UpdateDefaultUserInfo updateDto = UserDto.UpdateDefaultUserInfo.builder()
+                .updatedName(Optional.of(updatedName))
+                .updatedAddress(Optional.of(updatedAddress))
+                .updatedDetailAddress(Optional.of(updatedDetailAddress))
+                .updatedProfileImageUrl(Optional.of(updatedProfileImage))
+                .build();
 
         int threadSize = 2;
         CountDownLatch doneSignal = new CountDownLatch(threadSize);
@@ -565,13 +573,13 @@ class UserServiceTest {
         String savedUid = saveUser(username, password, email);
 
 
-        for(String updateName : updatedNames){
+        for(int i = 0 ; i <threadSize; i++){
             executorService.execute(()-> {
                 try {
                     // when
                     userService.updateUserInfo(
                             savedUid,
-                            new UserDto.UpdateDefaultUserInfo(updateName, updatedAddress, updatedDetailAddress, updatedProfileImage)
+                            updateDto
                     );
                     successCount.getAndIncrement();
                 } catch (OptimisticLockingFailureException e) {
