@@ -1,7 +1,9 @@
 package jpabook.jpashop.controller.argumentResolvers;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jpabook.jpashop.controller.argumentResolvers.annotations.LoginedUserUid;
+import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
@@ -35,8 +37,16 @@ public class LoginedUserUidArgumentResolver implements HandlerMethodArgumentReso
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
 
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION).split(" ")[1];
+        String token = getJwtToken(request.getHeader(HttpHeaders.AUTHORIZATION));
         return jwtTokenProvider.verify(token);
-        
+
+    }
+
+    private String getJwtToken(String tokenHeader) {
+            String[] tokenHeaderValues = tokenHeader.split(" ");
+            if(!tokenHeaderValues[0].equals("Bearer")){
+                throw new JwtException(UserExceptonMessages.INVALID_TOKEN.getMessage());
+            }
+            return tokenHeaderValues[1];
     }
 }
