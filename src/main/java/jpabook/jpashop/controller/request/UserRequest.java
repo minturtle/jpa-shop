@@ -56,7 +56,9 @@ public abstract class UserRequest {
     @NoArgsConstructor
     @Getter
     @Setter
-    public class Login {
+    @AllArgsConstructor
+    @Schema(name = "UsernamePasswordLoginForm")
+    public static class Login {
         private String userId;
         private String password;
 

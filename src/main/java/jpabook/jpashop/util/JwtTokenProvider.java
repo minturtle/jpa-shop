@@ -3,14 +3,11 @@ package jpabook.jpashop.util;
 
 import io.jsonwebtoken.*;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Component
 public class JwtTokenProvider {
 

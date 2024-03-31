@@ -1,15 +1,19 @@
 package jpabook.jpashop.controller;
 
 import jpabook.jpashop.controller.request.UserRequest;
-import jpabook.jpashop.controller.response.MemberResponse;
+import jpabook.jpashop.controller.response.UserResponse;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
+import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.service.UserService;
+import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.*;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +22,7 @@ public class UserController {
 
     private final UserService userService;
     private final ModelMapper modelMapper;
-
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/new")
     public void signIn(@RequestBody UserRequest.Create newMemberInfo) throws PasswordValidationException, AlreadyExistsUserException {
@@ -27,12 +31,14 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public void login(@RequestBody UserRequest.Login loginDto){
+    public UserResponse.Login login(@RequestBody UserRequest.Login loginDto) throws AuthenticateFailedException {
+        String uid = userService.login(loginDto.getUserId(), loginDto.getPassword());
 
+        return new UserResponse.Login(uid, jwtTokenProvider.sign(uid, new Date()));
     }
 
     @GetMapping("/detail")
-    public MemberResponse.Detail getMemberDetail(){
+    public UserResponse.Detail getMemberDetail(){
         return null;
     }
 
