@@ -3,6 +3,7 @@ package jpabook.jpashop.controller;
 
 import jakarta.persistence.EntityNotFoundException;
 import jpabook.jpashop.controller.response.ErrorResponse;
+import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class UserControllerAdvice {
 
 
 
-    @ExceptionHandler({ PasswordValidationException.class })
+    @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class})
     public ResponseEntity<ErrorResponse> invalidPassword(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.BAD_REQUEST);
     }

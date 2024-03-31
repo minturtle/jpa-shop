@@ -119,13 +119,29 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("아이디 또는 이메일 정보가 이미 가입되어 있다면 400오류를 throw하며 회원가입에 실패한다.")
-    public void testDuplicateUsernameOrEmail() throws Exception{
+    @DisplayName("username이 이미 가입되어 있다면 400오류를 throw하며 회원가입에 실패한다.")
+    public void testDuplicateUsername() throws Exception{
         //given
-
+        UserRequest.Create createForm = new UserRequest.Create(
+                "name",
+                "email@email.com",
+                "address",
+                "detailedAddress",
+                "http://example.com/image.png",
+                "honggildong",
+                "1234"
+        );
+        String createFormString = objectMapper.writeValueAsString(createForm);
         //when
-
+        MvcResult mvcResponse = mockMvc.perform(post("/api/user/new")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createFormString)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print()).andExpect(status().isBadRequest())
+                .andReturn();
         //then
+        ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);
+        assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.ALREADY_EXISTS_USERNAME.getMessage());
 
     }
 
