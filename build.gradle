@@ -91,3 +91,7 @@ clean {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+test {
+	// 테스트 JVM 인코딩 설정
+	systemProperty 'file.encoding', 'UTF-8'
+}
