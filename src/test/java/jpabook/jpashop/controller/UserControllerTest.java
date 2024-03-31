@@ -9,6 +9,7 @@ import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.PasswordUtils;
 import org.apache.logging.log4j.util.Chars;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
@@ -35,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Sql(value = "classpath:init-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserControllerTest {
 
     @Autowired
@@ -48,6 +49,8 @@ class UserControllerTest {
 
     @Autowired
     private PasswordUtils passwordUtils;
+
+
 
     @Test
     @DisplayName("Username/Password로 회원가입을 수행해 DB에 저장할 수 있다.")
@@ -112,6 +115,17 @@ class UserControllerTest {
 
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
 
+
+    }
+
+    @Test
+    @DisplayName("아이디 또는 이메일 정보가 이미 가입되어 있다면 400오류를 throw하며 회원가입에 실패한다.")
+    public void testDuplicateUsernameOrEmail() throws Exception{
+        //given
+
+        //when
+
+        //then
 
     }
 
