@@ -1,6 +1,8 @@
 package jpabook.jpashop.util;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import jpabook.jpashop.exception.user.UserExceptonMessages;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -66,5 +68,19 @@ class JwtTokenProviderTest {
         assertThatThrownBy(callable)
                 .isInstanceOf(ExpiredJwtException.class);
     }
+
+    @Test
+    @DisplayName("잘못된 토큰을 해독하는 경우 JwtTokenException을 throw한다.")
+    public void testVerifyInvalidToken() throws Exception{
+        //given
+        String invalidToken = "123";
+        //when
+        ThrowableAssert.ThrowingCallable callable = ()->jwtTokenProvider.verify(invalidToken);
+        //then
+        assertThatThrownBy(callable)
+                .isInstanceOf(JwtException.class)
+                .hasMessage(UserExceptonMessages.INVALID_TOKEN.getMessage());
+    }
+
 
 }

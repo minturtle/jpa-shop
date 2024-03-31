@@ -51,6 +51,8 @@ public class JwtTokenProvider {
      * description : 엑세스 토큰의 값을 읽고 결과값을 반환하는 함수
      *
      * @param : String Token - 해독하려는 토큰
+     * @throws ExpiredJwtException JWT 토큰이 만료된 경우
+     * @throws JwtException 토큰이 손상되어 해독이 불가한 경우
      * @return : 해독된 토큰의 uid
      */
     public String verify(String token) {

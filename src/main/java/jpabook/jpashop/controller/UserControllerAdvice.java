@@ -1,7 +1,8 @@
 package jpabook.jpashop.controller;
 
 
-import jakarta.persistence.EntityNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jpabook.jpashop.controller.response.ErrorResponse;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
@@ -19,11 +20,16 @@ public class UserControllerAdvice {
 
 
 
-    @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class})
-    public ResponseEntity<ErrorResponse> invalidPassword(Exception e){
+    @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, JwtException.class})
+    public ResponseEntity<ErrorResponse> badRequest(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.BAD_REQUEST);
     }
 
+
+    @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, ExpiredJwtException.class})
+    public ResponseEntity<ErrorResponse> UnAuthorized(Exception e){
+        return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.UNAUTHORIZED);
+    }
 
 }
 
