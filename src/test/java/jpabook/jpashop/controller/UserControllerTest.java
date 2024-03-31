@@ -228,7 +228,8 @@ class UserControllerTest {
         UserRequest.Update updatedForm = new UserRequest.Update(
                 updatedName,
                 updatedAddressInfo,
-                updatedProfileImage);
+                updatedProfileImage
+        );
 
 
         String updateFormString = objectMapper.writeValueAsString(updatedForm);
