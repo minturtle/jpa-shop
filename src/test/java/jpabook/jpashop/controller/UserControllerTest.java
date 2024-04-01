@@ -312,7 +312,7 @@ class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateFormString))
-                .andDo(print()).andExpect(status().isBadRequest());
+                .andDo(print()).andExpect(status().isUnauthorized());
         //then
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);

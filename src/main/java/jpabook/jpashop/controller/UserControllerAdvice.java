@@ -5,6 +5,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jpabook.jpashop.controller.response.ErrorResponse;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
+import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class UserControllerAdvice {
     }
 
 
-    @ExceptionHandler({ExpiredJwtException.class})
+    @ExceptionHandler({ExpiredJwtException.class, AuthenticateFailedException.class})
     public ResponseEntity<ErrorResponse> UnAuthorized(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.UNAUTHORIZED);
     }
