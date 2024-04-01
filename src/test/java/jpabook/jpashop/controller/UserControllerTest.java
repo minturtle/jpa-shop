@@ -282,19 +282,22 @@ class UserControllerTest {
 
         String updateFormString = createUpdatePasswordBody("abc1234!", updatedPassword);
         //when
-        mockMvc.perform(put("/api/user/password")
+        MvcResult mvcResponse = mockMvc.perform(put("/api/user/password")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateFormString))
-                .andDo(print()).andExpect(status().isBadRequest());
+                .andDo(print()).andExpect(status().isBadRequest()).andReturn();
         //then
+        ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);
+
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
         boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
+        assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
     }
     
     @Test
@@ -307,19 +310,22 @@ class UserControllerTest {
 
         String updateFormString = createUpdatePasswordBody("1234", updatedPassword);
         //when
-        mockMvc.perform(put("/api/user/password")
+        MvcResult mvcResponse = mockMvc.perform(put("/api/user/password")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateFormString))
-                .andDo(print()).andExpect(status().isUnauthorized());
+                .andDo(print()).andExpect(status().isUnauthorized()).andReturn();
         //then
+        ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);;
+
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
         boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
+        assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD.getMessage());
     }
 
     @Test
@@ -332,18 +338,20 @@ class UserControllerTest {
 
         String updateFormString = createUpdatePasswordBody("1234", updatedPassword);
         //when
-        mockMvc.perform(put("/api/user/password")
+        MvcResult mvcResponse = mockMvc.perform(put("/api/user/password")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateFormString))
-                .andDo(print()).andExpect(status().isForbidden());
+                .andDo(print()).andExpect(status().isForbidden()).andReturn();
         //then
+        ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);;
+
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
         assertThat(user.getUsernamePasswordAuthInfo()).isNull();
-
+        assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.NO_USERNAME_PASSWORD_AUTH_INFO.getMessage());
     }
 
 
