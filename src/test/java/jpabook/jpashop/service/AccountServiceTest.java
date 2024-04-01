@@ -60,7 +60,7 @@ class AccountServiceTest {
 
         userRepository.save(testUser);
         //when
-        accountService.addAccount(new AccountDto.Create(givenUid, 0L));
+        accountService.addAccount(new AccountDto.Create(givenUid, "내계좌" , 0L));
 
         //then
         User actual = userRepository.findByUidJoinAccount(givenUid).orElseThrow(RuntimeException::new);
@@ -213,7 +213,7 @@ class AccountServiceTest {
                 givenUserUid, "email@email.com", "name", "http://naver.com/image.png", "address", "detailedAddress"
         );
         userRepository.save(testUser);
-        String accountUid = accountService.addAccount(new AccountDto.Create(givenUserUid, givenBalance));
+        String accountUid = accountService.addAccount(new AccountDto.Create(givenUserUid, "내 계좌", givenBalance));
         return accountUid;
     }
 

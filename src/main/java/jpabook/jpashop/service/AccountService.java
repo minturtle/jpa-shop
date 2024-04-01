@@ -43,7 +43,7 @@ public class AccountService {
         User user = findUserOrThrow(dto);
 
         String accountUid = nanoIdProvider.createNanoId();
-        user.addAccount(new Account(accountUid, dto.getBalance()));
+        user.addAccount(new Account(accountUid, dto.getName(), dto.getBalance()));
 
 
         return accountUid;

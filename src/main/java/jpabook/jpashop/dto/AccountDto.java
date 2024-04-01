@@ -17,6 +17,7 @@ public abstract class AccountDto {
     @Data
     public static class Create{
         private String userUid;
+        private String name;
         private Long balance;
     }
 

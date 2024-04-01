@@ -16,8 +16,9 @@ import java.util.Objects;
 @NoArgsConstructor
 public class Account extends BaseEntity {
 
-    public Account(String uid, Long balance) {
+    public Account(String uid, String name,  Long balance) {
         this.uid = uid;
+        this.name = name;
         this.balance = balance;
     }
 
@@ -29,6 +30,7 @@ public class Account extends BaseEntity {
     @Column(name = "account_uid", unique = true, nullable = false, updatable = false)
     private String uid;
 
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

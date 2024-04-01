@@ -75,7 +75,7 @@ public class InitTestDataUtils {
     public void saveAccount(Long balance) {
         User user = userRepository.findByUid(USER_UID).orElseThrow(RuntimeException::new);
 
-        Account account = new Account(ACCOUNT_UID, balance);
+        Account account = new Account(ACCOUNT_UID, "내 계좌" , balance);
         user.addAccount(account);
     }
 

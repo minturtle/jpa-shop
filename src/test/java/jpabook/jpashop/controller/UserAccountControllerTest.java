@@ -1,6 +1,7 @@
 package jpabook.jpashop.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jpabook.jpashop.controller.request.UserAccountRequest;
 import jpabook.jpashop.controller.response.UserAccountResponse;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.repository.AccountRepository;
@@ -57,9 +58,15 @@ class UserAccountControllerTest {
         String givenUid = "user-001";
         String givenToken = tokenProvider.sign(givenUid, new Date());
 
+        UserAccountRequest.Create createAccountForm = new UserAccountRequest.Create("내 계좌");
+        String createAccountFormString = objectMapper.writeValueAsString(createAccountForm);
+
+
         //when
         MvcResult mvcResponse = mockMvc.perform(post("/api/user/account")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(createAccountFormString)
                         .characterEncoding(StandardCharsets.UTF_8))
                 .andDo(print()).andExpect(status().isOk()).andReturn();
 
@@ -69,8 +76,8 @@ class UserAccountControllerTest {
                 .orElseThrow(RuntimeException::new);
 
         assertThat(account.getUser().getUid()).isEqualTo(givenUid);
-        assertThat(account.getUid()).isEqualTo(actual.getAccountUid());
-        assertThat(account.getBalance()).isEqualTo(0L);
+        assertThat(account).extracting("uid", "name", "balance")
+                .contains(actual.getAccountUid(), "내 계좌", 0L);
     }
 
 }

@@ -34,6 +34,8 @@ public class QAccount extends EntityPathBase<Account> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
+    public final StringPath name = createString("name");
+
     public final StringPath uid = createString("uid");
 
     public final QUser user;
