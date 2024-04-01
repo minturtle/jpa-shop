@@ -7,6 +7,7 @@ import jpabook.jpashop.controller.response.ErrorResponse;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
+import jpabook.jpashop.exception.user.UserAuthTypeException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +27,17 @@ public class UserControllerAdvice {
 
 
     @ExceptionHandler({ExpiredJwtException.class, AuthenticateFailedException.class})
-    public ResponseEntity<ErrorResponse> UnAuthorized(Exception e){
+    public ResponseEntity<ErrorResponse> unAuthorized(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler({UserAuthTypeException.class})
+    public ResponseEntity<ErrorResponse> forbidden(Exception e){
+        return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler({OptimisticLockingFailureException.class})
-    public ResponseEntity<ErrorResponse> Conflict(Exception e){
+    public ResponseEntity<ErrorResponse> conflict(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.CONFLICT);
     }
 
