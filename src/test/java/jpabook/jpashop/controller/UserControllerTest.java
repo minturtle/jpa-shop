@@ -254,7 +254,7 @@ class UserControllerTest {
         String givenToken = tokenProvider.sign(givenUid, new Date());
         String updatedPassword = "update123!";
 
-        String updateFormString = createUpdatePasswordBody(updatedPassword);
+        String updateFormString = createUpdatePasswordBody("abc1234!", updatedPassword);
 
         //when
         mockMvc.perform(put("/api/user/password")
@@ -280,8 +280,7 @@ class UserControllerTest {
         String givenToken = tokenProvider.sign(givenUid, new Date());
         String updatedPassword = "1234";
 
-        String updateFormString = createUpdatePasswordBody(updatedPassword);
-        //when
+        String updateFormString = createUpdatePasswordBody("abc1234!", updatedPassword);
         //when
         mockMvc.perform(put("/api/user/password")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
@@ -298,6 +297,31 @@ class UserControllerTest {
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
     }
     
+    @Test
+    @DisplayName("사용자가 비밀번호 변경 시도시 기존 비밀번호가 일치하지 않는다면 401 오류를 throw하며 DB에 업데이트되지 않는다.")
+    public void testInvalidPreviousPassword() throws Exception{
+        //given
+        String givenUid = "user-001";
+        String givenToken = tokenProvider.sign(givenUid, new Date());
+        String updatedPassword = "1234";
+
+        String updateFormString = createUpdatePasswordBody("1234", updatedPassword);
+        //when
+        mockMvc.perform(put("/api/user/password")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateFormString))
+                .andDo(print()).andExpect(status().isBadRequest());
+        //then
+        User user = userRepository.findByUid(givenUid)
+                .orElseThrow(RuntimeException::new);
+
+        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+
+        assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
+    }
+
 
     /**
      * @author minseok kim
@@ -320,8 +344,8 @@ class UserControllerTest {
         return updateFormString;
     }
 
-    private String createUpdatePasswordBody(String updatedPassword) throws JsonProcessingException {
-        UserRequest.UpdatePassword updateForm = new UserRequest.UpdatePassword("abc1234!", updatedPassword);
+    private String createUpdatePasswordBody(String previousPassword, String updatedPassword) throws JsonProcessingException {
+        UserRequest.UpdatePassword updateForm = new UserRequest.UpdatePassword(previousPassword, updatedPassword);
 
         String updateFormString = objectMapper.writeValueAsString(updateForm);
         return updateFormString;
