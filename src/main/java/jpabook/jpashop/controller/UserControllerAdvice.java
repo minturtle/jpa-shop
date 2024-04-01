@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Arrays;
 
 
-@RestControllerAdvice(basePackageClasses = UserController.class)
+@RestControllerAdvice
 public class UserControllerAdvice {
 
     @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, JwtException.class})
