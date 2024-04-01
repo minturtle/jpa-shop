@@ -322,6 +322,30 @@ class UserControllerTest {
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
     }
 
+    @Test
+    @DisplayName("사용자가 비밀번호 변경 시도시 username/password가 설정되지 않은 유저라면 403 오류를 throw하며 DB에 업데이트되지 않는다.")
+    public void testNoUsernamePasswordAuthenticationInfoUpdatePassword() throws Exception{
+        //given
+        String givenUid = "user-002";
+        String givenToken = tokenProvider.sign(givenUid, new Date());
+        String updatedPassword = "test123!@";
+
+        String updateFormString = createUpdatePasswordBody("1234", updatedPassword);
+        //when
+        mockMvc.perform(put("/api/user/password")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateFormString))
+                .andDo(print()).andExpect(status().isForbidden());
+        //then
+        User user = userRepository.findByUid(givenUid)
+                .orElseThrow(RuntimeException::new);
+
+        assertThat(user.getUsernamePasswordAuthInfo()).isNull();
+
+    }
+
 
     /**
      * @author minseok kim
