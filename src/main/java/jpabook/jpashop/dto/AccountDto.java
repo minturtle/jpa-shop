@@ -41,4 +41,14 @@ public abstract class AccountDto {
         private CashFlowType type;
         private CashFlowStatus status;
     }
+
+    @AllArgsConstructor
+    @Builder
+    @Data
+    public static class Info {
+        private String accountUid;
+        private String accountName;
+        private Long balance;
+
+    }
 }

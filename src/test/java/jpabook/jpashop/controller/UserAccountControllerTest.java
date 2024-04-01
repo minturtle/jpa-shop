@@ -80,4 +80,16 @@ class UserAccountControllerTest {
                 .contains(actual.getAccountUid(), "내 계좌", 0L);
     }
 
+    @Test
+    @DisplayName("회원인증이 완료된 유저는 자기가 가진 가상계좌의 리스트를 조회할 수 있다.")
+    public void testGetAccountList() throws Exception{
+        //given
+
+        //when
+
+        //then
+
+    }
+
+
 }

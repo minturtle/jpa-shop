@@ -8,10 +8,9 @@ import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.service.AccountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,4 +28,9 @@ public class UserAccountController {
         return new UserAccountResponse.Create(accountUid);
     }
 
+    @GetMapping("/list")
+    public UserAccountResponse.Info getAccountList(@LoginedUserUid String userUid) throws CannotFindEntityException {
+        List<AccountDto.Info> accountList = accountService.findByUser(userUid);
+        return  null;
+    }
 }

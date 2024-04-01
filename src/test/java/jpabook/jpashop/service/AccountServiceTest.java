@@ -11,6 +11,7 @@ import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import org.assertj.core.api.ThrowableAssert;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -204,6 +205,18 @@ class AccountServiceTest {
         assertThatThrownBy(throwingCallable)
                 .isInstanceOf(InvalidBalanceValueException.class)
                 .hasMessage(AccountExceptionMessages.BALANCE_OVERFLOW.getMessage());
+    }
+
+    @Test
+    @DisplayName("유저의 가상계좌 리스트를 조회할 수 있다.")
+    public void testGetAccountList() throws Exception{
+        //given
+        createTestUserAndAccount("user-001", 1000L);
+        //when
+        List<AccountDto.Info> result = accountService.findByUser("user-001");
+        //then
+        assertThat(result).extracting("accountName", "balance")
+                .contains(Tuple.tuple("내 계좌", 1000L));
     }
 
 

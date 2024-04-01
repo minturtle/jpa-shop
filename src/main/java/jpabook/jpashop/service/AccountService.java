@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -93,7 +94,12 @@ public class AccountService {
         );
 
     }
+    public List<AccountDto.Info> findByUser(String userUid) throws CannotFindEntityException {
+        User user = userRepository.findByUid(userUid)
+                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
+        return user.getAccountList().stream().map(a -> new AccountDto.Info(a.getUid(), a.getName(), a.getBalance())).toList();
 
+    }
 
     private Account findAccountOrThrow(String accountUid) throws CannotFindEntityException {
         return accountRepository.findByUid(accountUid)
@@ -116,4 +122,5 @@ public class AccountService {
         return userRepository.findByUid(dto.getUserUid())
                 .orElseThrow(()->new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
     }
+
 }

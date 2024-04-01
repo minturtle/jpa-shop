@@ -18,4 +18,14 @@ public abstract class UserAccountResponse {
         private String accountUid;
     }
 
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @Schema(name = "AccountInfo")
+    public static class Info{
+        private String accountUid;
+        private String accountName;
+        private String balance;
+    }
 }

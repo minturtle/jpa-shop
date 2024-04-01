@@ -38,6 +38,8 @@ public class Account extends BaseEntity {
 
     private Long balance = 0L;
 
+    @Version
+    private int version;
 
     public void setUser(User user) {
         this.user = user;
@@ -59,8 +61,6 @@ public class Account extends BaseEntity {
     }
 
 
-    @Version
-    private int version;
 
 
     @Override
