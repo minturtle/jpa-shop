@@ -26,6 +26,6 @@ public abstract class UserAccountResponse {
     public static class Info{
         private String accountUid;
         private String accountName;
-        private String balance;
+        private Long balance;
     }
 }
