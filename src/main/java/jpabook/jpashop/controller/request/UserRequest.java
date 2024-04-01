@@ -48,6 +48,7 @@ public abstract class UserRequest {
     @AllArgsConstructor
     @Getter
     @Setter
+    @Schema(name = "UpdateUserInfoForm")
     public static class Update {
         private String name;
         private AddressInfo addressInfo;
@@ -59,6 +60,7 @@ public abstract class UserRequest {
     @AllArgsConstructor
     @Getter
     @Setter
+    @Schema(name = "UpdatePasswordForm")
     public static class UpdatePassword {
         private String password;
         private String updatedPassword;

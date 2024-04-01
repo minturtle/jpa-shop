@@ -9,6 +9,7 @@ import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
+import jpabook.jpashop.exception.user.UserAuthTypeException;
 import jpabook.jpashop.service.UserService;
 import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.*;
@@ -65,8 +66,10 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    public void updatePassword(@LoginedUserUid String uid, @RequestBody UserRequest.UpdatePassword req){
-        return;
+    public void updatePassword(@LoginedUserUid String uid, @RequestBody UserRequest.UpdatePassword req)
+            throws CannotFindEntityException, PasswordValidationException, AuthenticateFailedException, UserAuthTypeException
+    {
+        userService.updatePassword(uid, new UserDto.UpdatePassword(req.getPassword(), req.getUpdatedPassword()));
     }
 
 
