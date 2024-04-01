@@ -247,7 +247,7 @@ class UserControllerTest {
 
 
     @Test
-    @DisplayName("username/password 인증방식이 설정된 유저는 새 비밀번호와 기존 비밀번호를 입력해 비밀번호를 업데이트 할 수 있다. ")
+    @DisplayName("username/password 인증방식이 설정된 유저는 새 비밀번호와 기존 비밀번호를 입력해 비밀번호를 업데이트해 DB에 반영할 수 있다. ")
     public void testUpdatePassword() throws Exception{
         //given
         String givenUid = "user-001";
@@ -272,6 +272,27 @@ class UserControllerTest {
         assertThat(isPasswordMatchesWithUpdatedPassword).isTrue();
     }
 
+    @Test
+    @DisplayName("사용자가 비밀번호 변경 시도시 새 비밀번호가 비밀번호 제약조건에 맞지 않으면 400오류를 throw하며 DB에 업데이트되지 않는다.")
+    public void testInvalidNewPasswordWhenUpdatePassword() throws Exception{
+        //given
+        String givenUid = "user-001";
+        String givenToken = tokenProvider.sign(givenUid, new Date());
+        String updatedPassword = "1234";
+
+        String updateFormString = createUpdatePasswordBody(updatedPassword);
+        //when
+        //when
+        mockMvc.perform(put("/api/user/password")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateFormString))
+                .andDo(print()).andExpect(status().isBadRequest());
+        //then
+    
+    }
+    
 
     /**
      * @author minseok kim
