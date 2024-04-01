@@ -51,7 +51,7 @@ class UserAccountControllerTest {
     private JwtTokenProvider tokenProvider;
 
     @Test
-    @DisplayName("회원 인증이 완료된 유저는 새로운 계좌를 추가해 잔고가 0원인 채로 DB에 저장할 수 있다.")
+    @DisplayName("회원 인증이 완료된 유저가 새로운 계좌를 추가해 잔고가 0원인 채로 DB에 저장할 수 있다.")
     public void testCreateAccount() throws Exception{
         //given
         String givenUid = "user-001";
