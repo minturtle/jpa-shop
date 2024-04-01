@@ -290,7 +290,12 @@ class UserControllerTest {
                         .content(updateFormString))
                 .andDo(print()).andExpect(status().isBadRequest());
         //then
-    
+        User user = userRepository.findByUid(givenUid)
+                .orElseThrow(RuntimeException::new);
+
+        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+
+        assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
     }
     
 
