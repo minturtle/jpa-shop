@@ -31,6 +31,6 @@ public class UserAccountController {
     @GetMapping("/list")
     public UserAccountResponse.Info getAccountList(@LoginedUserUid String userUid) throws CannotFindEntityException {
         List<AccountDto.Info> accountList = accountService.findByUser(userUid);
-        return  null;
+        return null;
     }
 }

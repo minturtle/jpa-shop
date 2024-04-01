@@ -48,5 +48,5 @@ INSERT INTO `users` (
              NULL
          );
 
-INSERT INTO accounts (account_uid, name, user_id, balance)
-VALUES ('account-001', '내 계좌', 1, 1000);
+INSERT INTO accounts (account_uid, name, user_id, balance, version)
+VALUES ('account-001', '내 계좌', 1, 1000, 1);

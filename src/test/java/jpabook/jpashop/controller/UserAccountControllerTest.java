@@ -1,5 +1,6 @@
 package jpabook.jpashop.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.request.UserAccountRequest;
 import jpabook.jpashop.controller.response.UserAccountResponse;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -84,11 +86,20 @@ class UserAccountControllerTest {
     @DisplayName("회원인증이 완료된 유저는 자기가 가진 가상계좌의 리스트를 조회할 수 있다.")
     public void testGetAccountList() throws Exception{
         //given
+        String givenUid = "user-001";
+        String givenToken = tokenProvider.sign(givenUid, new Date());
 
         //when
-
+        MvcResult mvcResponse = mockMvc.perform(get("/api/user/account/list")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print()).andExpect(status().isOk()).andReturn();
         //then
+        List<UserAccountResponse.Info> actual = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<List<UserAccountResponse.Info>>() {
+        });
 
+        assertThat(actual).extracting("accountUid", "accountName", "balance")
+                .contains(tuple("account-001", "내 계좌", 1000L));
     }
 
 
