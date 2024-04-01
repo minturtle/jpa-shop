@@ -64,6 +64,11 @@ public class UserController {
         );
     }
 
+    @PutMapping("/password")
+    public void updatePassword(@LoginedUserUid String uid, @RequestBody UserRequest.UpdatePassword req){
+        return;
+    }
+
 
 }
 

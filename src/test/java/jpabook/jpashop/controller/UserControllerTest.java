@@ -1,5 +1,6 @@
 package jpabook.jpashop.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.request.UserRequest;
 import jpabook.jpashop.controller.response.ErrorResponse;
@@ -54,6 +55,7 @@ class UserControllerTest {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
 
     @Test
     @DisplayName("Username/Password로 회원가입을 수행해 DB에 저장할 수 있다.")
@@ -225,20 +227,13 @@ class UserControllerTest {
         AddressInfo updatedAddressInfo = new AddressInfo("updatedAddress", "updatedDetail");
         String updatedProfileImage = "http://example.com/update.png";
 
-        UserRequest.Update updatedForm = new UserRequest.Update(
-                updatedName,
-                updatedAddressInfo,
-                updatedProfileImage
-        );
-
-
-        String updateFormString = objectMapper.writeValueAsString(updatedForm);
+        String requestBody = createUserInfoUpdateBody(updatedName, updatedAddressInfo, updatedProfileImage);
         //when
          mockMvc.perform(put("/api/user/info")
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(updateFormString))
+                        .content(requestBody))
                 .andDo(print()).andExpect(status().isOk());
 
         //then
@@ -249,8 +244,33 @@ class UserControllerTest {
                 .contains(givenUid, updatedName, updatedAddressInfo, updatedProfileImage);
 
     }
-    
-    
+
+
+    @Test
+    @DisplayName("username/password 인증방식이 설정된 유저는 새 비밀번호와 기존 비밀번호를 입력해 비밀번호를 업데이트 할 수 있다. ")
+    public void testUpdatePassword() throws Exception{
+        //given
+        String givenUid = "user-001";
+        String givenToken = tokenProvider.sign(givenUid, new Date());
+        String updatedPassword = "update123!";
+
+        String updateFormString = createUpdatePasswordBody(updatedPassword);
+
+        //when
+        mockMvc.perform(put("/api/user/password")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updateFormString))
+                .andDo(print()).andExpect(status().isOk());
+        //then
+        User user = userRepository.findByUid(givenUid)
+                .orElseThrow(RuntimeException::new);
+
+        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+
+        assertThat(isPasswordMatchesWithUpdatedPassword).isTrue();
+    }
 
 
     /**
@@ -261,4 +281,24 @@ class UserControllerTest {
         String regex = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
         return token.matches(regex);
     }
+
+
+    private String createUserInfoUpdateBody(String updatedName, AddressInfo updatedAddressInfo, String updatedProfileImage) throws JsonProcessingException {
+        UserRequest.Update updatedForm = new UserRequest.Update(
+                updatedName,
+                updatedAddressInfo,
+                updatedProfileImage
+        );
+
+        String updateFormString = objectMapper.writeValueAsString(updatedForm);
+        return updateFormString;
+    }
+
+    private String createUpdatePasswordBody(String updatedPassword) throws JsonProcessingException {
+        UserRequest.UpdatePassword updateForm = new UserRequest.UpdatePassword("abc1234!", updatedPassword);
+
+        String updateFormString = objectMapper.writeValueAsString(updateForm);
+        return updateFormString;
+    }
+
 }

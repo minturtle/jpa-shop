@@ -55,6 +55,15 @@ public abstract class UserRequest {
     }
 
 
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class UpdatePassword {
+        private String password;
+        private String updatedPassword;
+
+    }
 
     @NoArgsConstructor
     @Getter
@@ -66,6 +75,8 @@ public abstract class UserRequest {
         private String password;
 
     }
+
+
 }
 
 
