@@ -138,7 +138,7 @@ class UserAccountControllerTest {
                 .orElseThrow(RuntimeException::new);
 
 
-        assertThat(result).extracting("accountUid", "amount", "CashFlowType", "CashFlowStatus")
+        assertThat(result).extracting("accountUid", "amount", "type", "status")
                         .contains(givenAccountUid, givenDepositAmount, CashFlowType.DEPOSIT, CashFlowStatus.DONE);
 
         assertThat(account.getBalance()).isEqualTo(givenAccountBalance + givenDepositAmount);

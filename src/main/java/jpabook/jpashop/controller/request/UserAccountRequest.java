@@ -17,4 +17,13 @@ public abstract class UserAccountRequest {
         private String accountName;
     }
 
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    @Schema(name = "CashFlowForm")
+    public static class CashFlowRequest {
+        private String accountUid;
+        private Integer amount;
+    }
 }
