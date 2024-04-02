@@ -146,6 +146,34 @@ class UserAccountControllerTest {
 
     }
 
+    @Test
+    @DisplayName("사용자가 가상계좌에 입금하는 경우 자신의 가상계좌가 아니라면 403 오류와 함께 DB에 반영되지 않는다.")
+    void testWhenDepositToOthersAccountThenThrowForbidden() throws Exception{
+        // given
+        String givenUid = "user-002";
+        String givenAccountUid = "account-001";
+        Long givenAccountBalance = 1000L;
+        Integer givenDepositAmount = 500;
+
+        String givenToken = tokenProvider.sign(givenUid, new Date());
+
+        String reqBody = createDepositRequestJson(givenAccountUid, givenDepositAmount);
+
+        // when
+        mockMvc.perform(post("/api/user/account/deposit")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reqBody))
+                .andDo(print()).andExpect(status().isForbidden());
+
+        // then
+        Account account = accountRepository.findByUid(givenAccountUid)
+                .orElseThrow(RuntimeException::new);
+        assertThat(account.getBalance()).isEqualTo(givenAccountBalance);
+    }
+
+
     private String createDepositRequestJson(String givenAccountUid, Integer givenDepositAmount) throws JsonProcessingException {
         UserAccountRequest.CashFlowRequest requestBody = new UserAccountRequest.CashFlowRequest(givenAccountUid, givenDepositAmount);
         String reqBody = objectMapper.writeValueAsString(requestBody);
