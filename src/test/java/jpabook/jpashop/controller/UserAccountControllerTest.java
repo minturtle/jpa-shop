@@ -1,5 +1,6 @@
 package jpabook.jpashop.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.request.UserAccountRequest;
@@ -120,8 +121,7 @@ class UserAccountControllerTest {
 
         String givenToken = tokenProvider.sign(givenUid, new Date());
 
-        UserAccountRequest.CashFlowRequest requestBody = new UserAccountRequest.CashFlowRequest(givenAccountUid, givenDepositAmount);
-        String reqBody = objectMapper.writeValueAsString(requestBody);
+        String reqBody = createDepositRequestJson(givenAccountUid, givenDepositAmount);
 
 
         // when
@@ -134,6 +134,7 @@ class UserAccountControllerTest {
 
         // then
         UserAccountResponse.CashflowResult result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), UserAccountResponse.CashflowResult.class);
+
         Account account = accountRepository.findByUid(givenAccountUid)
                 .orElseThrow(RuntimeException::new);
 
@@ -143,6 +144,12 @@ class UserAccountControllerTest {
 
         assertThat(account.getBalance()).isEqualTo(givenAccountBalance + givenDepositAmount);
 
+    }
+
+    private String createDepositRequestJson(String givenAccountUid, Integer givenDepositAmount) throws JsonProcessingException {
+        UserAccountRequest.CashFlowRequest requestBody = new UserAccountRequest.CashFlowRequest(givenAccountUid, givenDepositAmount);
+        String reqBody = objectMapper.writeValueAsString(requestBody);
+        return reqBody;
     }
 
 
