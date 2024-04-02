@@ -87,6 +87,10 @@ class UserAccountControllerTest {
     public void testGetAccountList() throws Exception{
         //given
         String givenUid = "user-001";
+        String givenAccountUid = "account-001";
+        String givenAccountName = "내 계좌";
+        Long givenAccountBalance = 1000L;
+
         String givenToken = tokenProvider.sign(givenUid, new Date());
 
         //when
@@ -99,7 +103,7 @@ class UserAccountControllerTest {
         });
 
         assertThat(actual).extracting("accountUid", "accountName", "balance")
-                .contains(tuple("account-001", "내 계좌", 1000L));
+                .contains(tuple(givenAccountUid, givenAccountName, givenAccountBalance));
     }
 
 
