@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.request.UserAccountRequest;
 import jpabook.jpashop.controller.response.UserAccountResponse;
 import jpabook.jpashop.domain.user.Account;
+import jpabook.jpashop.enums.user.account.CashFlowStatus;
+import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.JwtTokenProvider;
@@ -104,6 +106,43 @@ class UserAccountControllerTest {
 
         assertThat(actual).extracting("accountUid", "accountName", "balance")
                 .contains(tuple(givenAccountUid, givenAccountName, givenAccountBalance));
+    }
+
+
+    @Test
+    @DisplayName("사용자는 DB에 존재하는 자신의 가상 계좌에 금액을 추가해 DB에 반영할 수 있다.")
+    void testDeposit() throws Exception{
+        // given
+        String givenUid = "user-001";
+        String givenAccountUid = "account-001";
+        Long givenAccountBalance = 1000L;
+        Integer givenDepositAmount = 500;
+
+        String givenToken = tokenProvider.sign(givenUid, new Date());
+
+        UserAccountRequest.CashFlowRequest requestBody = new UserAccountRequest.CashFlowRequest(givenAccountUid, givenDepositAmount);
+        String reqBody = objectMapper.writeValueAsString(requestBody);
+
+
+        // when
+        MvcResult mvcResponse = mockMvc.perform(post("/api/user/account/deposit")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + givenToken)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(reqBody))
+                .andDo(print()).andExpect(status().isOk()).andReturn();
+
+        // then
+        UserAccountResponse.CashflowResult result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), UserAccountResponse.CashflowResult.class);
+        Account account = accountRepository.findByUid(givenAccountUid)
+                .orElseThrow(RuntimeException::new);
+
+
+        assertThat(result).extracting("accountUid", "amount", "CashFlowType", "CashFlowStatus")
+                        .contains(givenAccountUid, givenDepositAmount, CashFlowType.DEPOSIT, CashFlowStatus.DONE);
+
+        assertThat(account.getBalance()).isEqualTo(givenAccountBalance + givenDepositAmount);
+
     }
 
 
