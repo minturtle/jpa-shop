@@ -17,6 +17,7 @@ import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
+import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
@@ -59,7 +60,7 @@ public class OrderService {
 
         int totalPrice = decreaseProductStock(productDtoList);
 
-        AccountDto.CashFlowResult cashflowResult = accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, totalPrice));
+        AccountDto.CashFlowResult cashflowResult = accountService.withdraw(new AccountDto.CashFlowRequest(userUid, accountUid, totalPrice));
 
         Order order = createOrderEntity(cashflowResult, userUid, productDtoList);
         orderRepository.save(order);
@@ -78,13 +79,13 @@ public class OrderService {
      * @throws InvalidBalanceValueException 계좌의 Balance가 최댓값을 넘은 경우
      * @throws InternalErrorException Order과 Product 또는 Account가 잘 설정되어 있지 않은 경우
     */
-    @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class, InternalErrorException.class})
-    public void cancel(String orderUid) throws CannotFindEntityException, InvalidBalanceValueException, InternalErrorException {
+    @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class, InternalErrorException.class,UnauthorizedAccountAccessException.class})
+    public void cancel(String orderUid) throws CannotFindEntityException, InvalidBalanceValueException, InternalErrorException, UnauthorizedAccountAccessException {
         Order order = orderRepository.findByUidWithJoinProductAccount(orderUid)
                 .orElseThrow(() -> new CannotFindEntityException(OrderExceptionMessage.CANNOT_FIND_ORDER.getMessage()));
 
         increaseProductStock(order.getOrderProducts());
-        refundPayment(order.getPayment());
+        refundPayment(order.getUser().getUid(), order.getPayment());
         order.setStatus(OrderStatus.CANCELED);
 
     }
@@ -126,12 +127,12 @@ public class OrderService {
      * @throws InternalErrorException Account 조회에 실패한 경우
      *
     */
-    private void refundPayment(Payment payment) throws InvalidBalanceValueException, InternalErrorException {
+    private void refundPayment(String userUid, Payment payment) throws InvalidBalanceValueException, InternalErrorException, UnauthorizedAccountAccessException {
         try {
             String accountUid = payment.getAccount().getUid();
             Integer amount = payment.getAmount();
 
-            accountService.deposit(new AccountDto.CashFlowRequest(accountUid, amount));
+            accountService.deposit(new AccountDto.CashFlowRequest(userUid, accountUid, amount));
 
         }catch (CannotFindEntityException e){
             throw new InternalErrorException(AccountExceptionMessages.ENTITY_ACCOUNT_MAPPING_FAILED.getMessage());

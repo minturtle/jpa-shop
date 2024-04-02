@@ -10,6 +10,7 @@ import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
+import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.NanoIdProvider;
@@ -80,10 +81,16 @@ public class AccountService {
      * @exception CannotFindEntityException Account의 고유식별자로 account를 조회할 수 없을 때
      * @exception InvalidBalanceValueException 입금 후 금액이 시스템에서 정의한 계좌 최고액보다 클 때
      */
-    @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class})
-    public AccountDto.CashFlowResult deposit(AccountDto.CashFlowRequest dto) throws CannotFindEntityException, InvalidBalanceValueException {
+    @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class, UnauthorizedAccountAccessException.class})
+    public AccountDto.CashFlowResult deposit(AccountDto.CashFlowRequest dto) throws CannotFindEntityException, InvalidBalanceValueException, UnauthorizedAccountAccessException {
         Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
+
+        if(!account.getUser().getUid().equals(dto.getUserUid())){
+            throw new UnauthorizedAccountAccessException(AccountExceptionMessages.UNAUTHORIZED_ACCESS.getMessage());
+        }
+
         account.deposit(dto.getAmount());
+
 
         return new AccountDto.CashFlowResult(
                 dto.getAccountUid(),

@@ -7,6 +7,7 @@ import jpabook.jpashop.controller.response.UserAccountResponse;
 import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
+import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
 import jpabook.jpashop.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -38,8 +39,8 @@ public class UserAccountController {
 
     @PostMapping("/deposit")
     public UserAccountResponse.CashflowResult deposit(@LoginedUserUid String userUid, @RequestBody UserAccountRequest.CashFlowRequest reqBody)
-            throws CannotFindEntityException, InvalidBalanceValueException {
-        AccountDto.CashFlowResult result = accountService.deposit(new AccountDto.CashFlowRequest(reqBody.getAccountUid(), reqBody.getAmount()));
+            throws CannotFindEntityException, InvalidBalanceValueException, UnauthorizedAccountAccessException {
+        AccountDto.CashFlowResult result = accountService.deposit(new AccountDto.CashFlowRequest(userUid, reqBody.getAccountUid(), reqBody.getAmount()));
 
         return modelMapper.map(result, UserAccountResponse.CashflowResult.class);
     }

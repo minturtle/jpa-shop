@@ -8,6 +8,7 @@ import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserAuthTypeException;
+import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,7 @@ public class UserControllerAdvice {
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({UserAuthTypeException.class})
+    @ExceptionHandler({UserAuthTypeException.class, UnauthorizedAccountAccessException.class})
     public ResponseEntity<ErrorResponse> forbidden(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.FORBIDDEN);
     }

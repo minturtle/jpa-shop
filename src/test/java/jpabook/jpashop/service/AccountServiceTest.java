@@ -83,7 +83,7 @@ class AccountServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         //when
-        AccountDto.CashFlowResult result = accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
+        AccountDto.CashFlowResult result = accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, accountUid, withdrawAmount));
 
         //then
         assertThat(result).extracting("accountUid", "amount", "type", "status")
@@ -106,7 +106,7 @@ class AccountServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
-                ()-> accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
+                ()-> accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, accountUid, withdrawAmount));
 
         // then
         assertThatThrownBy(throwingCallable)
@@ -139,7 +139,7 @@ class AccountServiceTest {
         for(int i = 0; i < threadSize; i++){
             executorService.execute(()->{
                 try{
-                    accountService.withdraw(new AccountDto.CashFlowRequest(accountUid, withdrawAmount));
+                    accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, accountUid, withdrawAmount));
                     successCount.getAndIncrement();
                 }catch (OptimisticLockingFailureException e){
                     failCount.getAndIncrement();
@@ -177,7 +177,7 @@ class AccountServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
 
         // when
-        AccountDto.CashFlowResult result = accountService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
+        AccountDto.CashFlowResult result = accountService.deposit(new AccountDto.CashFlowRequest(givenUserUid, accountUid, depositAmount));
 
         // then
         assertThat(result).extracting("accountUid", "amount", "type", "status")
@@ -199,7 +199,7 @@ class AccountServiceTest {
         String accountUid = createTestUserAndAccount(givenUserUid, givenBalance);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable = ()->{
-            accountService.deposit(new AccountDto.CashFlowRequest(accountUid, depositAmount));
+            accountService.deposit(new AccountDto.CashFlowRequest(givenUserUid, accountUid, depositAmount));
         };
         // then
         assertThatThrownBy(throwingCallable)

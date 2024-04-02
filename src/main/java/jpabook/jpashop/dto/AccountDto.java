@@ -26,6 +26,7 @@ public abstract class AccountDto {
     @Builder
     @Data
     public static class CashFlowRequest {
+        private String userUid;
         private String accountUid;
         private int amount;
     }
