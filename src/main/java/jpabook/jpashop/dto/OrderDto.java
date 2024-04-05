@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.order.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -65,7 +66,8 @@ public abstract class OrderDto {
     }
 
 
-        @Data
+    @NoArgsConstructor
+    @Data
     @AllArgsConstructor
     @Builder
     public static class OrderProductRequestInfo {

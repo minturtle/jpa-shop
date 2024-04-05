@@ -14,7 +14,8 @@ public abstract class OrderRequest {
     @AllArgsConstructor
     @Schema(name = "CreateOrderRequest")
     public static class Create{
-        List<ProductOrderInfo> products;
+        private String accountUid;
+        private List<ProductOrderInfo> products;
     }
 
 

@@ -1,11 +1,17 @@
 package jpabook.jpashop.controller.order;
 
 
+import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
 import jpabook.jpashop.controller.common.request.OrderRequest;
 import jpabook.jpashop.controller.common.response.OrderResponse;
+import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.PaginationListDto;
+import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.product.InvalidStockQuantityException;
+import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,9 +20,16 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
-
+    private final ModelMapper modelMapper;
     @PostMapping("")
-    public void doOrder(@RequestBody OrderRequest.ItemInfoList requestBody){
+    public OrderResponse.Detail doOrder(@LoginedUserUid String userUid, @RequestBody OrderRequest.Create requestBody) throws CannotFindEntityException, InvalidBalanceValueException, InvalidStockQuantityException {
+        OrderDto.Detail orderResult = orderService.order(
+                userUid,
+                requestBody.getAccountUid(),
+                requestBody.getProducts()
+                        .stream().map(product -> modelMapper.map(product, OrderDto.OrderProductRequestInfo.class)).toList());
+
+        return modelMapper.map(orderResult, OrderResponse.Detail.class);
     }
 
     @GetMapping("/list")

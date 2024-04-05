@@ -53,6 +53,8 @@ class UserAccountControllerTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    private final Long givenAccountBalance = 100000L;
+
     @Test
     @DisplayName("회원 인증이 완료된 유저가 새로운 계좌를 추가해 잔고가 0원인 채로 DB에 저장할 수 있다.")
     public void testCreateAccount() throws Exception{
@@ -89,7 +91,6 @@ class UserAccountControllerTest {
         String givenUid = "user-001";
         String givenAccountUid = "account-001";
         String givenAccountName = "내 계좌";
-        Long givenAccountBalance = 1000L;
 
         String givenToken = tokenProvider.sign(givenUid, new Date());
 
@@ -113,7 +114,6 @@ class UserAccountControllerTest {
         // given
         String givenUid = "user-001";
         String givenAccountUid = "account-001";
-        Long givenAccountBalance = 1000L;
         Integer givenDepositAmount = 500;
 
         String givenToken = tokenProvider.sign(givenUid, new Date());
@@ -149,7 +149,6 @@ class UserAccountControllerTest {
         // given
         String givenUid = "user-002";
         String givenAccountUid = "account-001";
-        Long givenAccountBalance = 1000L;
         Integer givenDepositAmount = 500;
 
         String givenToken = tokenProvider.sign(givenUid, new Date());
