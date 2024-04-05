@@ -9,9 +9,12 @@ import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.service.ProductService;
 import lombok.*;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -20,7 +23,6 @@ import java.util.Optional;
 public class ProductController {
 
     private final ProductService productService;
-
 
     @GetMapping("/list")
     public PaginationListDto<ProductResponse.Preview> search(
@@ -31,7 +33,7 @@ public class ProductController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer maxPrice,
             @RequestParam(required = false) SortOption sortType,
-            @RequestParam(required = false) ProductType productType
+            @RequestParam(required = false, defaultValue = "ALL") ProductType productType
             ){
         if (sortType == null) {
             sortType = SortOption.BY_DATE;
@@ -56,10 +58,16 @@ public class ProductController {
                         sortType,
                         productType
                 ),
-                PageRequest.of(page, size)
+                PageRequest.of(page - 1, size)
         );
 
-        return null;
+        List<ProductResponse.Preview> responseList = result.getData()
+                .stream().map(dto -> new ProductResponse.Preview(dto.getUid(), dto.getName(), dto.getPrice(), dto.getThumbnailUrl())).toList();
+
+        return new PaginationListDto<>(
+                result.getCount(),
+                responseList
+                );
     }
 //
 //    @GetMapping("/{itemId}")
