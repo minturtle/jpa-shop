@@ -65,10 +65,11 @@ class ProductControllerTest {
     @DisplayName("사용자는 DB에 등록된 상품을 상품의 이름으로 필터링하여 조회할 시 상품정보를 최신순으로 정렬하여 반환한다.")
     public void testWhenSearchProductFilterWithNameThenReturnFilteredList() throws Exception{
         //given
+        String givenProductName = "Movie";
 
         //when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
-                        .param("query", "Movie"))
+                        .param("query", givenProductName))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -81,6 +82,33 @@ class ProductControllerTest {
                 .containsExactly(
                         tuple("movie-001", "Movie Name", 3000, "http://example.com/movie_thumbnail.jpg")
 
+                );
+    }
+
+    @Test
+    @DisplayName("사용자는 DB에 등록된 상품을 상품의 가격 범위로 필터링하여 최신순으로 정렬하여 결과를 조회할 수 있다.")
+    public void testWhenSearchWithPriceRangeThenReturnFilteredList() throws Exception{
+        //given
+        String minPrice = "1500";
+        String maxPrice = "2000";
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
+                        .param("minPrice",minPrice)
+                        .param("maxPrice", maxPrice)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //then
+        PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
+
+
+
+        assertThat(result.getCount()).isEqualTo(2);
+        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+                .containsExactly(
+                        tuple("album-001", "Album Name", 2000, "http://example.com/album_thumbnail.jpg"),
+                        tuple("book-001", "Book Name", 1500, "http://example.com/book_thumbnail.jpg")
                 );
     }
 

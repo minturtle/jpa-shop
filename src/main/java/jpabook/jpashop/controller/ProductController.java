@@ -30,8 +30,8 @@ public class ProductController {
             @RequestParam(required = false, defaultValue = "10") Integer size,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Integer minPrice,
-            @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) String category,
             @RequestParam(required = false) SortOption sortType,
             @RequestParam(required = false, defaultValue = "ALL") ProductType productType
             ){
