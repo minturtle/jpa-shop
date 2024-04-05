@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     @GetMapping("/list")
-    public PaginationListDto<OrderResponse.Preview> getOrderbyMember(
+    public PaginationListDto<OrderResponse.Preview> getOrderbyUser(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "5") int size
     ){

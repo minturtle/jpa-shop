@@ -12,14 +12,16 @@ public abstract class OrderResponse {
 
 
     @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
+    @Schema(name = "OrderPreview")
     public static class Preview{
-        private String orderId;
+        private String orderUid;
         private String name;
-
         private int totalPrice;
+        private LocalDateTime orderTime;
+        private OrderStatus orderStatus;
     }
 
     @Data

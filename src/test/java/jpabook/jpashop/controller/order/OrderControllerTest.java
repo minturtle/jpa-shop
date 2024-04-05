@@ -1,5 +1,6 @@
 package jpabook.jpashop.controller.order;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.common.request.OrderRequest;
 import jpabook.jpashop.controller.common.response.OrderResponse;
@@ -7,6 +8,7 @@ import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
@@ -37,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql", "classpath:init-order-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class OrderControllerTest {
 
 
@@ -208,6 +210,35 @@ class OrderControllerTest {
         assertThat(movie.getStockQuantity()).isEqualTo(8);
         assertThat(account.getBalance()).isEqualTo(500L);
     }
+
+    @Test
+    @DisplayName("사용자는 자신의 주문 기록 리스트를 조회할 수 있다.")
+    public void testWhenGetOrderHistoryListThenReturn() throws Exception{
+        //given
+        String givenUserUid = "user-001";
+        String accessToken = tokenProvider.sign(givenUserUid, new Date());
+        //when
+        MvcResult mvcResult = mockMvc.perform(get("/api/order/list")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        //then
+        PaginationListDto<OrderResponse.Preview> actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<PaginationListDto<OrderResponse.Preview>>(){});
+
+        assertThat(actual.getCount()).isEqualTo(2);
+        assertThat(actual.getData())
+                .extracting("orderUid", "totalPrice", "orderStatus", "orderTime")
+                .containsExactly(
+                        tuple("order-001", OrderStatus.ORDERED, "2021-08-01T00:00:00"),
+                        tuple("order-002", OrderStatus.CANCELED, "2021-08-02T00:00:00")
+                );
+        assertThat(actual.getData()).extracting("name")
+                .doesNotContainNull();
+
+
+    }
+
 
 
 }

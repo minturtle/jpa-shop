@@ -21,11 +21,6 @@ import java.util.List;
 public class Order extends BaseEntity {
 
 
-    public void cancel(){
-        this.status = OrderStatus.CANCELED;
-        orderProducts.forEach(OrderProduct::cancel);
-    }
-
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     private Long id;
@@ -64,4 +59,10 @@ public class Order extends BaseEntity {
     public void setStatus(OrderStatus status) {
         this.status = status;
     }
+
+    public void cancel(){
+        this.status = OrderStatus.CANCELED;
+        orderProducts.forEach(OrderProduct::cancel);
+    }
+
 }
