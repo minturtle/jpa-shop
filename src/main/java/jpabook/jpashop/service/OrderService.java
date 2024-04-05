@@ -67,26 +67,13 @@ public class OrderService {
         Order order = createOrderEntity(cashflowResult, userUid, productDtoList);
         orderRepository.save(order);
 
-        User user = userRepository.findByUidJoinCartProduct(userUid)
-                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
-
-
-        List<Cart> cartsToRemove = new ArrayList<>(user.getCartList().size());
-
-        for (Cart cart : user.getCartList()) {
-            if (productDtoList.stream().anyMatch(product -> product.getProductUid().equals(cart.getProduct().getUid()))) {
-                cartsToRemove.add(cart);
-            }
-        }
-
-        for (Cart cartToRemove : cartsToRemove) {
-            user.removeCart(cartToRemove);
-        }
+        removeCartIfExists(userUid, productDtoList);
 
         return createOrderResult(order);
 
 
     }
+
 
     /**
      * @description 주문 취소 메서드
@@ -273,4 +260,23 @@ public class OrderService {
                     o.getStatus()
             );
         }
+
+
+    private void removeCartIfExists(String userUid, List<OrderDto.OrderProductRequestInfo> productDtoList) throws CannotFindEntityException {
+        User user = userRepository.findByUidJoinCartProduct(userUid)
+                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
+
+
+        List<Cart> cartsToRemove = new ArrayList<>(user.getCartList().size());
+
+        for (Cart cart : user.getCartList()) {
+            if (productDtoList.stream().anyMatch(product -> product.getProductUid().equals(cart.getProduct().getUid()))) {
+                cartsToRemove.add(cart);
+            }
+        }
+
+        for (Cart cartToRemove : cartsToRemove) {
+            user.removeCart(cartToRemove);
+        }
+    }
 }
