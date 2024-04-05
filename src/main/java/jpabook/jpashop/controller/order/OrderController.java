@@ -22,7 +22,8 @@ public class OrderController {
     private final OrderService orderService;
     private final ModelMapper modelMapper;
     @PostMapping("")
-    public OrderResponse.Detail doOrder(@LoginedUserUid String userUid, @RequestBody OrderRequest.Create requestBody) throws CannotFindEntityException, InvalidBalanceValueException, InvalidStockQuantityException {
+    public OrderResponse.Detail doOrder(@LoginedUserUid String userUid, @RequestBody OrderRequest.Create requestBody)
+            throws CannotFindEntityException, InvalidBalanceValueException, InvalidStockQuantityException {
         OrderDto.Detail orderResult = orderService.order(
                 userUid,
                 requestBody.getAccountUid(),
