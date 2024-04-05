@@ -17,6 +17,7 @@ public class ProductCategory {
 
     @Id
     @GeneratedValue
+    @Column(name = "product_category_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

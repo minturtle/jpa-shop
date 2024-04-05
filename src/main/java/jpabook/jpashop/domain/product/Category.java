@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class Category {
 
     @Id @GeneratedValue
+    @Column(name = "category_id")
     private Long id;
 
     @Column(name = "category_uid", updatable = false, unique = true, nullable = false)
