@@ -9,6 +9,8 @@ import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserAuthTypeException;
 import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import java.util.Arrays;
 
 
 @RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class UserControllerAdvice {
 
     @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, JwtException.class})

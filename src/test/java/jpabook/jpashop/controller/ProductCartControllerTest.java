@@ -70,9 +70,13 @@ class ProductCartControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        assertThat(user.getCartList().size()).isEqualTo(1);
+        assertThat(user.getCartList().size()).isEqualTo(3);
         assertThat(user.getCartList()).extracting("product.uid", "quantity")
-                .containsExactly(tuple(givenMovieId, givenQuantity));
+                .contains(
+                        tuple(givenMovieId, givenQuantity),
+                        tuple("album-001", 3),
+                        tuple("book-001", 2)
+                );
 
     }
 

@@ -36,19 +36,19 @@ public class CartService {
      * @param dtoList 상품 고유식별자, 갯수 dto list
      * @throws
     */
-    public void addCarts(String userUid, List<CartDto.Add> dtoList) throws CannotFindEntityException {
+    public void addCarts(String userUid, CartDto.Add dto) throws CannotFindEntityException {
         User user = getUserOrThrow(userUid);
 
-        for(CartDto.Add dto : dtoList){
-            Product product = getProductOrThrow(dto.getProductUid());
+
+        Product product = getProductOrThrow(dto.getProductUid());
 
 
-            Cart cart = Cart.builder()
-                    .product(product)
-                    .quantity(dto.getQuantity())
-                    .build();
-            user.addCart(cart);
-        }
+        Cart cart = Cart.builder()
+                .product(product)
+                .quantity(dto.getQuantity())
+                .build();
+        user.addCart(cart);
+
 
 
 

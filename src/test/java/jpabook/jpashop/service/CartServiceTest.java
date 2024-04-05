@@ -62,14 +62,10 @@ class CartServiceTest {
     void testAddCarts() throws Exception{
         // given
 
-        List<CartDto.Add> dtoList = List.of(
-                new CartDto.Add("movie-001", 1),
-                new CartDto.Add("album-001", 2),
-                new CartDto.Add("book-001", 3)
-        );
+        CartDto.Add cartDto = new CartDto.Add("movie-001", 1);
 
         // when
-        cartService.addCarts(TEST_USER_UID, dtoList);
+        cartService.addCarts(TEST_USER_UID, cartDto);
 
         // then
         User user = getUserWithFetchJoinProduct();
@@ -77,9 +73,7 @@ class CartServiceTest {
         assertThat(user.getCartList())
                 .extracting("product", "quantity")
                 .contains(
-                        tuple(testMovie, 1),
-                        tuple(testAlbum, 2),
-                        tuple(testBook, 3)
+                        tuple(testMovie, 1)
                 );
 
     }
