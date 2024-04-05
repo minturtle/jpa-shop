@@ -77,7 +77,9 @@ public class ProductController {
         if(product instanceof  ProductDto.MovieDetail){
             return modelMapper.map(product, ProductResponse.MovieDetail.class);
         }
-
+        if(product instanceof  ProductDto.AlbumDetail){
+            return modelMapper.map(product, ProductResponse.AlbumDetail.class);
+        }
         return null;
     }
 

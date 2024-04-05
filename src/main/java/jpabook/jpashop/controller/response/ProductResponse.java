@@ -51,7 +51,7 @@ public class ProductResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "AlbumDetailInfo")
-    public static class AlbumDetail {
+    public static class AlbumDetail extends Detail{
         private String artist;
         private String etc;
     }

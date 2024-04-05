@@ -274,10 +274,10 @@ class ProductControllerTest {
                         "Album Name",
                         "Album description",
                         2000,
-                        10,
+                        5,
                         "http://example.com/album_thumbnail.jpg",
                         "Artist Name",
-                        "Etc"
+                        "Etc information"
                 );
     }
 
