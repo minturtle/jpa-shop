@@ -9,8 +9,6 @@ import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.service.ProductService;
 import lombok.*;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,13 +64,13 @@ public class ProductController {
                 responseList
                 );
     }
-//
-//    @GetMapping("/{itemId}")
-//    public ProductResponse.Detail findById(
-//            @PathVariable(name = "itemId")String itemId
-//    ){
-//        return null;
-//    }
+
+    @GetMapping("/{productUid}")
+    public ProductResponse.Detail findById(
+            @PathVariable(name = "productUid")String productUid
+    ){
+        return null;
+    }
 
 }
 

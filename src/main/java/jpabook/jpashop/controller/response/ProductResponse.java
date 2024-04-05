@@ -26,12 +26,27 @@ public class ProductResponse {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Detail {
+    public static abstract class Detail {
 
-        private Long itemId;
-        private String itemName;
+        private String uid;
+        private String name;
         private String description;
         private int price;
-
+        private int stockQuantity;
+        private int thumbnailUrl;
     }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(name = "MovieDetailInfo")
+    public static class MovieDetail{
+        private String director;
+        private String actor;
+    }
+
+
+
+
 }

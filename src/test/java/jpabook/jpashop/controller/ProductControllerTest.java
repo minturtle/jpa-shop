@@ -230,6 +230,34 @@ class ProductControllerTest {
 
     }
 
+    @Test
+    @DisplayName("사용자는 특정 영화 상품을 상품의 고유 식별자로 선택해 상세 정보를 조회할 수 있다.")
+    public void testWhenFindMovieByUidThenReturnMovieDetail() throws Exception{
+        //given
+        String givenMovieId = "movie-001";
+
+
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/" + givenMovieId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        //then
+        ProductResponse.MovieDetail actual = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ProductResponse.MovieDetail.class);
+
+        assertThat(actual).extracting("productUid", "name", "description", "price", "stockQuantity", "thumbnailUrl", "director", "actor")
+                .containsExactly(
+                        "movie-001",
+                        "Movie Name",
+                        "Movie description",
+                        3000,
+                        8,
+                        "http://example.com/movie_thumbnail.jpg",
+                        "Movie Director", "Movie Actor"
+                );
+
+    }
+
 
 
 
