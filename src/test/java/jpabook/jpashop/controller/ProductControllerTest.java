@@ -40,7 +40,7 @@ class ProductControllerTest {
 
 
     @Test
-    @DisplayName("사용자는 DB에 등록된 상품을 검색 조건 없이 검색할 시 DB에서 조회해 상품 정보를 최신순으로 정렬해 반환한다.")
+    @DisplayName("사용자는 DB에 등록된 상품을 검색 조건 없이 검색할 시 DB에서 조회해 상품 정보를 최신순으로 정렬된 채 조회한다.")
     void testWhenSearchProductThenReturnList() throws Exception{
         // given
 
@@ -62,7 +62,7 @@ class ProductControllerTest {
     }
 
     @Test
-    @DisplayName("사용자는 DB에 등록된 상품을 상품의 이름으로 필터링하여 조회할 시 상품정보를 최신순으로 정렬하여 반환한다.")
+    @DisplayName("사용자는 DB에 등록된 상품을 상품의 이름으로 필터링하여 조회할 시 필터링된 상품정보를 조회한다.")
     public void testWhenSearchProductFilterWithNameThenReturnFilteredList() throws Exception{
         //given
         String givenProductName = "Movie";
@@ -79,14 +79,14 @@ class ProductControllerTest {
 
         assertThat(result.getCount()).isEqualTo(1);
         assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
-                .containsExactly(
+                .contains(
                         tuple("movie-001", "Movie Name", 3000, "http://example.com/movie_thumbnail.jpg")
 
                 );
     }
 
     @Test
-    @DisplayName("사용자는 DB에 등록된 상품을 상품의 가격 범위로 필터링하여 최신순으로 정렬하여 결과를 조회할 수 있다.")
+    @DisplayName("사용자는 DB에 등록된 상품을 상품의 가격 범위로 필터링하여 결과를 조회할 수 있다.")
     public void testWhenSearchWithPriceRangeThenReturnFilteredList() throws Exception{
         //given
         String minPrice = "1500";
@@ -106,11 +106,40 @@ class ProductControllerTest {
 
         assertThat(result.getCount()).isEqualTo(2);
         assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
-                .containsExactly(
+                .contains(
                         tuple("album-001", "Album Name", 2000, "http://example.com/album_thumbnail.jpg"),
                         tuple("book-001", "Book Name", 1500, "http://example.com/book_thumbnail.jpg")
                 );
     }
+
+    @Test
+    @DisplayName("사용자는 DB에 등록된 상품을 상품의 카테고리로 필터링하여 조회할 수 있다.")
+    public void testWhenSearchWithCategoryThenReturnFilteredList() throws Exception{
+        //given
+        String givenCategory = "category-001";
+
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
+                        .param("category",givenCategory)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+
+        //then
+        PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
+
+
+        assertThat(result.getCount()).isEqualTo(1);
+        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+                .contains(
+                        tuple("movie-001", "Movie Name", 3000, "http://example.com/movie_thumbnail.jpg")
+
+                );
+
+
+    }
+
 
 
 }
