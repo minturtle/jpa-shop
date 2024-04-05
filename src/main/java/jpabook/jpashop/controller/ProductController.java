@@ -32,12 +32,9 @@ public class ProductController {
             @RequestParam(required = false) Integer minPrice,
             @RequestParam(required = false) Integer maxPrice,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) SortOption sortType,
+            @RequestParam(required = false, defaultValue = "BY_DATE") SortOption sortType,
             @RequestParam(required = false, defaultValue = "ALL") ProductType productType
             ){
-        if (sortType == null) {
-            sortType = SortOption.BY_DATE;
-        }
 
 
         if(minPrice != null && maxPrice != null && minPrice > maxPrice){

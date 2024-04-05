@@ -4,9 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.response.ProductResponse;
 import jpabook.jpashop.dto.PaginationListDto;
+import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +18,8 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -53,7 +58,7 @@ class ProductControllerTest {
 
 
         assertThat(result.getCount()).isEqualTo(3);
-        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
                         tuple("movie-001", "Movie Name", 3000, "http://example.com/movie_thumbnail.jpg"),
                         tuple("album-001", "Album Name", 2000, "http://example.com/album_thumbnail.jpg"),
@@ -78,7 +83,7 @@ class ProductControllerTest {
 
 
         assertThat(result.getCount()).isEqualTo(1);
-        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .contains(
                         tuple("movie-001", "Movie Name", 3000, "http://example.com/movie_thumbnail.jpg")
 
@@ -105,7 +110,7 @@ class ProductControllerTest {
 
 
         assertThat(result.getCount()).isEqualTo(2);
-        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .contains(
                         tuple("album-001", "Album Name", 2000, "http://example.com/album_thumbnail.jpg"),
                         tuple("book-001", "Book Name", 1500, "http://example.com/book_thumbnail.jpg")
@@ -131,7 +136,7 @@ class ProductControllerTest {
 
 
         assertThat(result.getCount()).isEqualTo(1);
-        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .contains(
                         tuple("movie-001", "Movie Name", 3000, "http://example.com/movie_thumbnail.jpg")
 
@@ -156,12 +161,34 @@ class ProductControllerTest {
 
 
         assertThat(result.getCount()).isEqualTo(1);
-        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .contains(
                         tuple("book-001", "Book Name", 1500, "http://example.com/book_thumbnail.jpg")
                 );
 
 
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"BY_DATE:movie-001,album-001,book-001", "BY_NAME:album-001,book-001,movie-001", "BY_PRICE:book-001,album-001,movie-001"}, delimiter = ':')
+    @DisplayName("사용자는 검색시 검색결과를 원하는대로 정렬할 수 있다.")
+    public void testWhenSearchWithOrderThenReturnOrderedList(SortOption productSortOption, String expectedString) throws Exception{
+        //given
+
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
+                        .param("sortType", String.valueOf(productSortOption))
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //then
+        PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
+        String[] expected = expectedString.split(",");
+
+        assertThat(result.getCount()).isEqualTo(3);
+        assertThat(result.getData()).extracting("productUid")
+                .containsExactly(expected);
     }
 
 

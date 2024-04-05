@@ -14,8 +14,8 @@ public class ProductResponse {
     @NoArgsConstructor
     @Schema(name = "ProductResponsePreview")
     public static class Preview {
-        private String itemUid;
-        private String itemName;
+        private String productUid;
+        private String productName;
         private int price;
         private String productImage;
     }
