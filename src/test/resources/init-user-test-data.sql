@@ -50,3 +50,6 @@ INSERT INTO `users` (
 
 INSERT INTO accounts (account_uid, name, user_id, balance, version)
 VALUES ('account-001', '내 계좌', 1, 100000, 1);
+
+INSERT INTO accounts (account_uid, name, user_id, balance, version)
+VALUES ('account-002', '내 계좌2', 1, 500, 1);

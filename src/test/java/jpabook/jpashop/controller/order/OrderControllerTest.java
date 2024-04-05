@@ -166,10 +166,47 @@ class OrderControllerTest {
         Product album = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Product book = productRepository.findByUid("book-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Product movie = productRepository.findByUid("movie-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
+
 
         assertThat(album.getStockQuantity()).isEqualTo(5);
         assertThat(book.getStockQuantity()).isEqualTo(20);
         assertThat(movie.getStockQuantity()).isEqualTo(8);
+        assertThat(account.getBalance()).isEqualTo(100000L);
+    }
+
+    @Test
+    @DisplayName("사용자가 잔액보다 많은 금액을 주문하면 주문이 실패한다.")
+    public void testWhenOrderMoreThanBalanceThenFailed() throws Exception{
+        //given
+        String givenUserUid = "user-001";
+        String accessToken = tokenProvider.sign(givenUserUid, new Date());
+        int orderQuantity = 1000;
+
+        OrderRequest.Create orderRequest = new OrderRequest.Create(
+                "account-002",
+                List.of(
+                        new OrderRequest.ProductOrderInfo("album-001", orderQuantity)
+                )
+        );
+        //when
+        mockMvc.perform(post("/api/order")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+        //then
+        Product album = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Product book = productRepository.findByUid("book-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Product movie = productRepository.findByUid("movie-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account account = accountRepository.findByUid("account-002").orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
+
+
+        assertThat(album.getStockQuantity()).isEqualTo(5);
+        assertThat(book.getStockQuantity()).isEqualTo(20);
+        assertThat(movie.getStockQuantity()).isEqualTo(8);
+        assertThat(account.getBalance()).isEqualTo(500L);
     }
 
 

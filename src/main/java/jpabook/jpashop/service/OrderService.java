@@ -263,7 +263,7 @@ public class OrderService {
 
 
     private void removeCartIfExists(String userUid, List<OrderDto.OrderProductRequestInfo> productDtoList) throws CannotFindEntityException {
-        User user = userRepository.findByUidJoinCartProduct(userUid)
+        User user = userRepository.findByUid(userUid)
                 .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
 
 
