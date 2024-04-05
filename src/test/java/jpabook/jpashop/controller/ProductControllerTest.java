@@ -245,7 +245,7 @@ class ProductControllerTest {
         //then
         ProductResponse.MovieDetail actual = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ProductResponse.MovieDetail.class);
 
-        assertThat(actual).extracting("productUid", "name", "description", "price", "stockQuantity", "thumbnailUrl", "director", "actor")
+        assertThat(actual).extracting("uid", "name", "description", "price", "stockQuantity", "thumbnailUrl", "director", "actor")
                 .containsExactly(
                         "movie-001",
                         "Movie Name",
@@ -253,7 +253,8 @@ class ProductControllerTest {
                         3000,
                         8,
                         "http://example.com/movie_thumbnail.jpg",
-                        "Movie Director", "Movie Actor"
+                        "Director Name",
+                        "Actor Name"
                 );
 
     }

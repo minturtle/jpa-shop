@@ -33,7 +33,7 @@ public class ProductResponse {
         private String description;
         private int price;
         private int stockQuantity;
-        private int thumbnailUrl;
+        private String thumbnailUrl;
     }
 
     @Getter
@@ -41,7 +41,7 @@ public class ProductResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     @Schema(name = "MovieDetailInfo")
-    public static class MovieDetail{
+    public static class MovieDetail extends Detail{
         private String director;
         private String actor;
     }

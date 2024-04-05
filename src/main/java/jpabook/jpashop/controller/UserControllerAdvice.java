@@ -27,7 +27,7 @@ public class UserControllerAdvice {
     }
 
 
-    @ExceptionHandler({ExpiredJwtException.class, AuthenticateFailedException.class})
+    @ExceptionHandler({AuthenticateFailedException.class})
     public ResponseEntity<ErrorResponse> unAuthorized(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.UNAUTHORIZED);
     }
@@ -35,11 +35,6 @@ public class UserControllerAdvice {
     @ExceptionHandler({UserAuthTypeException.class, UnauthorizedAccountAccessException.class})
     public ResponseEntity<ErrorResponse> forbidden(Exception e){
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.FORBIDDEN);
-    }
-
-    @ExceptionHandler({OptimisticLockingFailureException.class})
-    public ResponseEntity<ErrorResponse> conflict(Exception e){
-        return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.CONFLICT);
     }
 
 
