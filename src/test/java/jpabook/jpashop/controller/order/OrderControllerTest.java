@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.common.request.OrderRequest;
 import jpabook.jpashop.controller.common.response.OrderResponse;
+import jpabook.jpashop.domain.order.Order;
 import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.repository.AccountRepository;
+import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import jpabook.jpashop.util.JwtTokenProvider;
@@ -61,6 +63,9 @@ class OrderControllerTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
 
     @Test
@@ -269,6 +274,32 @@ class OrderControllerTest {
         assertThat(actual.getOrderProducts())
                 .extracting("productUid", "unitPrice", "quantity", "totalPrice")
                 .containsExactly(tuple("album-001", 2000, 2, 4000));
+    }
+
+    @Test
+    @DisplayName("사용자는 주문을 취소할 수 있다.")
+    public void testWhenCancelOrderThenSuccess() throws Exception{
+        //given
+        String givenUserUid = "user-001";
+        String accessToken = tokenProvider.sign(givenUserUid, new Date());
+        String givenOrderUid = "order-001";
+
+        //when
+        mockMvc.perform(post("/api/order/{orderId}/cancel", givenOrderUid)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk());
+        //then
+        Order order = orderRepository
+                .findByUid(givenOrderUid).orElseThrow(() -> new IllegalArgumentException("주문이 존재하지 않습니다."));
+        Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        Product product = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+
+        assertThat(order).extracting("orderStatus")
+                .isEqualTo(OrderStatus.CANCELED);
+        assertThat(account).extracting("balance")
+                .isEqualTo(100000L + 4000L);
+        assertThat(product.getStockQuantity()).isEqualTo(5 + 2);
     }
 
 

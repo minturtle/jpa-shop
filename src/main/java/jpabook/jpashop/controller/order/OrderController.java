@@ -58,9 +58,9 @@ public class OrderController {
         return modelMapper.map(orderService.findByOrderId(orderUid), OrderResponse.Detail.class);
     }
 
-    @PostMapping("/{orderId}/cancel")
+    @PostMapping("/{orderUid}/cancel")
     public void cancelOrder(
-            @PathVariable(name="orderId") String id
+            @PathVariable(name="orderUid") String orderUid
     ){
 
     }
