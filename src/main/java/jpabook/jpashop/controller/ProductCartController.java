@@ -37,5 +37,9 @@ public class ProductCartController {
         cartService.updateCart(userUid, new CartDto.Update(cartRequest.getProductUid(), cartRequest.getAddCount()));
     }
 
+    @DeleteMapping("{productUid}")
+    public void deleteCart(@LoginedUserUid String userUid, @PathVariable("productUid") String productUid) throws CannotFindEntityException {
+        cartService.deleteCart(userUid, productUid);
+    }
 
 }

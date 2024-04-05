@@ -130,4 +130,8 @@ public class User extends BaseEntity {
         return Objects.hash(id);
     }
 
+    public void removeCart(Cart cart) {
+        this.cartList.remove(cart);
+        cart.setUser(null);
+    }
 }

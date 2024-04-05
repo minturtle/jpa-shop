@@ -125,4 +125,16 @@ public class CartService {
         cart.addQuantity(update.getAddCount());
 
     }
+
+    public void deleteCart(String userUid, String productUid) throws CannotFindEntityException {
+        User user = userRepository.findByUid(userUid)
+                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
+
+        Cart cart = user.getCartList().stream()
+                .filter(c -> c.getProduct().getUid().equals(productUid))
+                .findFirst()
+                .orElseThrow(() -> new CannotFindEntityException(CartExceptionMessages.CART_NOT_FOUND.getMessage()));
+
+        user.removeCart(cart);
+    }
 }
