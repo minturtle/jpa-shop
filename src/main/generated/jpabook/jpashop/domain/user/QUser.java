@@ -28,7 +28,7 @@ public class QUser extends EntityPathBase<User> {
 
     public final QAddressInfo addressInfo;
 
-    public final ListPath<jpabook.jpashop.domain.Cart, jpabook.jpashop.domain.QCart> cartList = this.<jpabook.jpashop.domain.Cart, jpabook.jpashop.domain.QCart>createList("cartList", jpabook.jpashop.domain.Cart.class, jpabook.jpashop.domain.QCart.class, PathInits.DIRECT2);
+    public final ListPath<jpabook.jpashop.domain.product.Cart, jpabook.jpashop.domain.product.QCart> cartList = this.<jpabook.jpashop.domain.product.Cart, jpabook.jpashop.domain.product.QCart>createList("cartList", jpabook.jpashop.domain.product.Cart.class, jpabook.jpashop.domain.product.QCart.class, PathInits.DIRECT2);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;

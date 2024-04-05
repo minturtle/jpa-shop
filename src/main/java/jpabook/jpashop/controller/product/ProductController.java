@@ -1,8 +1,8 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.product;
 
 
 import jpabook.jpashop.dto.PaginationListDto;
-import jpabook.jpashop.controller.response.ProductResponse;
+import jpabook.jpashop.controller.common.response.ProductResponse;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;

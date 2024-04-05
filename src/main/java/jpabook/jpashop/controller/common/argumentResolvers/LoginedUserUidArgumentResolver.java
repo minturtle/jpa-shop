@@ -1,8 +1,8 @@
-package jpabook.jpashop.controller.argumentResolvers;
+package jpabook.jpashop.controller.common.argumentResolvers;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
-import jpabook.jpashop.controller.argumentResolvers.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller.request;
+package jpabook.jpashop.controller.common.request;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;

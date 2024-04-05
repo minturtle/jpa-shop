@@ -2,10 +2,9 @@ package jpabook.jpashop.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jpabook.jpashop.controller.response.ProductResponse;
+import jpabook.jpashop.controller.common.response.ProductResponse;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.enums.product.SortOption;
-import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

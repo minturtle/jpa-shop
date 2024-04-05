@@ -1,9 +1,8 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.user;
 
 
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
-import jpabook.jpashop.controller.response.ErrorResponse;
+import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
@@ -11,7 +10,6 @@ import jpabook.jpashop.exception.user.UserAuthTypeException;
 import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

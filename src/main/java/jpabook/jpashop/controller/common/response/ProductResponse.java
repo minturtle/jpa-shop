@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller.response;
+package jpabook.jpashop.controller.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

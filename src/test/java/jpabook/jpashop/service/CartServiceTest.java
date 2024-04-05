@@ -1,6 +1,6 @@
 package jpabook.jpashop.service;
 
-import jpabook.jpashop.domain.Cart;
+import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;

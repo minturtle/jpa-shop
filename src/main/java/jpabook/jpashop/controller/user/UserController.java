@@ -1,8 +1,8 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.user;
 
-import jpabook.jpashop.controller.argumentResolvers.annotations.LoginedUserUid;
-import jpabook.jpashop.controller.request.UserRequest;
-import jpabook.jpashop.controller.response.UserResponse;
+import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.common.request.UserRequest;
+import jpabook.jpashop.controller.common.response.UserResponse;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;

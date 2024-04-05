@@ -1,7 +1,7 @@
 package jpabook.jpashop.domain.user;
 
 import jpabook.jpashop.domain.BaseEntity;
-import jpabook.jpashop.domain.Cart;
+import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.order.Order;
 import lombok.Getter;
 

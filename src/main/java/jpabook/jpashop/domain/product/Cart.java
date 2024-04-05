@@ -1,7 +1,8 @@
-package jpabook.jpashop.domain;
+package jpabook.jpashop.domain.product;
 
 
 import jakarta.persistence.*;
+import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.product.CartQuantityException;
@@ -15,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @Getter
-public class Cart extends BaseEntity{
+public class Cart extends BaseEntity {
 
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

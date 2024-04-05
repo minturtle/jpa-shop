@@ -1,7 +1,7 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.common;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import jpabook.jpashop.controller.response.ErrorResponse;
+import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.exception.common.InternalErrorException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;

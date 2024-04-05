@@ -1,4 +1,4 @@
-package jpabook.jpashop.domain;
+package jpabook.jpashop.domain.product;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -16,13 +16,13 @@ import com.querydsl.core.types.dsl.PathInits;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QCart extends EntityPathBase<Cart> {
 
-    private static final long serialVersionUID = -1203130013L;
+    private static final long serialVersionUID = -632092670L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QCart cart = new QCart("cart");
 
-    public final QBaseEntity _super = new QBaseEntity(this);
+    public final jpabook.jpashop.domain.QBaseEntity _super = new jpabook.jpashop.domain.QBaseEntity(this);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
@@ -32,7 +32,7 @@ public class QCart extends EntityPathBase<Cart> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
-    public final jpabook.jpashop.domain.product.QProduct product;
+    public final QProduct product;
 
     public final NumberPath<Integer> quantity = createNumber("quantity", Integer.class);
 
@@ -56,7 +56,7 @@ public class QCart extends EntityPathBase<Cart> {
 
     public QCart(Class<? extends Cart> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.product = inits.isInitialized("product") ? new jpabook.jpashop.domain.product.QProduct(forProperty("product")) : null;
+        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product")) : null;
         this.user = inits.isInitialized("user") ? new jpabook.jpashop.domain.user.QUser(forProperty("user"), inits.get("user")) : null;
     }
 

@@ -1,9 +1,9 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.user;
 
 
-import jpabook.jpashop.controller.argumentResolvers.annotations.LoginedUserUid;
-import jpabook.jpashop.controller.request.UserAccountRequest;
-import jpabook.jpashop.controller.response.UserAccountResponse;
+import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.common.request.UserAccountRequest;
+import jpabook.jpashop.controller.common.response.UserAccountResponse;
 import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;

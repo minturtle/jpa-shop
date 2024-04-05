@@ -1,7 +1,7 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.product;
 
 
-import jpabook.jpashop.controller.response.ErrorResponse;
+import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.exception.product.CartQuantityException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

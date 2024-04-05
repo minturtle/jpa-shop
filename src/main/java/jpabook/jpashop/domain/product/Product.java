@@ -1,10 +1,8 @@
 package jpabook.jpashop.domain.product;
 
 import jpabook.jpashop.domain.BaseEntity;
-import jpabook.jpashop.domain.Cart;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 

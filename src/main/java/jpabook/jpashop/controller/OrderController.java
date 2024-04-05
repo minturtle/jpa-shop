@@ -1,8 +1,8 @@
 package jpabook.jpashop.controller;
 
 
-import jpabook.jpashop.controller.request.OrderRequest;
-import jpabook.jpashop.controller.response.OrderResponse;
+import jpabook.jpashop.controller.common.request.OrderRequest;
+import jpabook.jpashop.controller.common.response.OrderResponse;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;

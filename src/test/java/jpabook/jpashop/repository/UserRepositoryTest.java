@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceUnitUtil;
 import jpabook.jpashop.config.QueryDslConfig;
-import jpabook.jpashop.domain.Cart;
+import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;

@@ -24,7 +24,7 @@ public class QBook extends EntityPathBase<Book> {
     public final StringPath author = createString("author");
 
     //inherited
-    public final ListPath<jpabook.jpashop.domain.Cart, jpabook.jpashop.domain.QCart> cartList = _super.cartList;
+    public final ListPath<Cart, QCart> cartList = _super.cartList;
 
     //inherited
     public final ListPath<ProductCategory, QProductCategory> categories = _super.categories;

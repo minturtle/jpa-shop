@@ -1,9 +1,9 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.product;
 
 
-import jpabook.jpashop.controller.argumentResolvers.annotations.LoginedUserUid;
-import jpabook.jpashop.controller.request.CartRequest;
-import jpabook.jpashop.controller.response.CartResponse;
+import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.common.request.CartRequest;
+import jpabook.jpashop.controller.common.response.CartResponse;
 import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.product.CartQuantityException;

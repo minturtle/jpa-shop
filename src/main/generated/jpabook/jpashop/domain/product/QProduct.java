@@ -22,7 +22,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final jpabook.jpashop.domain.QBaseEntity _super = new jpabook.jpashop.domain.QBaseEntity(this);
 
-    public final ListPath<jpabook.jpashop.domain.Cart, jpabook.jpashop.domain.QCart> cartList = this.<jpabook.jpashop.domain.Cart, jpabook.jpashop.domain.QCart>createList("cartList", jpabook.jpashop.domain.Cart.class, jpabook.jpashop.domain.QCart.class, PathInits.DIRECT2);
+    public final ListPath<Cart, QCart> cartList = this.<Cart, QCart>createList("cartList", Cart.class, QCart.class, PathInits.DIRECT2);
 
     public final ListPath<ProductCategory, QProductCategory> categories = this.<ProductCategory, QProductCategory>createList("categories", ProductCategory.class, QProductCategory.class, PathInits.DIRECT2);
 

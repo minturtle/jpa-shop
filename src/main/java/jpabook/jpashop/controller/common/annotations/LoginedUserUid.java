@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller.argumentResolvers.annotations;
+package jpabook.jpashop.controller.common.annotations;
 
 
 import java.lang.annotation.ElementType;

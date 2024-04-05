@@ -1,7 +1,7 @@
 package jpabook.jpashop.service;
 
 
-import jpabook.jpashop.domain.Cart;
+import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.CartDto;
@@ -12,7 +12,6 @@ import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
-import jpabook.jpashop.util.NanoIdProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

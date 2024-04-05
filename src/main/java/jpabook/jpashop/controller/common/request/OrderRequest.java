@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller.request;
+package jpabook.jpashop.controller.common.request;
 
 import lombok.Getter;
 
