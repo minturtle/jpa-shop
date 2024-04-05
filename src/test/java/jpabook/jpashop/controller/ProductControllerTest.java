@@ -19,8 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -256,7 +254,31 @@ class ProductControllerTest {
                         "Director Name",
                         "Actor Name"
                 );
+    }
 
+    @Test
+    @DisplayName("사용자는 특정 앨범 상품을 상품의 고유 식별자로 선택해 상세 정보를 조회할 수 있다.")
+    public void testWhenFindAlbumByUidThenReturnAlbumDetail() throws Exception{
+        //given
+        String givenAlbumId = "album-001";
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/" + givenAlbumId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        //then
+        ProductResponse.AlbumDetail actual = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ProductResponse.AlbumDetail.class);
+        assertThat(actual).extracting("uid", "name", "description", "price", "stockQuantity", "thumbnailUrl", "artist", "etc")
+                .containsExactly(
+                        "album-001",
+                        "Album Name",
+                        "Album description",
+                        2000,
+                        10,
+                        "http://example.com/album_thumbnail.jpg",
+                        "Artist Name",
+                        "Etc"
+                );
     }
 
 

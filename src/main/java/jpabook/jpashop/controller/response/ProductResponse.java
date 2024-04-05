@@ -46,7 +46,13 @@ public class ProductResponse {
         private String actor;
     }
 
-
-
-
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(name = "AlbumDetailInfo")
+    public static class AlbumDetail {
+        private String artist;
+        private String etc;
+    }
 }
