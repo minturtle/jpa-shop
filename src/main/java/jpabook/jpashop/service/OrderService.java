@@ -4,6 +4,7 @@ import jpabook.jpashop.domain.order.Order;
 import jpabook.jpashop.domain.order.OrderProduct;
 import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.order.Payment;
+import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.AddressInfo;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -65,6 +67,21 @@ public class OrderService {
         Order order = createOrderEntity(cashflowResult, userUid, productDtoList);
         orderRepository.save(order);
 
+        User user = userRepository.findByUidJoinCartProduct(userUid)
+                .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
+
+
+        List<Cart> cartsToRemove = new ArrayList<>(user.getCartList().size());
+
+        for (Cart cart : user.getCartList()) {
+            if (productDtoList.stream().anyMatch(product -> product.getProductUid().equals(cart.getProduct().getUid()))) {
+                cartsToRemove.add(cart);
+            }
+        }
+
+        for (Cart cartToRemove : cartsToRemove) {
+            user.removeCart(cartToRemove);
+        }
 
         return createOrderResult(order);
 

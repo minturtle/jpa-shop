@@ -117,8 +117,8 @@ class OrderControllerTest {
         OrderRequest.Create orderRequest = new OrderRequest.Create(
                 "account-001",
                 List.of(
-                        new OrderRequest.ProductOrderInfo("book-001", orderQuantity),
-                        new OrderRequest.ProductOrderInfo("movie-001", orderQuantity)
+                        new OrderRequest.ProductOrderInfo("album-001", orderQuantity),
+                        new OrderRequest.ProductOrderInfo("book-001", orderQuantity)
                 )
         );
         //when
@@ -130,14 +130,14 @@ class OrderControllerTest {
                 .andExpect(status().isOk());
         //then
         User user = userRepository.findByUid("user-001").orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        Product album = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Product book = productRepository.findByUid("book-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Product movie = productRepository.findByUid("movie-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
 
         assertThat(user.getCartList()).isEmpty();
+        assertThat(album.getStockQuantity()).isEqualTo(5 - orderQuantity);
         assertThat(book.getStockQuantity()).isEqualTo(20 - orderQuantity);
-        assertThat(movie.getStockQuantity()).isEqualTo(8 - orderQuantity);
-        assertThat(account.getBalance()).isEqualTo(100000 - 9000);
+        assertThat(account.getBalance()).isEqualTo(100000 - 7000);
 
     }
 
