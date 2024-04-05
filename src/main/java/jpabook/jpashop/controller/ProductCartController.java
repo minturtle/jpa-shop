@@ -31,4 +31,10 @@ public class ProductCartController {
         return cartService.findCartByUserUid(userUid).stream().map(dto->modelMapper.map(dto, CartResponse.Info.class)).toList();
     }
 
+    @PutMapping("")
+    public void updateCart(@LoginedUserUid String userUid, @RequestBody CartRequest.Update cartRequest) throws CannotFindEntityException {
+        cartService.updateCart(userUid, new CartDto.Update(cartRequest.getProductUid(), cartRequest.getAddCount()));
+    }
+
+
 }

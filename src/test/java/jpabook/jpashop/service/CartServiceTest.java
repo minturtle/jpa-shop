@@ -98,7 +98,6 @@ class CartServiceTest {
                 );
     }
 
-
     private User getUserWithFetchJoinProduct() {
 
         return userRepository.findByUidJoinCartProduct(TEST_USER_UID)

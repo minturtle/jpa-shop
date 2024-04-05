@@ -26,4 +26,11 @@ public abstract class CartDto {
         private int price;
         private int quantity;
     }
+
+    @AllArgsConstructor
+    @Getter
+    public static class Update {
+        private String productUid;
+        private int addCount;
+    }
 }

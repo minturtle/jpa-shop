@@ -6,6 +6,7 @@ import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.product.CartExceptionMessages;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
@@ -112,4 +113,15 @@ public class CartService {
         return cart;
     }
 
+    public void updateCart(String userUid, CartDto.Update update) throws CannotFindEntityException {
+        User user = getUserOrThrow(userUid);
+
+        Cart cart = user.getCartList().stream()
+                .filter(c -> c.getProduct().getUid().equals(update.getProductUid()))
+                .findFirst()
+                .orElseThrow(() -> new CannotFindEntityException(CartExceptionMessages.CART_NOT_FOUND.getMessage()));
+
+        cart.addQuantity(update.getAddCount());
+
+    }
 }
