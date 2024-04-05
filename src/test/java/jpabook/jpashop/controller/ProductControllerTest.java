@@ -68,7 +68,7 @@ class ProductControllerTest {
 
         //when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
-                        .param("query", "movie"))
+                        .param("query", "Movie"))
                 .andExpect(status().isOk())
                 .andReturn();
 
