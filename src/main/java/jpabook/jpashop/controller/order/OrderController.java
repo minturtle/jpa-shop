@@ -12,6 +12,8 @@ import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.internal.asm.TypeReference;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -35,10 +37,16 @@ public class OrderController {
 
     @GetMapping("/list")
     public PaginationListDto<OrderResponse.Preview> getOrderbyUser(
+            @LoginedUserUid String userUid,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "5") int size
     ){
-        return null;
+
+        PaginationListDto<OrderDto.Preview> result = orderService.findByUser(userUid, PageRequest.of(page - 1, size));
+
+        return new PaginationListDto<>(result.getCount(), result.getData().stream()
+                .map(orderDto -> modelMapper.map(orderDto, OrderResponse.Preview.class)).toList());
+
     }
 
     @GetMapping("/{orderId}")

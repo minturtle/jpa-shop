@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -230,8 +231,8 @@ class OrderControllerTest {
         assertThat(actual.getData())
                 .extracting("orderUid", "totalPrice", "orderStatus", "orderTime")
                 .containsExactly(
-                        tuple("order-001", OrderStatus.ORDERED, "2021-08-01T00:00:00"),
-                        tuple("order-002", OrderStatus.CANCELED, "2021-08-02T00:00:00")
+                        tuple("order-001", 1000, OrderStatus.ORDERED, LocalDateTime.of(2021, 8, 1, 0, 0, 0)),
+                        tuple("order-002", 2000, OrderStatus.CANCELED, LocalDateTime.of(2021, 8, 2, 0, 0, 0))
                 );
         assertThat(actual.getData()).extracting("name")
                 .doesNotContainNull();

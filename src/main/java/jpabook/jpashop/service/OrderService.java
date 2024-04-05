@@ -10,6 +10,7 @@ import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
+import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.common.InternalErrorException;
 import jpabook.jpashop.exception.order.OrderExceptionMessage;
@@ -26,6 +27,7 @@ import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.util.NanoIdProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -114,10 +116,12 @@ public class OrderService {
      * @param
      * @throws
     */
-    public List<OrderDto.Preview> findByUser(String userUid) throws EntityNotFoundException{
-        List<Order> orderList = orderRepository.findByUser(userUid);
+    public PaginationListDto<OrderDto.Preview> findByUser(String userUid, Pageable pageable) throws EntityNotFoundException{
 
-        return orderList.stream().map(this::createOrderPreview).toList();
+        Integer count = orderRepository.countByUser(userUid);
+        List<Order> orderList = orderRepository.findByUser(userUid, pageable);
+
+        return new PaginationListDto<>(count, orderList.stream().map(this::createOrderPreview).toList()) ;
     }
 
 

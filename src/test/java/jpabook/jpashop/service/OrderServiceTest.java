@@ -5,6 +5,7 @@ import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.dto.OrderDto;
+import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
@@ -24,6 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -314,13 +316,13 @@ class OrderServiceTest {
         initTestDataUtils.saveAccount(100000L);
         initTestDataUtils.saveOrder();
         // when
-        List<OrderDto.Preview> result = orderService.findByUser(USER_UID);
+        PaginationListDto<OrderDto.Preview> result = orderService.findByUser(USER_UID, PageRequest.of(0, 10));
         // then
         assertAll("주문 리스트 정보는 UID, 물품 요약, 총액, 상태, 주문시간 정보를 모두 담고 있어야 한다.",
-                ()->assertThat(result).extracting("orderUid",  "totalPrice", "orderStatus")
+                ()->assertThat(result.getData()).extracting("orderUid",  "totalPrice", "orderStatus")
                         .contains(tuple("order-001", 45000, OrderStatus.ORDERED)),
-                ()->assertThat(result.get(0).getOrderTime()).isNotNull(),
-                ()->assertThat(result.get(0).getName()).contains("외 2건")
+                ()->assertThat(result.getData().get(0).getOrderTime()).isNotNull(),
+                ()->assertThat(result.getData().get(0).getName()).contains("외 2건")
         );
     }
 

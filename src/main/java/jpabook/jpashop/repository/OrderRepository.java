@@ -3,6 +3,7 @@ package jpabook.jpashop.repository;
 import jpabook.jpashop.domain.order.Order;
 
 import jpabook.jpashop.domain.user.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -21,5 +22,12 @@ public interface OrderRepository extends CrudRepository<Order, Long> {
     Optional<Order> findByUidWithJoinProductAccount(@Param("uid") String uid);
 
     @Query("select o from Order o join o.user u where u.uid = :userUid")
+    List<Order> findByUser(@Param("userUid") String userUid, Pageable pageable);
+
+    @Query("select o from Order o join o.user u where u.uid = :userUid")
     List<Order> findByUser(@Param("userUid") String userUid);
+
+    @Query("select count(o) from Order o join o.user u where u.uid = :userUid")
+    Integer countByUser(@Param("userUid") String userUid);
+
 }
