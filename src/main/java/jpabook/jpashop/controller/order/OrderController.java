@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller;
+package jpabook.jpashop.controller.order;
 
 
 import jpabook.jpashop.controller.common.request.OrderRequest;
@@ -16,11 +16,10 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("")
-    public void doOrder(@RequestBody OrderRequest.ItemInfoList requestItems){
-
+    public void doOrder(@RequestBody OrderRequest.ItemInfoList requestBody){
     }
 
-    @GetMapping("/orders")
+    @GetMapping("/list")
     public PaginationListDto<OrderResponse.Preview> getOrderbyMember(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "5") int size

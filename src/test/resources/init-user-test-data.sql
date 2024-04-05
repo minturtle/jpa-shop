@@ -49,4 +49,4 @@ INSERT INTO `users` (
          );
 
 INSERT INTO accounts (account_uid, name, user_id, balance, version)
-VALUES ('account-001', '내 계좌', 1, 1000, 1);
+VALUES ('account-001', '내 계좌', 1, 100000, 1);
