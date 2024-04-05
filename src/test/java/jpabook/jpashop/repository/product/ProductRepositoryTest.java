@@ -188,7 +188,7 @@ class ProductRepositoryTest {
 
         assertThat(result)
                 .extracting("uid")
-                .containsExactly(expectedUidList);
+                .containsExactly((Object[])expectedUidList);
     }
 
 

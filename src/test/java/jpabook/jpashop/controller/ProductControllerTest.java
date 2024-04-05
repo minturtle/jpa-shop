@@ -188,7 +188,7 @@ class ProductControllerTest {
 
         assertThat(result.getCount()).isEqualTo(3);
         assertThat(result.getData()).extracting("productUid")
-                .containsExactly(expected);
+                .containsExactly((Object[])expected);
     }
 
 
