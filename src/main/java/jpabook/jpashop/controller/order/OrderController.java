@@ -51,11 +51,11 @@ public class OrderController {
 
 
 
-    @GetMapping("/{orderId}")
+    @GetMapping("/{orderUid}")
     public OrderResponse.Detail getOrderDetail(
-            @PathVariable(name="orderId") String id
-    ){
-        return null;
+            @PathVariable(name="orderUid") String orderUid
+    ) throws CannotFindEntityException {
+        return modelMapper.map(orderService.findByOrderId(orderUid), OrderResponse.Detail.class);
     }
 
     @PostMapping("/{orderId}/cancel")

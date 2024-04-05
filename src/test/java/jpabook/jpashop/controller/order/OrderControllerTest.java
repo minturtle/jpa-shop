@@ -268,7 +268,7 @@ class OrderControllerTest {
                 );
         assertThat(actual.getOrderProducts())
                 .extracting("productUid", "unitPrice", "quantity", "totalPrice")
-                .containsExactly(tuple("album-001", 500, 2, 1000));
+                .containsExactly(tuple("album-001", 2000, 2, 4000));
     }
 
 
