@@ -185,6 +185,31 @@ class ProductCartControllerTest {
 
     }
 
+    @Test
+    @DisplayName("사용자는 자신의 장바구니에 속한 상품을 삭제할 수 있다.")
+    public void testWhenRemoveCartThenSuccess() throws Exception{
+        //given
+        String givenUid = "user-001";
+        String productUid = "album-001";
+        String token = tokenProvider.sign(givenUid, new Date());
+        //when
+        mockMvc.perform(delete("/api/product/cart/" + productUid)
+                        .header("Authorization", "Bearer " + token)
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+        //then
+        User user = userRepository.findByUid(givenUid)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        assertThat(user.getCartList().size()).isEqualTo(1);
+        assertThat(user.getCartList()).extracting("product.uid", "quantity")
+                .contains(
+                        tuple("book-001", 2)
+                );
+    }
+
+
     private Cart getCart(String cartUid) {
         User user = userRepository.findByUid("user-001")
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
