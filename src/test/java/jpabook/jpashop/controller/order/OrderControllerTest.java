@@ -240,6 +240,37 @@ class OrderControllerTest {
 
     }
 
+    @Test
+    @DisplayName("사용자는 주문 상세 정보를 조회할 수 있다.")
+    public void thenWhenGetOrderDetailInfoThenReturn() throws Exception{
+        //given
+        String givenUserUid = "user-001";
+
+        String accessToken = tokenProvider.sign(givenUserUid, new Date());
+        String givenOrderUid = "order-001";
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get("/api/order/{orderId}", givenOrderUid)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        //then
+        OrderResponse.Detail actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), OrderResponse.Detail.class);
+
+        assertThat(actual).extracting("orderUid", "orderStatus", "orderTime", "orderPaymentDetail.accountUid", "orderPaymentDetail.totalPrice")
+                .containsExactly(
+                        "order-001",
+                        OrderStatus.ORDERED,
+                        LocalDateTime.of(2021, 8, 1, 0, 0, 0),
+                        "account-001",
+                        1000
+                );
+        assertThat(actual.getOrderProducts())
+                .extracting("productUid", "unitPrice", "quantity", "totalPrice")
+                .containsExactly(tuple("album-001", 500, 2, 1000));
+    }
+
 
 
 }
