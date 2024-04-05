@@ -34,4 +34,8 @@ public class Cart extends BaseEntity{
     public void setUser(User user) {
         this.user = user;
     }
+
+    public void addQuantity(int quantity) {
+        this.quantity += quantity;
+    }
 }

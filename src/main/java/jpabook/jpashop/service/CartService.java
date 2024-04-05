@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,20 +34,22 @@ public class CartService {
      * @description 상품을 장바구니에 추가하는 메서드
      * @author minseok kim
      * @param userUid 유저의 고유식별자
-     * @param dtoList 상품 고유식별자, 갯수 dto list
+     * @param dto 상품 고유식별자, 갯수 dto
      * @throws
     */
     public void addCarts(String userUid, CartDto.Add dto) throws CannotFindEntityException {
         User user = getUserOrThrow(userUid);
 
+        Optional<Cart> isAlreadyExistsOptional = user.getCartList().stream()
+                .filter(cart -> cart.getProduct().getUid().equals(dto.getProductUid()))
+                .findAny();
 
-        Product product = getProductOrThrow(dto.getProductUid());
-
-
-        Cart cart = Cart.builder()
-                .product(product)
-                .quantity(dto.getQuantity())
-                .build();
+        if(isAlreadyExistsOptional.isPresent()){
+            Cart cart = isAlreadyExistsOptional.get();
+            cart.addQuantity(dto.getQuantity());
+            return;
+        }
+        Cart cart = createCart(dto);
         user.addCart(cart);
 
 
@@ -99,6 +102,14 @@ public class CartService {
                 .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
 
     }
+    private  Cart createCart(CartDto.Add dto) throws CannotFindEntityException {
+        Product product = getProductOrThrow(dto.getProductUid());
 
+        Cart cart = Cart.builder()
+                .product(product)
+                .quantity(dto.getQuantity())
+                .build();
+        return cart;
+    }
 
 }
