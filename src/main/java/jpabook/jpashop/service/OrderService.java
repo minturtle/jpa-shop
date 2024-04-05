@@ -242,9 +242,9 @@ public class OrderService {
                     product.getUid(),
                     product.getName(),
                     product.getThumbnailImageUrl(),
-                    product.getPrice(),
+                    orderProduct.getItemPrice(),
                     orderProduct.getCount(),
-                    product.getPrice() * orderProduct.getCount()
+                    orderProduct.getItemPrice() * orderProduct.getCount()
             );
             result.addOrderProduct(detail);
         }

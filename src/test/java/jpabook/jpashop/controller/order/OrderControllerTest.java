@@ -273,7 +273,7 @@ class OrderControllerTest {
                 );
         assertThat(actual.getOrderProducts())
                 .extracting("productUid", "unitPrice", "quantity", "totalPrice")
-                .containsExactly(tuple("album-001", 2000, 2, 4000));
+                .containsExactly(tuple("album-001", 500, 2, 1000));
     }
 
     @Test
@@ -295,10 +295,10 @@ class OrderControllerTest {
         Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
         Product product = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
 
-        assertThat(order).extracting("orderStatus")
+        assertThat(order).extracting("status")
                 .isEqualTo(OrderStatus.CANCELED);
         assertThat(account).extracting("balance")
-                .isEqualTo(100000L + 4000L);
+                .isEqualTo(100000L + 1000L);
         assertThat(product.getStockQuantity()).isEqualTo(5 + 2);
     }
 

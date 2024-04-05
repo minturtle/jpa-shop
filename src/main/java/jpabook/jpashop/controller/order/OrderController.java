@@ -7,8 +7,10 @@ import jpabook.jpashop.controller.common.response.OrderResponse;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.common.InternalErrorException;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
+import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -61,7 +63,7 @@ public class OrderController {
     @PostMapping("/{orderUid}/cancel")
     public void cancelOrder(
             @PathVariable(name="orderUid") String orderUid
-    ){
-
+    ) throws CannotFindEntityException, InvalidBalanceValueException, UnauthorizedAccountAccessException, InternalErrorException {
+        orderService.cancel(orderUid);
     }
 }
