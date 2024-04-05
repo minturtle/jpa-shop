@@ -59,9 +59,29 @@ class ProductControllerTest {
                         tuple("album-001", "Album Name", 2000, "http://example.com/album_thumbnail.jpg"),
                         tuple("book-001", "Book Name", 1500, "http://example.com/book_thumbnail.jpg")
                 );
+    }
+
+    @Test
+    @DisplayName("사용자는 DB에 등록된 상품을 상품의 이름으로 필터링하여 조회할 시 상품정보를 최신순으로 정렬하여 반환한다.")
+    public void testWhenSearchProductFilterWithNameThenReturnFilteredList() throws Exception{
+        //given
+
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
+                        .param("query", "movie"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        //then
+        PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
 
 
+        assertThat(result.getCount()).isEqualTo(1);
+        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+                .containsExactly(
+                        tuple("movie-001", "Movie Name", 3000, "http://example.com/movie_thumbnail.jpg")
 
+                );
     }
 
 
