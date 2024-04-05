@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -190,6 +191,45 @@ class ProductControllerTest {
         assertThat(result.getData()).extracting("productUid")
                 .containsExactly((Object[])expected);
     }
+
+    @Test
+    @DisplayName("사용자는 검색시 여러개의 조건을 걸어 원하는대로 정렬해 필터링된 결과값을 받아볼 수 있다.")
+    public void testSearchWithMultiFilteringThenReturnFilteredResult() throws Exception{
+        //given
+
+        String givenName = "Book";
+        String minPrice = "1500";
+        String maxPrice = "2000";
+        String givenCategory = "category-002";
+        String productType = "BOOK";
+        SortOption productSortOption = SortOption.BY_DATE;
+
+
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
+                        .param("query", givenName)
+                        .param("minPrice", minPrice)
+                        .param("maxPrice", maxPrice)
+                        .param("category", givenCategory)
+                        .param("productType", productType)
+                        .param("sortType", String.valueOf(productSortOption))
+                )
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+        //then
+        PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
+
+
+        assertThat(result.getCount()).isEqualTo(1);
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
+                .contains(
+                        tuple("book-001", "Book Name", 1500, "http://example.com/book_thumbnail.jpg")
+                );
+
+
+    }
+
 
 
 
