@@ -181,8 +181,6 @@ class ProductCartControllerTest {
                 .andExpect(status().isBadRequest());
         //then
         Cart actual = getCart(productUid);
-
-
         assertThat(actual.getQuantity()).isEqualTo(3);
 
     }

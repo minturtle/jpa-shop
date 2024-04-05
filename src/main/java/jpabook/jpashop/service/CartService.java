@@ -7,6 +7,7 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.product.CartExceptionMessages;
+import jpabook.jpashop.exception.product.CartQuantityException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
@@ -38,7 +39,7 @@ public class CartService {
      * @param dto 상품 고유식별자, 갯수 dto
      * @throws
     */
-    public void addCarts(String userUid, CartDto.Add dto) throws CannotFindEntityException {
+    public void addCarts(String userUid, CartDto.Add dto) throws CannotFindEntityException, CartQuantityException {
         User user = getUserOrThrow(userUid);
 
         Optional<Cart> isAlreadyExistsOptional = user.getCartList().stream()
@@ -113,7 +114,7 @@ public class CartService {
         return cart;
     }
 
-    public void updateCart(String userUid, CartDto.Update update) throws CannotFindEntityException {
+    public void updateCart(String userUid, CartDto.Update update) throws CannotFindEntityException, CartQuantityException {
         User user = getUserOrThrow(userUid);
 
         Cart cart = user.getCartList().stream()

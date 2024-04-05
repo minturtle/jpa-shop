@@ -6,6 +6,7 @@ import jpabook.jpashop.controller.request.CartRequest;
 import jpabook.jpashop.controller.response.CartResponse;
 import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.product.CartQuantityException;
 import jpabook.jpashop.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -23,7 +24,7 @@ public class ProductCartController {
 
 
      @PostMapping("")
-     public void addCart(@LoginedUserUid String userUid,  @RequestBody CartRequest.Add cartRequest) throws CannotFindEntityException {
+     public void addCart(@LoginedUserUid String userUid,  @RequestBody CartRequest.Add cartRequest) throws CannotFindEntityException, CartQuantityException {
          cartService.addCarts(userUid, new CartDto.Add(cartRequest.getProductUid(), cartRequest.getQuantity()));
      }
     @GetMapping("")
@@ -32,7 +33,7 @@ public class ProductCartController {
     }
 
     @PutMapping("")
-    public void updateCart(@LoginedUserUid String userUid, @RequestBody CartRequest.Update cartRequest) throws CannotFindEntityException {
+    public void updateCart(@LoginedUserUid String userUid, @RequestBody CartRequest.Update cartRequest) throws CannotFindEntityException, CartQuantityException {
         cartService.updateCart(userUid, new CartDto.Update(cartRequest.getProductUid(), cartRequest.getAddCount()));
     }
 

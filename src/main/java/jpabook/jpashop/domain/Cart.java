@@ -4,6 +4,7 @@ package jpabook.jpashop.domain;
 import jakarta.persistence.*;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.exception.product.CartQuantityException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,11 @@ public class Cart extends BaseEntity{
         this.user = user;
     }
 
-    public void addQuantity(int quantity) {
+    public void addQuantity(int quantity) throws CartQuantityException {
+        if(this.quantity + quantity < 0){
+            throw new CartQuantityException("수량은 0보다 작을 수 없습니다.");
+        }
+
         this.quantity += quantity;
     }
 }
