@@ -56,7 +56,7 @@ class ProductCartControllerTest {
         String token = tokenProvider.sign(givenUid, new Date());
 
         //when
-        mockMvc.perform(post("/api/v1/carts")
+        mockMvc.perform(post("/api/product/cart")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(new CartRequest.Add(givenMovieId, givenQuantity))))
@@ -67,8 +67,8 @@ class ProductCartControllerTest {
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         assertThat(user.getCartList().size()).isEqualTo(1);
-        assertThat(user.getCartList().get(0)).extracting("product.id", "quantity")
-                .containsExactly(givenMovieId, givenQuantity);
+        assertThat(user.getCartList()).extracting("product.uid", "quantity")
+                .containsExactly(tuple(givenMovieId, givenQuantity));
 
     }
 
