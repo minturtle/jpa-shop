@@ -144,30 +144,59 @@ class ProductCartControllerTest {
     public void testWhenUpdateCartQuantityThenSuccess(int updateQuantity) throws Exception{
         //given
         String givenUid = "user-001";
+        String productUid = "album-001";
 
         String token = tokenProvider.sign(givenUid, new Date());
         //when
         mockMvc.perform(put("/api/product/cart")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CartRequest.Update("album-001", updateQuantity)))
+                        .content(objectMapper.writeValueAsString(new CartRequest.Update(productUid, updateQuantity)))
                 )
                 .andDo(print())
                 .andExpect(status().isOk());
         //then
-        User user = userRepository.findByUid(givenUid)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        Cart actual = user.getCartList().stream()
-                .filter(cart -> cart.getProduct().getUid().equals("album-001"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+        Cart actual = getCart(productUid);
 
 
         assertThat(actual.getQuantity()).isEqualTo(3 + updateQuantity);
 
     }
 
+    @Test
+    @DisplayName("사용자는 자신의 장바구니의 갯수를 0이하로 수정할 수 없다.")
+    public void testWhenUpdateCartQuantityUnder0ThenFailed() throws Exception{
+        String givenUid = "user-001";
+        String productUid = "album-001";
+        String token = tokenProvider.sign(givenUid, new Date());
+        int updateQuantity = -4;
+
+        //when
+        mockMvc.perform(put("/api/product/cart")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CartRequest.Update(productUid, updateQuantity)))
+                )
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+        //then
+        Cart actual = getCart(productUid);
+
+
+        assertThat(actual.getQuantity()).isEqualTo(3);
+
+    }
+
+    private Cart getCart(String cartUid) {
+        User user = userRepository.findByUid("user-001")
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Cart actual = user.getCartList().stream()
+                .filter(cart -> cart.getProduct().getUid().equals(cartUid))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+        return actual;
+    }
 
 
 }
