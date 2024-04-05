@@ -3,6 +3,9 @@ package jpabook.jpashop.repository.product;
 
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jpabook.jpashop.domain.product.Album;
+import jpabook.jpashop.domain.product.Book;
+import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.enums.product.SortOption;
@@ -72,6 +75,20 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
             query.where(product.price.loe(priceRange.getMaxPrice()));
 
         }
+        switch (searchCondition.getProductType()){
+            case ALL -> {
+            }
+            case BOOK -> {
+                query.where(product.instanceOf(Book.class));
+            }
+            case ALBUM -> {
+                query.where(product.instanceOf(Album.class));
+            }
+            case MOVIE -> {
+                query.where(product.instanceOf(Movie.class));
+            }
+        }
+
     }
 
     private void setUpPagenationQuries(JPAQuery query, Pageable pageable, SortOption sortOption) {
