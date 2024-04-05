@@ -8,10 +8,8 @@ import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.service.CartService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.modelmapper.ModelMapper;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,12 +19,16 @@ import java.util.List;
 public class ProductCartController {
 
     private final CartService cartService;
+    private final ModelMapper modelMapper;
+
 
      @PostMapping("")
      public void addCart(@LoginedUserUid String userUid,  @RequestBody CartRequest.Add cartRequest) throws CannotFindEntityException {
          cartService.addCarts(userUid, List.of(new CartDto.Add(cartRequest.getProductUid(), cartRequest.getQuantity())));
      }
-
-
+    @GetMapping("")
+    public List<CartResponse.Info> getCart(@LoginedUserUid String userUid) throws CannotFindEntityException {
+        return cartService.findCartByUserUid(userUid).stream().map(dto->modelMapper.map(dto, CartResponse.Info.class)).toList();
+    }
 
 }

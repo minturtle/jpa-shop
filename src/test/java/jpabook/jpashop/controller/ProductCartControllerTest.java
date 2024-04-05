@@ -93,10 +93,10 @@ class ProductCartControllerTest {
         List<CartResponse.Info> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<List<CartResponse.Info>>() {});
 
         assertThat(result.size()).isEqualTo(2);
-        assertThat(result).extracting("product.uid", "quantity")
+        assertThat(result).extracting("productUid", "productName", "productImageUrl", "price" ,"quantity")
                 .contains(
-                        tuple("album-001",3),
-                        tuple("book-002", 2)
+                        tuple("album-001", "Album Name", "http://example.com/album_thumbnail.jpg", 2000, 3),
+                        tuple("book-001", "Book Name", "http://example.com/book_thumbnail.jpg", 1500, 2)
                 );
     }
 
