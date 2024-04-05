@@ -6,7 +6,9 @@ import jpabook.jpashop.controller.common.response.OrderResponse;
 import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
+import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.repository.AccountRepository;
+import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +55,9 @@ class OrderControllerTest {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Test
@@ -101,5 +106,40 @@ class OrderControllerTest {
         assertThat(account.getBalance()).isEqualTo(100000 - 4000);
 
     }
+    @Test
+    @DisplayName("사용자는 장바구니에 담긴 상품을 주문하면 Account의 잔액과 상품의 재고가 감소하고, 주문이 생성되며 장바구니에 담긴 해당 물건은 삭제된다.")
+    public void testWhenUserOrderInCartThenSuccess() throws Exception{
+        //given
+        String givenUserUid = "user-001";
+        String accessToken = tokenProvider.sign(givenUserUid, new Date());
+        int orderQuantity = 2;
+
+        OrderRequest.Create orderRequest = new OrderRequest.Create(
+                "account-001",
+                List.of(
+                        new OrderRequest.ProductOrderInfo("book-001", orderQuantity),
+                        new OrderRequest.ProductOrderInfo("movie-001", orderQuantity)
+                )
+        );
+        //when
+        mockMvc.perform(post("/api/order")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(orderRequest)))
+                .andDo(print())
+                .andExpect(status().isOk());
+        //then
+        User user = userRepository.findByUid("user-001").orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        Product book = productRepository.findByUid("book-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Product movie = productRepository.findByUid("movie-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
+
+        assertThat(user.getCartList()).isEmpty();
+        assertThat(book.getStockQuantity()).isEqualTo(20 - orderQuantity);
+        assertThat(movie.getStockQuantity()).isEqualTo(8 - orderQuantity);
+        assertThat(account.getBalance()).isEqualTo(100000 - 9000);
+
+    }
+
 
 }
