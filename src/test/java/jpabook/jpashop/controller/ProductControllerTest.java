@@ -137,8 +137,33 @@ class ProductControllerTest {
 
                 );
 
+    }
+
+    @Test
+    @DisplayName("사용자는 DB에 등록된 상품 중 특정 타입의 상품만을 필터링하여 조회할 수 있다.")
+    public void testWhenSearchFilterWithProductTypeThenReturnFilteredList() throws Exception{
+        //given
+        String productType = "BOOK";
+
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/list")
+                        .param("productType", productType)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+        //then
+        PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
+
+
+        assertThat(result.getCount()).isEqualTo(1);
+        assertThat(result.getData()).extracting("itemUid", "itemName", "price", "productImage")
+                .contains(
+                        tuple("book-001", "Book Name", 1500, "http://example.com/book_thumbnail.jpg")
+                );
+
 
     }
+
 
 
 
