@@ -55,4 +55,16 @@ public class ProductResponse {
         private String artist;
         private String etc;
     }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Schema(name = "BookDetailInfo")
+    public static class BookDetail extends Detail {
+        private String author;
+        private String isbn;
+
+    }
+
 }

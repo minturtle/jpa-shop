@@ -80,7 +80,11 @@ public class ProductController {
         if(product instanceof  ProductDto.AlbumDetail){
             return modelMapper.map(product, ProductResponse.AlbumDetail.class);
         }
-        return null;
+        if(product instanceof  ProductDto.BookDetail){
+            return modelMapper.map(product, ProductResponse.BookDetail.class);
+        }
+
+        throw new InternalErrorException(ProductExceptionMessages.ENTITY_PRODUCT_MAPPING_FAILED.getMessage());
     }
 
 }

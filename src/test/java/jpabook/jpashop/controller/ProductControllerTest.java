@@ -282,7 +282,33 @@ class ProductControllerTest {
     }
 
 
+    @Test
+    @DisplayName("사용자는 특정 책 상품을 상품의 고유 식별자로 선택해 상세 정보를 조회할 수 있다.")
+    public void testWhenFindBookByUidThenReturnBookDetail() throws Exception{
+        //given
+        String givenBookId = "book-001";
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/" + givenBookId))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+        //then
+        ProductResponse.BookDetail bookDetail = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ProductResponse.BookDetail.class);
 
+        assertThat(bookDetail).extracting("uid", "name", "description", "price", "stockQuantity", "thumbnailUrl", "author", "isbn")
+                .containsExactly(
+                        "book-001",
+                        "Book Name",
+                        "Book description",
+                        1500,
+                        20,
+                        "http://example.com/book_thumbnail.jpg",
+                        "Author Name",
+                        "ISBN1234567890"
+                );
+
+
+    }
 
 
 }
