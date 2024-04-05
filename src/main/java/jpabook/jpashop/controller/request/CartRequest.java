@@ -18,4 +18,16 @@ public abstract class CartRequest {
         private String productUid;
         private int quantity;
     }
+
+
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @Schema(name = "UpdateCartRequest")
+    public static class Update{
+        private String productUid;
+        private int addCount;
+    }
+
 }

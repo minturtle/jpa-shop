@@ -4,11 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.request.CartRequest;
 import jpabook.jpashop.controller.response.CartResponse;
+import jpabook.jpashop.domain.Cart;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -133,6 +136,36 @@ class ProductCartControllerTest {
                         tuple("album-001", "Album Name", "http://example.com/album_thumbnail.jpg", 2000, 3),
                         tuple("book-001", "Book Name", "http://example.com/book_thumbnail.jpg", 1500, 2)
                 );
+    }
+
+    @ParameterizedTest
+    @CsvSource({"1", "-1"})
+    @DisplayName("사용자는 자신의 장바구니의 상품의 갯수를 수정할 수 있다.")
+    public void testWhenUpdateCartQuantityThenSuccess(int updateQuantity) throws Exception{
+        //given
+        String givenUid = "user-001";
+
+        String token = tokenProvider.sign(givenUid, new Date());
+        //when
+        mockMvc.perform(put("/api/product/cart")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new CartRequest.Update("album-001", updateQuantity)))
+                )
+                .andDo(print())
+                .andExpect(status().isOk());
+        //then
+        User user = userRepository.findByUid(givenUid)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Cart actual = user.getCartList().stream()
+                .filter(cart -> cart.getProduct().getUid().equals("album-001"))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+
+        assertThat(actual.getQuantity()).isEqualTo(3 + updateQuantity);
+
     }
 
 
