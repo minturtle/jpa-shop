@@ -38,11 +38,6 @@ class ProductControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-
-    @Autowired
-    private JwtTokenProvider tokenProvider;
-
-
     @Test
     @DisplayName("사용자는 DB에 등록된 상품을 검색 조건 없이 검색할 시 DB에서 조회해 상품 정보를 최신순으로 정렬된 채 조회한다.")
     void testWhenSearchProductThenReturnList() throws Exception{
