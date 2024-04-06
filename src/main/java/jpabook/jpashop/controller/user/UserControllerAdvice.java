@@ -7,6 +7,7 @@ import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserAuthTypeException;
+import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
@@ -24,7 +25,7 @@ import java.util.Arrays;
 @Slf4j
 public class UserControllerAdvice {
 
-    @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, JwtException.class})
+    @ExceptionHandler({ PasswordValidationException.class, AlreadyExistsUserException.class, JwtException.class, InvalidBalanceValueException.class})
     public ResponseEntity<ErrorResponse> badRequest(Exception e){
         log.info("method execution failed-400 : {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.BAD_REQUEST);

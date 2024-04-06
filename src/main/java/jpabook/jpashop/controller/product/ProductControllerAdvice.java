@@ -3,6 +3,7 @@ package jpabook.jpashop.controller.product;
 
 import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.exception.product.CartQuantityException;
+import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -18,7 +19,7 @@ import java.util.Arrays;
 @Slf4j
 public class ProductControllerAdvice {
 
-    @ExceptionHandler(CartQuantityException.class)
+    @ExceptionHandler({CartQuantityException.class, InvalidStockQuantityException.class})
     public ResponseEntity<ErrorResponse> badRequest(Exception e){
         log.info("method execution failed-400 : {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.BAD_REQUEST);
