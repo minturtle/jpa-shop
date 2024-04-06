@@ -20,8 +20,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("min-ecomerce API")
-                .description("ecomerce API")
+                .title("min-ecommerce API")
+                .description("ecommerce API")
                 .version("1.0.0");
     }
 
