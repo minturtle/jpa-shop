@@ -21,12 +21,12 @@ public class LoggingAspect {
     @Around("loggableClass()")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
-        log.info("Executing method: {}", joinPoint.getSignature().toShortString());
+        log.debug("Executing method: {}", joinPoint.getSignature().toShortString());
 
         Object proceed = joinPoint.proceed();
 
         long executionTime = System.currentTimeMillis() - start;
-        log.info("{} executed in {}ms", joinPoint.getSignature().toShortString(), executionTime);
+        log.debug("{} executed in {}ms", joinPoint.getSignature().toShortString(), executionTime);
         return proceed;
     }
 

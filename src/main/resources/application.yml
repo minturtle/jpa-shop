@@ -19,6 +19,7 @@ nanoId:
   size : 10
 
 
+
 server:
   servlet:
     encoding:
@@ -28,3 +29,8 @@ server:
 jwt:
   secret: secretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKey
   access-token-expire-time: 10800000 # 3H
+logging:
+  level:
+    jpabook:
+      jpashop:
+        aop: DEBUG
