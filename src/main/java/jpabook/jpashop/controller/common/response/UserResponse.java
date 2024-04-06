@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 public abstract class UserResponse {
 
@@ -15,6 +16,7 @@ public abstract class UserResponse {
     @AllArgsConstructor
     @Getter
     @Setter
+    @Component("UserDetailResponse")
     public static class Detail{
         private String uid;
         private String name;
