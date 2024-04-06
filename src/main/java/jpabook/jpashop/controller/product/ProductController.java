@@ -1,6 +1,7 @@
 package jpabook.jpashop.controller.product;
 
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.controller.common.response.ProductResponse;
 import jpabook.jpashop.dto.ProductDto;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/product")
 @RequiredArgsConstructor
+@Loggable
 public class ProductController {
 
     private final ProductService productService;

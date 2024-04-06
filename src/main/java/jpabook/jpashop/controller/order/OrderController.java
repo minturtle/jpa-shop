@@ -1,6 +1,7 @@
 package jpabook.jpashop.controller.order;
 
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
 import jpabook.jpashop.controller.common.request.OrderRequest;
 import jpabook.jpashop.controller.common.response.OrderResponse;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/order")
+@Loggable
 public class OrderController {
 
     private final OrderService orderService;

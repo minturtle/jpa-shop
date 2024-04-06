@@ -1,5 +1,6 @@
 package jpabook.jpashop.service;
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.domain.order.Order;
 import jpabook.jpashop.domain.order.OrderProduct;
 import jpabook.jpashop.domain.order.OrderStatus;
@@ -39,6 +40,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Loggable
 public class OrderService {
 
     private final OrderRepository orderRepository;

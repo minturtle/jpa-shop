@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
@@ -27,6 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
+@Loggable
 public class AccountService {
 
     private final UserRepository userRepository;

@@ -1,6 +1,7 @@
 package jpabook.jpashop.controller.product;
 
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
 import jpabook.jpashop.controller.common.request.CartRequest;
 import jpabook.jpashop.controller.common.response.CartResponse;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/product/cart")
 @RequiredArgsConstructor
+@Loggable
 public class ProductCartController {
 
     private final CartService cartService;

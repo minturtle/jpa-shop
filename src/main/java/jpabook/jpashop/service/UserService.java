@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.*;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 @Transactional
 @Slf4j
+@Loggable
 public class UserService {
 
     private final UserRepository userRepository;

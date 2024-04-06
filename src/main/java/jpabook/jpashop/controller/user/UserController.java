@@ -1,5 +1,6 @@
 package jpabook.jpashop.controller.user;
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
 import jpabook.jpashop.controller.common.request.UserRequest;
 import jpabook.jpashop.controller.common.response.UserResponse;
@@ -23,6 +24,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
+@Loggable
 public class UserController {
 
     private final UserService userService;

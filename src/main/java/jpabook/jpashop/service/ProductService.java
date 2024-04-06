@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;
@@ -24,6 +25,7 @@ import java.util.Optional;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Loggable
 public class ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;

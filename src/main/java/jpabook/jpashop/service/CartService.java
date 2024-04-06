@@ -1,6 +1,7 @@
 package jpabook.jpashop.service;
 
 
+import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.User;
@@ -23,6 +24,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Loggable
 public class CartService {
 
 
