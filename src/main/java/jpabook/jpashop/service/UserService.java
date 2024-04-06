@@ -40,6 +40,8 @@ public class UserService {
     */
     @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
     public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo) throws PasswordValidationException, AlreadyExistsUserException {
+        log.info("register user : email - {}", registerInfo.getEmail());
+
 
         validDuplicationEmail(registerInfo.getEmail());
         validDuplicationUsername(registerInfo.getUsername());
@@ -66,6 +68,8 @@ public class UserService {
 
         saveProcess(newUser);
 
+
+        log.info("register user success : userUid - {}, email - {}", uid, registerInfo.getEmail());
         return uid;
     }
 
@@ -77,6 +81,8 @@ public class UserService {
      * @exception
     */
     public String login(String username, String password) throws AuthenticateFailedException {
+        log.info("login user : username - {}", username);
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthenticateFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage()));
 
@@ -86,6 +92,7 @@ public class UserService {
             throw new AuthenticateFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage());
         }
 
+        log.info("login user success : username - {}, userUid - {}", username, user.getUid());
         return user.getUid();
     }
 
@@ -100,6 +107,8 @@ public class UserService {
     */
     @Transactional(rollbackFor = {AlreadyExistsUserException.class, RuntimeException.class})
     public UserDto.OAuthLoginResult loginKakao(String kakaoUid, String email) throws AlreadyExistsUserException {
+        log.info("login kakao user : email - {}", email);
+
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         boolean isUserPresent = userOptional.isPresent();
@@ -125,6 +134,7 @@ public class UserService {
 
         saveProcess(newUser);
 
+        log.info("login kakao user success : email - {}", email);
         return new UserDto.OAuthLoginResult(uid, true);
     }
 
@@ -141,6 +151,7 @@ public class UserService {
      */
     @Transactional(rollbackFor = {AlreadyExistsUserException.class, RuntimeException.class})
     public UserDto.OAuthLoginResult loginGoogle(String googleUid,  String email) throws AlreadyExistsUserException {
+        log.info("login google user : email - {}", email);
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         boolean isUserPresent = userOptional.isPresent();
@@ -162,6 +173,8 @@ public class UserService {
         newUser.setGoogleOAuth2AuthInfo(googleUid);
 
         saveProcess(newUser);
+
+        log.info("login google user success : email - {}", email);
         return new UserDto.OAuthLoginResult(uid, true);
     }
 
@@ -173,9 +186,11 @@ public class UserService {
     */
     @Transactional(readOnly = true)
     public UserDto.Detail getUserInfo(String userUid) throws CannotFindEntityException {
+        log.info("get user info : userUid - {}", userUid);
         User user = findUserByUidOrThrow(userUid);
 
 
+        log.info("get user info success : userUid - {}", userUid);
         return UserDto.Detail.builder()
                 .userUid(user.getUid())
                 .name(user.getName())
@@ -197,6 +212,7 @@ public class UserService {
     */
     @Transactional(rollbackFor = {CannotFindEntityException.class, RuntimeException.class})
     public void updateUserInfo(String userUid, UserDto.UpdateDefaultUserInfo dto) throws CannotFindEntityException, OptimisticLockingFailureException {
+        log.info("update user info : userUid - {}", userUid);
         User findUser = findUserByUidOrThrow(userUid);
         AddressInfo savedAddressInfo = findUser.getAddressInfo();
 
@@ -209,6 +225,7 @@ public class UserService {
         );
 
         findUser.setProfileImageUrl(dto.getUpdatedProfileImageUrl().orElse(findUser.getProfileImageUrl()));
+        log.info("update user info success : userUid - {}", userUid);
     }
 
 
@@ -226,6 +243,8 @@ public class UserService {
     */
     public void updatePassword(String userUid, UserDto.UpdatePassword dto)
             throws CannotFindEntityException, UserAuthTypeException, OptimisticLockingFailureException, AuthenticateFailedException, PasswordValidationException {
+        log.info("update user password : userUid - {}", userUid);
+
         User findUser = findUserByUidOrThrow(userUid);
         UsernamePasswordAuthInfo authInfo = findUser.getUsernamePasswordAuthInfo();
 
@@ -247,7 +266,7 @@ public class UserService {
                 authInfo.getSaltBytes()
         );
 
-
+        log.info("update user password success : userUid - {}", userUid);
     }
 
 

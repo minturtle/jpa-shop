@@ -44,12 +44,13 @@ public class AccountService {
      * @description User의 Account를 추가하는 메서드
      */
     public String addAccount(AccountDto.Create dto) throws CannotFindEntityException {
+        log.info("add Account Logic started : user-{}, balance-{}won", dto.getUserUid(), dto.getBalance());
         User user = findUserOrThrow(dto);
 
         String accountUid = nanoIdProvider.createNanoId();
         user.addAccount(new Account(accountUid, dto.getName(), dto.getBalance()));
 
-
+        log.info("add Account Logic finished : user- {}, account-uid- {},balance-{}won", dto.getUserUid(), accountUid, dto.getBalance());
         return accountUid;
     }
 
@@ -64,8 +65,12 @@ public class AccountService {
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class})
     public AccountDto.CashFlowResult withdraw(AccountDto.CashFlowRequest dto) throws CannotFindEntityException, InvalidBalanceValueException, OptimisticLockingFailureException {
         Account account = findAccountWithOptimisticLockOrThrow(dto.getAccountUid());
+        log.info("withdraw Logic started : account-uid : {}, before_account_balance-{}, amount-{}won", dto.getAccountUid(), account.getBalance(), dto.getAmount());
+
         account.withdraw(dto.getAmount());
 
+
+        log.info("withdraw Logic finished : account-uid : {}, after_account_balance-{}, amount-{}won", dto.getAccountUid(), account.getBalance(), dto.getAmount());
         return new AccountDto.CashFlowResult(
                 dto.getAccountUid(),
                 dto.getAmount(),
@@ -86,6 +91,8 @@ public class AccountService {
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class, UnauthorizedAccountAccessException.class})
     public AccountDto.CashFlowResult deposit(AccountDto.CashFlowRequest dto) throws CannotFindEntityException, InvalidBalanceValueException, UnauthorizedAccountAccessException {
         Account account = findAccountWithPessimisticLockOrThrow(dto.getAccountUid());
+        log.info("deposit Logic started : account-uid : {}, before_account_balance-{}, amount-{}won", dto.getAccountUid(), account.getBalance(), dto.getAmount());
+
 
         if(!account.getUser().getUid().equals(dto.getUserUid())){
             throw new UnauthorizedAccountAccessException(AccountExceptionMessages.UNAUTHORIZED_ACCESS.getMessage());
@@ -93,7 +100,7 @@ public class AccountService {
 
         account.deposit(dto.getAmount());
 
-
+        log.info("deposit Logic finished : account-uid : {}, after_account_balance-{}, amount-{}won", dto.getAccountUid(), account.getBalance(), dto.getAmount());
         return new AccountDto.CashFlowResult(
                 dto.getAccountUid(),
                 dto.getAmount(),

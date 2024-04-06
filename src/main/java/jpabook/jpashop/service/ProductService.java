@@ -14,6 +14,7 @@ import jpabook.jpashop.exception.product.ProductExceptionMessages;
 import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import java.util.Optional;
 @Transactional
 @RequiredArgsConstructor
 @Loggable
+@Slf4j
 public class ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
@@ -37,7 +39,7 @@ public class ProductService {
     */
 
     public PaginationListDto<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Pageable pageable) {
-
+        log.info("search product logic started");
         List<Product> searchResult = productRepository.search(searchCondition, pageable);
         Long count = productRepository.getCount(searchCondition);
 
@@ -45,6 +47,7 @@ public class ProductService {
         List<ProductDto.Preview> dtoList = searchResult.stream().map(p -> modelMapper.map(p, ProductDto.Preview.class)).toList();
 
 
+        log.info("search product logic finished");
         return PaginationListDto.<ProductDto.Preview>builder()
                 .count(count)
                 .data(dtoList)
@@ -62,19 +65,25 @@ public class ProductService {
      * @exception InternalErrorException 상품의 타입이 올바르게 매핑되지 않은 경우
     */
     public ProductDto.Detail findByUid(String givenUid) throws CannotFindEntityException, InternalErrorException {
+        log.info("find product by uid logic started");
+
         Product product = productRepository.findByUid(givenUid)
                 .orElseThrow(()->new CannotFindEntityException(ProductExceptionMessages.CANNOT_FIND_PRODUCT.getMessage()));
 
         if(product instanceof Movie){
+            log.info("find product by uid logic finished");
             return modelMapper.map(product, ProductDto.MovieDetail.class);
         }
         else if(product instanceof Album){
+            log.info("find product by uid logic finished");
             return modelMapper.map(product, ProductDto.AlbumDetail.class);
         }
         else if(product instanceof Book){
+            log.info("find product by uid logic finished");
             return modelMapper.map(product, ProductDto.BookDetail.class);
         }
 
+        log.info("find product by uid logic finished");
         throw new InternalErrorException(ProductExceptionMessages.PRODUCT_TYPE_MAPPAING_FAILED.getMessage());
     }
     

@@ -28,6 +28,7 @@ import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.util.NanoIdProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -40,6 +41,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 @Loggable
 public class OrderService {
 
@@ -63,7 +65,7 @@ public class OrderService {
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidStockQuantityException.class, InvalidBalanceValueException.class, RuntimeException.class})
     public OrderDto.Detail order(String userUid, String accountUid, List<OrderDto.OrderProductRequestInfo> productDtoList)
             throws CannotFindEntityException, InvalidStockQuantityException, InvalidBalanceValueException {
-
+        log.info("order logic started : user-{}, account-{}, product-{}", userUid, accountUid, productDtoList);
         int totalPrice = decreaseProductStock(productDtoList);
 
         AccountDto.CashFlowResult cashflowResult = accountService.withdraw(new AccountDto.CashFlowRequest(userUid, accountUid, totalPrice));
@@ -73,6 +75,8 @@ public class OrderService {
 
         removeCartIfExists(userUid, productDtoList);
 
+
+        log.info("order logic finished : user-{}, order-{}", userUid, order.getUid());
         return createOrderResult(order);
 
 
@@ -89,6 +93,8 @@ public class OrderService {
     */
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class, InternalErrorException.class,UnauthorizedAccountAccessException.class})
     public void cancel(String orderUid) throws CannotFindEntityException, InvalidBalanceValueException, InternalErrorException, UnauthorizedAccountAccessException {
+        log.info("cancel order logic started : order-{}", orderUid);
+
         Order order = orderRepository.findByUidWithJoinProductAccount(orderUid)
                 .orElseThrow(() -> new CannotFindEntityException(OrderExceptionMessage.CANNOT_FIND_ORDER.getMessage()));
 
@@ -96,6 +102,7 @@ public class OrderService {
         refundPayment(order.getUser().getUid(), order.getPayment());
         order.setStatus(OrderStatus.CANCELED);
 
+        log.info("cancel order logic finished : order-{}", orderUid);
     }
 
     /**
@@ -105,9 +112,12 @@ public class OrderService {
      * @throws CannotFindEntityException UID 조회 실패시
     */
     public OrderDto.Detail findByOrderId(String orderUid) throws CannotFindEntityException {
+        log.info("find order logic started : order-{}", orderUid);
+
         Order findOrder = orderRepository.findByUid(orderUid)
                 .orElseThrow(() -> new CannotFindEntityException(OrderExceptionMessage.CANNOT_FIND_ORDER.getMessage()));
 
+        log.info("find order logic finished : order-{}", orderUid);
         return createOrderResult(findOrder);
     }
 
@@ -119,10 +129,12 @@ public class OrderService {
      * @throws
     */
     public PaginationListDto<OrderDto.Preview> findByUser(String userUid, Pageable pageable) throws EntityNotFoundException{
+        log.info("find order by user logic started : user-{}", userUid);
 
         Integer count = orderRepository.countByUser(userUid);
         List<Order> orderList = orderRepository.findByUser(userUid, pageable);
 
+        log.info("find order by user logic finished : user-{}", userUid);
         return new PaginationListDto<>(count, orderList.stream().map(this::createOrderPreview).toList()) ;
     }
 

@@ -14,6 +14,7 @@ import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @Loggable
+@Slf4j
 public class CartService {
 
 
@@ -41,6 +43,7 @@ public class CartService {
      * @throws
     */
     public void addCarts(String userUid, CartDto.Add dto) throws CannotFindEntityException, CartQuantityException {
+        log.info("add cart logic started : user-{}, product-{}, quantity-{}", userUid, dto.getProductUid(), dto.getQuantity());
         User user = getUserOrThrow(userUid);
 
         Optional<Cart> isAlreadyExistsOptional = user.getCartList().stream()
@@ -55,8 +58,7 @@ public class CartService {
         Cart cart = createCart(dto);
         user.addCart(cart);
 
-
-
+        log.info("add cart logic finished : user-{}, product-{}, quantity-{}", userUid, dto.getProductUid(), dto.getQuantity());
 
     }
 
@@ -68,6 +70,8 @@ public class CartService {
      * @throws
     */
     public List<CartDto.Detail> findCartByUserUid(String userUid) throws CannotFindEntityException {
+        log.info("find cart by userUid logic started : user-{}", userUid);
+
         User user = getUserWithProduct(userUid);
 
         List<CartDto.Detail> resultList = new ArrayList<>(user.getCartList().size());
@@ -85,7 +89,7 @@ public class CartService {
             resultList.add(dto);
         }
 
-
+        log.info("find cart by userUid logic finished : user-{}", userUid);
         return resultList;
     }
 

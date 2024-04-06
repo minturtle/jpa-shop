@@ -2,10 +2,7 @@ package jpabook.jpashop.dto;
 
 
 import jpabook.jpashop.domain.order.OrderStatus;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -67,12 +64,21 @@ public abstract class OrderDto {
 
 
     @NoArgsConstructor
-    @Data
+    @Getter
+    @Setter
     @AllArgsConstructor
     @Builder
     public static class OrderProductRequestInfo {
         private String productUid;
         private int quantity;
+
+        @Override
+        public String toString() {
+            return "{" +
+                    "productUid='" + productUid + '\'' +
+                    ", quantity=" + quantity +
+                    '}';
+        }
     }
 
 
