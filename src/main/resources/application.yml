@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/jpashop?serverTimezone=UTC&character_set_server=utf8mb4;
-    username: root
-    password: 1111
+    url: jdbc:mysql://146.56.119.182:3306/jpashop?serverTimezone=UTC&character_set_server=utf8mb4;
+    username: minturtle
+    password: tony267
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
