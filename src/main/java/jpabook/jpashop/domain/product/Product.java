@@ -50,6 +50,7 @@ public abstract class Product extends BaseEntity {
 
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
 

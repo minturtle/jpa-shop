@@ -9,7 +9,7 @@ spring:
       encoding: utf-8
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
   security:
     password:
       iterations: 100000
