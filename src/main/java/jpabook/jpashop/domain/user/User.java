@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -18,6 +19,7 @@ import java.util.Objects;
 @Entity
 @NoArgsConstructor
 @Table(name = "users")
+@SuperBuilder
 public class User extends BaseEntity {
 
 

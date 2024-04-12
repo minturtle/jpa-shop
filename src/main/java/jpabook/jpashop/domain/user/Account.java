@@ -7,6 +7,7 @@ import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Objects;
 
@@ -14,6 +15,7 @@ import java.util.Objects;
 @Table(name = "accounts")
 @Getter
 @NoArgsConstructor
+@SuperBuilder
 public class Account extends BaseEntity {
 
     public Account(String uid, String name,  Long balance) {
