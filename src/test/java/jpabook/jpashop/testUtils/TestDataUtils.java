@@ -1,10 +1,7 @@
 package jpabook.jpashop.testUtils;
 
 
-import jpabook.jpashop.domain.product.Album;
-import jpabook.jpashop.domain.product.Book;
-import jpabook.jpashop.domain.product.Category;
-import jpabook.jpashop.domain.product.Movie;
+import jpabook.jpashop.domain.product.*;
 import jpabook.jpashop.domain.user.*;
 
 import java.time.LocalDateTime;
@@ -26,6 +23,10 @@ public class TestDataUtils {
     public static final Album album;
     public static final Book book;
     public static final Movie movie;
+
+    public static final Cart cart1;
+
+    public static final Cart cart2;
 
 
 
@@ -118,6 +119,19 @@ public class TestDataUtils {
                 .actor("Actor Name")
                 .build();
 
+        cart1 = Cart.builder()
+                .id(1L)
+                .user(user1)
+                .product(album)
+                .quantity(3)
+                .build();
+
+        cart2 = Cart.builder()
+                .id(2L)
+                .user(user1)
+                .product(book)
+                .quantity(2)
+                .build();
 
     }
 
