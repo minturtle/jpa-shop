@@ -18,6 +18,12 @@ public class OrderProduct {
         this.itemPrice = product.getPrice();
     }
 
+    public OrderProduct(Product product, int count, int itemPrice) {
+        this.product = product;
+        this.count = count;
+        this.itemPrice = itemPrice;
+    }
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_item_id")
     private Long id;

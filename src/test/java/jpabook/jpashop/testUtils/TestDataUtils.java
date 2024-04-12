@@ -1,10 +1,15 @@
 package jpabook.jpashop.testUtils;
 
 
+import jpabook.jpashop.domain.order.Order;
+import jpabook.jpashop.domain.order.OrderProduct;
+import jpabook.jpashop.domain.order.OrderStatus;
+import jpabook.jpashop.domain.order.Payment;
 import jpabook.jpashop.domain.product.*;
 import jpabook.jpashop.domain.user.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class TestDataUtils {
 
@@ -27,6 +32,15 @@ public class TestDataUtils {
     public static final Cart cart1;
 
     public static final Cart cart2;
+
+    public static final Order order1;
+
+    public static final Order order2;
+
+
+    public static final OrderProduct orderProduct1;
+
+    public static final OrderProduct orderProduct2;
 
 
 
@@ -131,6 +145,31 @@ public class TestDataUtils {
                 .user(user1)
                 .product(book)
                 .quantity(2)
+                .build();
+
+        orderProduct1 = new OrderProduct(album, 2, 500);
+        orderProduct2 = new OrderProduct(book, 2, 1000);
+
+        order1 = Order.builder()
+                .uid("order-001")
+                .user(user1)
+                .deliveryInfo(new AddressInfo("123 Main St", "Apt 101"))
+                .payment(new Payment(account1, 1000))
+                .status(OrderStatus.ORDERED)
+                .createdAt(LocalDateTime.of(2021, 8, 1, 0, 0))
+                .modifiedAt(LocalDateTime.of(2021, 8, 1, 0, 0))
+                .orderProducts(List.of(orderProduct1))
+                .build();
+
+        order2 = Order.builder()
+                .uid("order-002")
+                .user(user1)
+                .deliveryInfo(new AddressInfo("123 Main St", "Apt 101"))
+                .payment(new Payment(account1, 2000))
+                .status(OrderStatus.CANCELED)
+                .createdAt(LocalDateTime.of(2021, 8, 2, 0, 0))
+                .modifiedAt(LocalDateTime.of(2021, 8, 2, 0, 0))
+                .orderProducts(List.of(orderProduct2))
                 .build();
 
     }
