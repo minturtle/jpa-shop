@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.tuple;
 
 @DataJpaTest
 @Import(ProductRepositoryTest.TestConfig.class)
+@ActiveProfiles("test")
 class ProductRepositoryTest {
 
     @Autowired

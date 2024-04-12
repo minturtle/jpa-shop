@@ -8,12 +8,8 @@ spring:
     init:
       encoding: utf-8
   jpa:
-    properties:
-      hibernate:
-        show_sql: true
-        format_sql: true
-        hbm2ddl:
-          auto: create
+    hibernate:
+      ddl-auto: create
   security:
     password:
       iterations: 100000
