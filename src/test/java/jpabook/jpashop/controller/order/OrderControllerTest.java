@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jpabook.jpashop.controller.common.request.OrderRequest;
 import jpabook.jpashop.controller.common.response.OrderResponse;
 import jpabook.jpashop.domain.order.Order;
+import jpabook.jpashop.domain.order.OrderProduct;
 import jpabook.jpashop.domain.order.OrderStatus;
+import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.domain.user.User;
@@ -27,10 +29,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
+import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -70,19 +72,22 @@ class OrderControllerTest {
 
     @Test
     @DisplayName("사용자는 장바구니가 아닌 상품을 선택해 주문하면 Account의 잔액과 상품의 재고가 감소하고, 주문이 생성된다.")
-    public void testWhenOrderNoCartItemThenSuccess() throws Exception{
+    public void given_AuthenticatedUserAccountProduct_when_Order_then_Success() throws Exception{
         //given
-        String givenUserUid = "user-001";
+        String givenUserUid = user1.getUid();
+        Account givenAccount = account1;
+        Product givenProduct = album;
+
 
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
 
-        int orderQuantity = 2;
+        int givenOrderQuantity = 2;
 
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
-                "account-001",
+                givenAccount.getUid(),
                 List.of(
-                        new OrderRequest.ProductOrderInfo("album-001", orderQuantity)
+                        new OrderRequest.ProductOrderInfo(givenProduct.getUid(), givenOrderQuantity)
                 )
         );
 
@@ -96,8 +101,8 @@ class OrderControllerTest {
                 .andReturn();
         //then
         OrderResponse.Detail actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), OrderResponse.Detail.class);
-        Product product = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        Product product = productRepository.findByUid(givenProduct.getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account account = accountRepository.findByUid(givenAccount.getUid()).orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
 
         assertAll("주문 완료후 주문 정보는 관련 정보를 모두 담고 있어야 한다.",
                 ()->assertThat(actual.getOrderUid()).isNotNull(),
@@ -105,28 +110,33 @@ class OrderControllerTest {
                 ()->assertThat(actual.getOrderTime()).isNotNull(),
                 ()->assertThat(actual.getOrderPaymentDetail())
                         .extracting("accountUid", "totalPrice")
-                        .containsExactly("account-001", 4000),
+                        .containsExactly(givenAccount.getUid(), givenProduct.getPrice() * givenOrderQuantity),
                 ()->assertThat(actual.getOrderProducts())
                         .extracting("productUid","unitPrice", "quantity", "totalPrice")
-                        .containsExactly(tuple("album-001",2000, orderQuantity, 4000)));
+                        .containsExactly(tuple(givenProduct.getUid(), givenProduct.getPrice(), givenOrderQuantity, givenProduct.getPrice() * givenOrderQuantity))
+        );
 
-        assertThat(product.getStockQuantity()).isEqualTo(5 - orderQuantity);
-        assertThat(account.getBalance()).isEqualTo(100000 - 4000);
+        assertThat(product.getStockQuantity()).isEqualTo(givenProduct.getStockQuantity() - givenOrderQuantity);
+        assertThat(account.getBalance()).isEqualTo(givenAccount.getBalance() - givenProduct.getPrice() * givenOrderQuantity);
 
     }
     @Test
     @DisplayName("사용자는 장바구니에 담긴 상품을 주문하면 Account의 잔액과 상품의 재고가 감소하고, 주문이 생성되며 장바구니에 담긴 해당 물건은 삭제된다.")
-    public void testWhenUserOrderInCartThenSuccess() throws Exception{
+    public void given_AuthenticatedUserAccountCart_when_OrderInCart_then_SuccessAndRemoveCart() throws Exception{
         //given
-        String givenUserUid = "user-001";
+        String givenUserUid = user1.getUid();
+        Account givenAccount = account1;
+
+        Cart givenCart1 = cart1;
+        Cart givenCart2 = cart2;
+
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
-        int orderQuantity = 2;
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
-                "account-001",
+                givenAccount.getUid(),
                 List.of(
-                        new OrderRequest.ProductOrderInfo("album-001", orderQuantity),
-                        new OrderRequest.ProductOrderInfo("book-001", orderQuantity)
+                        new OrderRequest.ProductOrderInfo(givenCart1.getProduct().getUid(), givenCart1.getQuantity()),
+                        new OrderRequest.ProductOrderInfo(givenCart2.getProduct().getUid(), givenCart2.getQuantity())
                 )
         );
         //when
@@ -137,30 +147,39 @@ class OrderControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
         //then
-        User user = userRepository.findByUid("user-001").orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
-        Product album = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Product book = productRepository.findByUid("book-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
+        User actualUser = userRepository.findByUid(givenUserUid).orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+        Product actualProduct1 = productRepository.findByUid(givenCart1.getProduct().getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Product actualProduct2 = productRepository.findByUid(givenCart2.getProduct().getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account actualAccount = accountRepository.findByUid(givenAccount.getUid()).orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
 
-        assertThat(user.getCartList()).isEmpty();
-        assertThat(album.getStockQuantity()).isEqualTo(5 - orderQuantity);
-        assertThat(book.getStockQuantity()).isEqualTo(20 - orderQuantity);
-        assertThat(account.getBalance()).isEqualTo(100000 - 7000);
+        int expectedStockQuantity1 = givenCart1.getProduct().getStockQuantity() - givenCart1.getQuantity();
+        int expectedStockQuantity2 = givenCart2.getProduct().getStockQuantity() - givenCart2.getQuantity();
+        long expectedBalance = givenAccount.getBalance() - (givenCart1.getProduct().getPrice() * givenCart1.getQuantity() + givenCart2.getProduct().getPrice() * givenCart2.getQuantity());
+
+
+        assertThat(actualUser.getCartList()).isEmpty();
+        assertThat(actualProduct1.getStockQuantity()).isEqualTo(expectedStockQuantity1);
+        assertThat(actualProduct2.getStockQuantity()).isEqualTo(expectedStockQuantity2);
+        assertThat(actualAccount.getBalance()).isEqualTo(expectedBalance);
 
     }
 
     @Test
     @DisplayName("사용자가 상품의 남은 재고 이상을 주문하면 주문이 실패한다.")
-    public void testWhenOrderMoreThanQuatityThenFailed() throws Exception{
+    public void given_AuthenticatedUserNotEnoughStockProduct_when_Order_then_Failed() throws Exception{
         //given
-        String givenUserUid = "user-001";
+        String givenUserUid = user1.getUid();
+        Account givenAccount = account1;
+        Product givenProduct = album;
+        int givenOrderQuantity = 1000000;
+
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
-        int orderQuantity = 1000;
+
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
-                "account-001",
+                givenAccount.getUid(),
                 List.of(
-                        new OrderRequest.ProductOrderInfo("album-001", orderQuantity)
+                        new OrderRequest.ProductOrderInfo(givenProduct.getUid(), givenOrderQuantity)
                 )
         );
         //when
@@ -171,30 +190,30 @@ class OrderControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
         //then
-        Product album = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Product book = productRepository.findByUid("book-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Product movie = productRepository.findByUid("movie-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
+        Product actualAlbum = productRepository.findByUid(givenProduct.getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account actualAccount = accountRepository.findByUid(givenAccount.getUid()).orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
 
 
-        assertThat(album.getStockQuantity()).isEqualTo(5);
-        assertThat(book.getStockQuantity()).isEqualTo(20);
-        assertThat(movie.getStockQuantity()).isEqualTo(8);
-        assertThat(account.getBalance()).isEqualTo(100000L);
+        assertThat(actualAlbum.getStockQuantity()).isEqualTo(givenProduct.getStockQuantity());
+        assertThat(actualAccount.getBalance()).isEqualTo(givenAccount.getBalance());
     }
 
     @Test
     @DisplayName("사용자가 잔액보다 많은 금액을 주문하면 주문이 실패한다.")
-    public void testWhenOrderMoreThanBalanceThenFailed() throws Exception{
+    public void given_AuthenticatedUserNotEnoughAccount_when_Order_then_Failed() throws Exception{
         //given
-        String givenUserUid = "user-001";
+        String givenUserUid = user1.getUid();
+        Account givenAccount = account2;
+        Product givenProduct = album;
+
+
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
-        int orderQuantity = 1000;
+        int givenOrderQuantity = 10;
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
-                "account-002",
+                givenAccount.getUid(),
                 List.of(
-                        new OrderRequest.ProductOrderInfo("album-001", orderQuantity)
+                        new OrderRequest.ProductOrderInfo(givenProduct.getUid(), givenOrderQuantity)
                 )
         );
         //when
@@ -205,23 +224,20 @@ class OrderControllerTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
         //then
-        Product album = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Product book = productRepository.findByUid("book-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Product movie = productRepository.findByUid("movie-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
-        Account account = accountRepository.findByUid("account-002").orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
+        Product actualProduct = productRepository.findByUid(givenProduct.getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account actualAccount = accountRepository.findByUid(givenAccount.getUid()).orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
 
 
-        assertThat(album.getStockQuantity()).isEqualTo(5);
-        assertThat(book.getStockQuantity()).isEqualTo(20);
-        assertThat(movie.getStockQuantity()).isEqualTo(8);
-        assertThat(account.getBalance()).isEqualTo(500L);
+        assertThat(actualProduct.getStockQuantity()).isEqualTo(givenProduct.getStockQuantity());
+        assertThat(actualAccount.getBalance()).isEqualTo(givenAccount.getBalance());
     }
 
     @Test
     @DisplayName("사용자는 자신의 주문 기록 리스트를 조회할 수 있다.")
-    public void testWhenGetOrderHistoryListThenReturn() throws Exception{
+    public void given_AuthenticatedUser_when_GetOrderHistoryList_then_Return() throws Exception{
         //given
-        String givenUserUid = "user-001";
+        String givenUserUid = user1.getUid();
+
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
         //when
         MvcResult mvcResult = mockMvc.perform(get("/api/order/list")
@@ -232,12 +248,15 @@ class OrderControllerTest {
         //then
         PaginationListDto<OrderResponse.Preview> actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), new TypeReference<PaginationListDto<OrderResponse.Preview>>(){});
 
+        Order expectedOrder1 = order1;
+        Order expectedOrder2 = order2;
+
         assertThat(actual.getCount()).isEqualTo(2);
         assertThat(actual.getData())
                 .extracting("orderUid", "totalPrice", "orderStatus", "orderTime")
                 .containsExactly(
-                        tuple("order-001", 1000, OrderStatus.ORDERED, LocalDateTime.of(2021, 8, 1, 0, 0, 0)),
-                        tuple("order-002", 2000, OrderStatus.CANCELED, LocalDateTime.of(2021, 8, 2, 0, 0, 0))
+                        tuple(expectedOrder1.getUid(), expectedOrder1.getPayment().getAmount(), expectedOrder1.getStatus(), expectedOrder1.getCreatedAt()),
+                        tuple(expectedOrder2.getUid(), expectedOrder2.getPayment().getAmount(), expectedOrder2.getStatus(), expectedOrder2.getCreatedAt())
                 );
         assertThat(actual.getData()).extracting("name")
                 .doesNotContainNull();
@@ -247,12 +266,12 @@ class OrderControllerTest {
 
     @Test
     @DisplayName("사용자는 주문 상세 정보를 조회할 수 있다.")
-    public void thenWhenGetOrderDetailInfoThenReturn() throws Exception{
+    public void given_AuthenticatedUserOrder_when_GetOrderDetail_then_ReturnDetailOrderInfo() throws Exception{
         //given
-        String givenUserUid = "user-001";
+        String givenUserUid = user1.getUid();
+        String givenOrderUid = order1.getUid();
 
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
-        String givenOrderUid = "order-001";
 
         //when
         MvcResult mvcResult = mockMvc.perform(get("/api/order/{orderId}", givenOrderUid)
@@ -263,26 +282,49 @@ class OrderControllerTest {
         //then
         OrderResponse.Detail actual = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), OrderResponse.Detail.class);
 
-        assertThat(actual).extracting("orderUid", "orderStatus", "orderTime", "orderPaymentDetail.accountUid", "orderPaymentDetail.totalPrice")
+        Order expectedOrder = order1;
+        OrderProduct expectedOrderProduct = orderProduct1;
+
+        assertThat(actual).extracting(
+                "orderUid",
+                        "orderStatus",
+                        "orderTime",
+                        "orderPaymentDetail.accountUid",
+                        "orderPaymentDetail.totalPrice"
+                )
                 .containsExactly(
-                        "order-001",
-                        OrderStatus.ORDERED,
-                        LocalDateTime.of(2021, 8, 1, 0, 0, 0),
-                        "account-001",
-                        1000
+                        expectedOrder.getUid(),
+                        expectedOrder.getStatus(),
+                        expectedOrder.getCreatedAt(),
+                        expectedOrder.getPayment().getAccount().getUid(),
+                        expectedOrder.getPayment().getAmount()
                 );
         assertThat(actual.getOrderProducts())
-                .extracting("productUid", "unitPrice", "quantity", "totalPrice")
-                .containsExactly(tuple("album-001", 500, 2, 1000));
+                .extracting(
+                        "productUid",
+                        "unitPrice",
+                        "quantity",
+                        "totalPrice"
+                )
+                .containsExactly(
+                        tuple(
+                                expectedOrderProduct.getProduct().getUid(),
+                                expectedOrderProduct.getItemPrice(),
+                                expectedOrderProduct.getCount(),
+                                expectedOrderProduct.calculateTotalItemPrice()
+                        )
+                );
     }
 
     @Test
     @DisplayName("사용자는 주문을 취소할 수 있다.")
-    public void testWhenCancelOrderThenSuccess() throws Exception{
+    public void given_AuthenticatedUserOrder_when_CancelOrder_then_Success() throws Exception{
         //given
-        String givenUserUid = "user-001";
+        String givenUserUid = user1.getUid();
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
-        String givenOrderUid = "order-001";
+        String givenOrderUid = order1.getUid();
+        Account givenAccount = order1.getPayment().getAccount();
+        Product givenProduct = orderProduct1.getProduct();
 
         //when
         mockMvc.perform(post("/api/order/{orderId}/cancel", givenOrderUid)
@@ -290,16 +332,19 @@ class OrderControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
         //then
-        Order order = orderRepository
+        Order actualOrder = orderRepository
                 .findByUid(givenOrderUid).orElseThrow(() -> new IllegalArgumentException("주문이 존재하지 않습니다."));
-        Account account = accountRepository.findByUid("account-001").orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
-        Product product = productRepository.findByUid("album-001").orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
+        Account actualAccount = accountRepository.findByUid(givenAccount.getUid()).orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        Product actualProduct = productRepository.findByUid(givenProduct.getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
 
-        assertThat(order).extracting("status")
+        assertThat(actualOrder).extracting("status")
                 .isEqualTo(OrderStatus.CANCELED);
-        assertThat(account).extracting("balance")
-                .isEqualTo(100000L + 1000L);
-        assertThat(product.getStockQuantity()).isEqualTo(5 + 2);
+
+        assertThat(actualAccount).extracting("balance")
+                .isEqualTo(givenAccount.getBalance() + order1.getPayment().getAmount());
+
+        assertThat(actualProduct.getStockQuantity())
+                .isEqualTo(givenProduct.getStockQuantity() + orderProduct1.getCount());
     }
 
 
