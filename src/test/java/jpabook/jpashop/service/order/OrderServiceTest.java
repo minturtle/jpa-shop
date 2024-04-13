@@ -1,9 +1,11 @@
 package jpabook.jpashop.service.order;
 
 import jpabook.jpashop.domain.order.Order;
+import jpabook.jpashop.domain.order.OrderProduct;
 import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.product.Product;
 import jpabook.jpashop.domain.user.Account;
+import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
@@ -57,9 +59,9 @@ class OrderServiceTest {
     @DisplayName("Account에 주문 금액 이상의 잔고를 가진 유저가 특정 상품들에 대해 주문을 수행하여 상품의 재고와 계좌의 잔고를 감소시키고, DB에 관련 정보를 저장할 수 있다.")
     void testOrder() throws Exception{
         // given
-        Long givenBalance = account1.getBalance();
-        String givenUserUid = user1.getUid();
-        String givenAccountUid = account1.getUid();
+        Account givenAccount = account1;
+        User givenUser = user1;
+
 
         int movieOrderQuantity = 1;
         int albumOrderQuantity = 2;
@@ -73,11 +75,11 @@ class OrderServiceTest {
 
         // when
 
-        OrderDto.Detail result = orderService.order(givenUserUid, givenAccountUid, orderList);
+        OrderDto.Detail result = orderService.order(givenUser.getUid(), givenAccount.getUid(), orderList);
 
 
         // then
-        Account account = accountRepository.findByUid(account1.getUid())
+        Account account = accountRepository.findByUid(givenAccount.getUid())
                 .orElseThrow(RuntimeException::new);
 
 
@@ -89,7 +91,7 @@ class OrderServiceTest {
 
         assertAll("result는 주문에 관련한 정보를 모두 담고 있어야 한다.",
                 ()->assertThat(result).extracting("orderStatus", "orderPaymentDetail.accountUid", "orderPaymentDetail.totalPrice")
-                        .contains( OrderStatus.ORDERED, givenAccountUid, expectedTotalPrice ),
+                        .contains( OrderStatus.ORDERED, givenAccount.getUid(), expectedTotalPrice ),
                 ()->assertThat(result).extracting("orderUid", "orderTime").doesNotContainNull(),
                 ()-> assertThat(result.getOrderProducts()).extracting("productUid", "productName","productImageUrl","unitPrice","quantity", "totalPrice")
                         .contains(
@@ -100,10 +102,10 @@ class OrderServiceTest {
         );
 
         assertAll("주문 후에 주문 금액만큼 Account의 금액이 감소되어야 한다.",
-                ()->assertThat(account.getBalance()).isEqualTo(givenBalance - expectedTotalPrice));
+                ()->assertThat(account.getBalance()).isEqualTo(givenAccount.getBalance() - expectedTotalPrice));
 
         assertAll("주문 정보를 모두 DB에 저장해야 한다.",
-                ()->assertThat(order.getDeliveryInfo()).extracting("address", "detailedAddress").contains(user1.getAddressInfo().getAddress(), user1.getAddressInfo().getDetailedAddress()),
+                ()->assertThat(order.getDeliveryInfo()).extracting("address", "detailedAddress").contains(givenUser.getAddressInfo().getAddress(), givenUser.getAddressInfo().getDetailedAddress()),
                 ()->assertThat(order.getPayment()).extracting("account", "amount").contains(account, expectedTotalPrice),
                 ()->assertThat(order.getOrderProducts()).extracting("product").doesNotContainNull(),
                 ()->assertThat(order.getOrderProducts()).extracting("count", "itemPrice").contains(
@@ -161,7 +163,9 @@ class OrderServiceTest {
     @DisplayName("상품 주문시 계좌의 잔고가 부족하다면 오류를 throw하며 상품의 갯수와 계좌의 잔고가 줄어들지 않는다.")
     void testOrderNotEnoughMoney() throws Exception{
         // given
-        Long givenBalance = account2.getBalance();
+
+        String givenUserUid = user1.getUid();
+        Account givenAccount = account2;
 
         int movieOrderQuantity = 1;
         int albumOrderQuantity = 2;
@@ -172,8 +176,6 @@ class OrderServiceTest {
         String givenBookUid = book.getUid();
 
 
-        String givenUserUid = user1.getUid();
-        String givenAccountUid = account2.getUid();
 
 
         List<OrderDto.OrderProductRequestInfo> orderList = List.of(
@@ -182,14 +184,14 @@ class OrderServiceTest {
                 new OrderDto.OrderProductRequestInfo(givenBookUid, bookOrderQuantity)
         );
         // when
-        ThrowableAssert.ThrowingCallable throwingCallable = ()->orderService.order(givenUserUid, givenAccountUid, orderList);
+        ThrowableAssert.ThrowingCallable throwingCallable = ()->orderService.order(givenUserUid, givenAccount.getUid(), orderList);
 
         // then
         assertThatThrownBy(throwingCallable)
                 .isInstanceOf(InvalidBalanceValueException.class)
                 .hasMessage(AccountExceptionMessages.NEGATIVE_ACCOUNT_BALANCE.getMessage());
 
-        Account account = accountRepository.findByUid(givenAccountUid)
+        Account account = accountRepository.findByUid(givenAccount.getUid())
                 .orElseThrow(RuntimeException::new);
 
         Product actualMovie = productRepository.findByUid(givenMovieUid)
@@ -200,7 +202,7 @@ class OrderServiceTest {
                 .orElseThrow(RuntimeException::new);
 
 
-        assertThat(account.getBalance()).isEqualTo(givenBalance);
+        assertThat(account.getBalance()).isEqualTo(givenAccount.getBalance());
 
         assertAll("각 상품은 결제되기 전 초기의 수량을 가지고 있어야 한다.",
                 ()->assertThat(actualMovie.getStockQuantity()).isEqualTo(movie.getStockQuantity()),
@@ -252,8 +254,10 @@ class OrderServiceTest {
     @DisplayName("사용자의 주문 리스트 조회시 사용자가 주문했던 리스트가 조회된다.")
     void testFindUsersOrder() throws Exception{
         // given
+        String givenUserUid = user1.getUid();
+
         // when
-        PaginationListDto<OrderDto.Preview> result = orderService.findByUser(user1.getUid(), PageRequest.of(0, 10));
+        PaginationListDto<OrderDto.Preview> result = orderService.findByUser(givenUserUid, PageRequest.of(0, 10));
         // then
         assertAll("주문 리스트 정보는 UID, 물품 요약, 총액, 상태, 주문시간 정보를 모두 담고 있어야 한다.",
                 ()->assertThat(result.getData()).extracting("orderUid", "name", "totalPrice", "orderTime", "orderStatus")
@@ -267,15 +271,15 @@ class OrderServiceTest {
     public void testFindByOrderUid() throws Exception{
         //given
         String givenAlbumUid = album.getUid();
+        String givenOrderUid = order1.getUid();
+        OrderProduct givenOrderProduct = orderProduct1;
 
-
-        int albumOrderQuantity = orderProduct1.getCount();
 
         //when
-        OrderDto.Detail result = orderService.findByOrderId(order1.getUid());
+        OrderDto.Detail result = orderService.findByOrderId(givenOrderUid);
 
         //then
-        int expectedTotalPrice = orderProduct1.calculateTotalItemPrice();
+        int expectedTotalPrice = givenOrderProduct.calculateTotalItemPrice();
 
         assertAll("result는 주문에 관련한 정보를 모두 담고 있어야 한다.",
                 ()->assertThat(result.getOrderStatus()).isEqualTo(OrderStatus.ORDERED),
@@ -284,7 +288,7 @@ class OrderServiceTest {
                 ()->assertThat(result).extracting("orderUid", "orderTime").doesNotContainNull(),
                 ()-> assertThat(result.getOrderProducts()).extracting("productUid", "productName","productImageUrl","unitPrice","quantity", "totalPrice")
                         .contains(
-                                tuple(givenAlbumUid, album.getName(), album.getThumbnailImageUrl(), orderProduct1.getItemPrice(), albumOrderQuantity, orderProduct1.getItemPrice() * albumOrderQuantity)
+                                tuple(givenAlbumUid, album.getName(), album.getThumbnailImageUrl(), givenOrderProduct.getItemPrice(), givenOrderProduct.getCount(), givenOrderProduct.getItemPrice() * givenOrderProduct.getCount())
                         )
         );
     }
