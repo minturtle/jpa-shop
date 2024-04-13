@@ -38,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Transactional
 @Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class AccountServiceTest {
 
     @Autowired
@@ -172,6 +172,57 @@ class AccountServiceTest {
                 .contains(Tuple.tuple(account1.getName(), account1.getBalance()),
                         Tuple.tuple(account2.getName(), account2.getBalance()));
     }
+
+    @Test
+    @DisplayName("한 account에 동시에 출금을 시도할 시, 첫번째 출금 요청만 성공한다.")
+    void testWithdrawConcurrency() throws Exception{
+        // given
+        String givenUserUid = user1.getUid();
+        String accountUid = account1.getUid();
+        long givenBalance = account1.getBalance();
+        int withdrawAmount = 200;
+
+
+        int threadSize = 2;
+
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadSize);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger failCount = new AtomicInteger();
+
+
+        // when
+        for(int i = 0; i < threadSize; i++){
+            executorService.execute(()->{
+                try{
+                    accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, accountUid, withdrawAmount));
+                    successCount.getAndIncrement();
+                }catch (OptimisticLockingFailureException e){
+                    failCount.getAndIncrement();
+                }catch (Exception e){
+                    e.printStackTrace();
+                    Assertions.fail();
+                }finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        countDownLatch.await();
+        executorService.shutdown();
+
+        // then
+        Account actual = accountRepository.findByUid(accountUid).orElseThrow(RuntimeException::new);
+        long expectedBalance = givenBalance - (withdrawAmount * successCount.get());
+
+        assertAll("thread run count check",
+                ()->assertThat(successCount.get()).isEqualTo(1),
+                ()->assertThat(failCount.get()).isEqualTo(1));
+
+        assertThat(actual.getBalance()).isEqualTo(expectedBalance);
+    }
+
 
 
     private Account getAccount(String accountUid) {
