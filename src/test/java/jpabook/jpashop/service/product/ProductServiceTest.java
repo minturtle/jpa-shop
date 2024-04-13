@@ -2,17 +2,12 @@ package jpabook.jpashop.service.product;
 
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
-import jpabook.jpashop.domain.product.Category;
 import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;
-import jpabook.jpashop.repository.CategoryRepository;
-import jpabook.jpashop.repository.product.ProductRepository;
 import jpabook.jpashop.service.ProductService;
-import jpabook.jpashop.testUtils.TestDataUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +16,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.util.List;
 import java.util.Optional;
 
 import static jpabook.jpashop.testUtils.TestDataUtils.*;
@@ -39,7 +33,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("이미 저장된 상품의 특정 검색 조건 없이 리스트를 조회해, 조회된 물품의 정보와 갯수를 알 수 있다.")
-    void testGetProductListWithoutSearchCondition() throws Exception{
+    void given_Product_when_SearchWithoutFilteringWithPagenation_then_ReturnAllProductsPaginated() throws Exception{
         // given
         Album givenAlbum = album;
         Book givenBook = book;
@@ -68,7 +62,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("이미 저장된 영화 상품의 상세 정보를 상품의 고유식별자로 조회할 수 있다.")
-    public void testFindMovieByProductUid() throws Exception{
+    public void given_Movie_when_GetMovieDetail_then_returnMovieInfo() throws Exception{
         //given
         Movie givenMovie = movie;
 
@@ -90,7 +84,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("이미 저장된 앨범 상품의 상세 정보를 상품의 고유 식별자로 조회할 수 있다.")
-    public void testFindByAlbumProductUid() throws Exception{
+    public void given_Album_when_GetAlbumDetail_then_returnAlbumInfo() throws Exception{
         //given
         Album givenAlbum = album;
         //when
@@ -108,7 +102,7 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("이미 저장된 책 상품의 상세 정보를 상품의 고유 식별자로 조회할 수 있다.")
-    public void testFindBookByUid() throws Exception{
+    public void given_Movie_when_GetBookDetail_then_returnBookInfo() throws Exception{
         //given
         Book givenBook = book;
         //when

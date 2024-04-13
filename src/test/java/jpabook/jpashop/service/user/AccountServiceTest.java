@@ -5,17 +5,14 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.enums.user.account.CashFlowStatus;
 import jpabook.jpashop.enums.user.account.CashFlowType;
-import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.service.AccountService;
-import jpabook.jpashop.testUtils.TestDataUtils;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +20,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -53,13 +49,15 @@ class AccountServiceTest {
 
 
     @Test
-    @DisplayName("유저의 Account를 추가할 수 있다. 이 때, account의 금액은 0원으로 초기화 된다.")
-    public void testCreateUserAcccount() throws Exception{
+    @DisplayName("유저의 Account를 추가할 수 있다.")
+    public void given_User_when_addAccount_thenSave() throws Exception{
         //given
         String givenUid = user1.getUid();
+        String givenAccountName = "내계좌";
+        long givenAccountBalance = 0L;
 
         //when
-        accountService.addAccount(new AccountDto.Create(givenUid, "내계좌" , 0L));
+        accountService.addAccount(new AccountDto.Create(givenUid, givenAccountName, givenAccountBalance));
 
         //then
         User actual = userRepository.findByUidJoinAccount(givenUid).orElseThrow(RuntimeException::new);
@@ -71,36 +69,36 @@ class AccountServiceTest {
                 .contains(
                         Tuple.tuple(account1.getName(), account1.getBalance()),
                         Tuple.tuple(account2.getName(), account2.getBalance()),
-                        Tuple.tuple("내계좌", 0L)
+                        Tuple.tuple(givenAccountName, givenAccountBalance)
                 );
     }
 
     @Test
     @DisplayName("유저의 잔고에서 잔고의 금액보다 작은 금액을 출금할 수 있다.")
-    public void testWithdraw() throws Exception{
+    public void given_accountHasEnoughBalance_when_WithDraw_thenSuccess() throws Exception{
         //given
         String givenUserUid = user1.getUid();
-        String accountUid = account1.getUid();
+        String givenAccountUid = account1.getUid();
         Long givenBalance = account1.getBalance();
-        int withdrawAmount = 500;
+        int givenWithdrawAmount = 500;
 
 
         //when
-        AccountDto.CashFlowResult result = accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, accountUid, withdrawAmount));
+        AccountDto.CashFlowResult result = accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, givenAccountUid, givenWithdrawAmount));
 
         //then
         assertThat(result).extracting("accountUid", "amount", "type", "status")
-                .contains(accountUid, withdrawAmount, CashFlowType.WITHDRAW, CashFlowStatus.DONE);
+                .contains(givenAccountUid, givenWithdrawAmount, CashFlowType.WITHDRAW, CashFlowStatus.DONE);
 
-        Account actual = getAccount(accountUid);
-        assertThat(actual.getBalance()).isEqualTo(givenBalance - withdrawAmount);
+        Account actual = getAccount(givenAccountUid);
+        assertThat(actual.getBalance()).isEqualTo(givenBalance - givenWithdrawAmount);
 
     }
 
 
     @Test
     @DisplayName("유저의 잔고보다 큰 금액을 출금시도할 시 오류를 throw한다.")
-    void testWithdrawFail() throws Exception{
+    void given_accountHasNotEnoughBalance_when_Withdraw_then_failedAndRollback() throws Exception{
         // given
         String givenUserUid =  user1.getUid();
         String accountUid = account1.getUid();
@@ -122,7 +120,7 @@ class AccountServiceTest {
     
     @Test
     @DisplayName("특정 Account에 입금할 수 있다.")
-    void testDeposit() throws Exception{
+    void given_Account_when_Deposit_then_success() throws Exception{
         // given
         String givenUserUid = user1.getUid();
         String accountUid = account1.getUid();
@@ -144,7 +142,7 @@ class AccountServiceTest {
     
     @Test
     @DisplayName("특정 Account에 값이 MAX값보다 큰 경우, 오버플로우를 방지하기 위해 오류가 throw된다.")
-    void testAccountOverflowException() throws Exception{
+    void given_Account_when_DepositMuch_then_FailedAndRollback() throws Exception{
         // given
         String givenUserUid = user1.getUid();
         String accountUid = account1.getUid();
@@ -162,25 +160,29 @@ class AccountServiceTest {
 
     @Test
     @DisplayName("유저의 가상계좌 리스트를 조회할 수 있다.")
-    public void testGetAccountList() throws Exception{
+    public void given_UserHasAccount_when_getUsersAccountList_then_Return() throws Exception{
         //given
+        List<AccountDto.Info> givenUser = accountService.findByUser(user1.getUid());
+        Account givenAccount1 = account1;
+        Account givenAccount2 = account2;
 
         //when
-        List<AccountDto.Info> result = accountService.findByUser(user1.getUid());
+        List<AccountDto.Info> result = givenUser;
+
         //then
         assertThat(result).extracting("accountName", "balance")
-                .contains(Tuple.tuple(account1.getName(), account1.getBalance()),
-                        Tuple.tuple(account2.getName(), account2.getBalance()));
+                .contains(Tuple.tuple(givenAccount1.getName(), givenAccount1.getBalance()),
+                        Tuple.tuple(givenAccount2.getName(), givenAccount2.getBalance()));
     }
 
     @Test
     @DisplayName("한 account에 동시에 출금을 시도할 시, 첫번째 출금 요청만 성공한다.")
-    void testWithdrawConcurrency() throws Exception{
+    void given_Account_when_DepositConcurrently_then_SuccessFirstOnly() throws Exception{
         // given
         String givenUserUid = user1.getUid();
-        String accountUid = account1.getUid();
+        String givenAccountUid = account1.getUid();
         long givenBalance = account1.getBalance();
-        int withdrawAmount = 200;
+        int givenWithdrawAmount = 200;
 
 
         int threadSize = 2;
@@ -196,7 +198,7 @@ class AccountServiceTest {
         for(int i = 0; i < threadSize; i++){
             executorService.execute(()->{
                 try{
-                    accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, accountUid, withdrawAmount));
+                    accountService.withdraw(new AccountDto.CashFlowRequest(givenUserUid, givenAccountUid, givenWithdrawAmount));
                     successCount.getAndIncrement();
                 }catch (OptimisticLockingFailureException e){
                     failCount.getAndIncrement();
@@ -213,8 +215,8 @@ class AccountServiceTest {
         executorService.shutdown();
 
         // then
-        Account actual = accountRepository.findByUid(accountUid).orElseThrow(RuntimeException::new);
-        long expectedBalance = givenBalance - (withdrawAmount * successCount.get());
+        Account actual = accountRepository.findByUid(givenAccountUid).orElseThrow(RuntimeException::new);
+        long expectedBalance = givenBalance - (givenWithdrawAmount * successCount.get());
 
         assertAll("thread run count check",
                 ()->assertThat(successCount.get()).isEqualTo(1),
