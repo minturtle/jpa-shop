@@ -163,6 +163,9 @@ public class TestDataUtils {
                 .quantity(2)
                 .build();
 
+        user1.addCart(cart1);
+        user1.addCart(cart2);
+
         orderProduct1 = new OrderProduct(album, 2, 500);
         orderProduct2 = new OrderProduct(book, 2, 1000);
 

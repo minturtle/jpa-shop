@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
+import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -54,44 +55,43 @@ class ProductCartControllerTest {
 
     @Test
     @DisplayName("사용자는 특정 상품의 갯수를 선택해 장바구니에 담을 수 있다.")
-    public void testWhenAddCartThenSuccess() throws Exception{
+    public void given_AuthenticatedUserProduct_when_AddCart_then_Success() throws Exception{
         //given
-        String givenUid = "user-001";
-        String givenMovieId = "movie-001";
+        String givenUserUid = user2.getUid();
+        String givenProductId = movie.getUid();
         int givenQuantity = 1;
 
-        String token = tokenProvider.sign(givenUid, new Date());
+        String token = tokenProvider.sign(givenUserUid, new Date());
 
         //when
         mockMvc.perform(post("/api/product/cart")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new CartRequest.Add(givenMovieId, givenQuantity))))
+                .content(objectMapper.writeValueAsString(new CartRequest.Add(givenProductId, givenQuantity))))
                 .andDo(print())
                 .andExpect(status().isOk());
         //then
-        User user = userRepository.findByUid(givenUid)
+        User actualUser = userRepository.findByUid(givenUserUid)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        assertThat(user.getCartList().size()).isEqualTo(3);
-        assertThat(user.getCartList()).extracting("product.uid", "quantity")
+        assertThat(actualUser.getCartList().size()).isEqualTo(1);
+        assertThat(actualUser.getCartList()).extracting("product.uid", "quantity")
                 .contains(
-                        tuple(givenMovieId, givenQuantity),
-                        tuple("album-001", 3),
-                        tuple("book-001", 2)
+                        tuple(givenProductId, givenQuantity)
                 );
 
     }
 
     @Test
     @DisplayName("사용자가 장바구니에 이미 있는 상품을 추가할시 기존 장바구니에 있던 상품의 갯수가 증가한다.")
-    public void testWhenAddCartAlreadyExistsThenAddCartQuantity() throws Exception{
+    public void given_AuthenticatedUserCart_when_AddCart_then_AddCartQuantity() throws Exception{
         //given
-        String givenUid = "user-001";
-        String givenProductUid = "album-001";
+        String givenUserUid = user1.getUid();
+        Cart givenCart = cart1;
+        String givenProductUid = givenCart.getProduct().getUid();
         int givenQuantity = 1;
 
-        String token = tokenProvider.sign(givenUid, new Date());
+        String token = tokenProvider.sign(givenUserUid, new Date());
 
         //when
         mockMvc.perform(post("/api/product/cart")
@@ -101,14 +101,13 @@ class ProductCartControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
         //then
-        User user = userRepository.findByUid(givenUid)
+        User actualUser = userRepository.findByUid(givenUserUid)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        assertThat(user.getCartList().size()).isEqualTo(2);
-        assertThat(user.getCartList()).extracting("product.uid", "quantity")
+        assertThat(actualUser.getCartList().size()).isEqualTo(2);
+        assertThat(actualUser.getCartList()).extracting("product.uid", "quantity")
                 .contains(
-                        tuple("album-001", 4),
-                        tuple("book-001", 2)
+                        tuple(givenProductUid, givenCart.getQuantity() + givenQuantity)
                 );
 
     }
@@ -116,9 +115,9 @@ class ProductCartControllerTest {
 
     @Test
     @DisplayName("사용자는 자신의 장바구니에 속한 상품을 조회할 수 있다.")
-    public void testWhenGetCategorylistThenReturn() throws Exception{
+    public void given_AuthenticatedUser_when_GetCartlist_ThenReturn() throws Exception{
         //given
-        String givenUid = "user-001";
+        String givenUid = user1.getUid();
 
         String token = tokenProvider.sign(givenUid, new Date());
         //when
@@ -130,21 +129,41 @@ class ProductCartControllerTest {
         //then
         List<CartResponse.Info> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<List<CartResponse.Info>>() {});
 
+        Cart expectedCart1 = cart1;
+        Cart expectedCart2 = cart2;
+
         assertThat(result.size()).isEqualTo(2);
-        assertThat(result).extracting("productUid", "productName", "productImageUrl", "price" ,"quantity")
+        assertThat(result).extracting(
+                "productUid",
+                        "productName",
+                        "productImageUrl",
+                        "price",
+                        "quantity")
                 .contains(
-                        tuple("album-001", "Album Name", "http://example.com/album_thumbnail.jpg", 2000, 3),
-                        tuple("book-001", "Book Name", "http://example.com/book_thumbnail.jpg", 1500, 2)
+                        tuple(
+                                expectedCart1.getProduct().getUid(),
+                                expectedCart1.getProduct().getName(),
+                                expectedCart1.getProduct().getThumbnailImageUrl(),
+                                expectedCart1.getProduct().getPrice(),
+                                expectedCart1.getQuantity()
+                        ),
+                        tuple(
+                                expectedCart2.getProduct().getUid(),
+                                expectedCart2.getProduct().getName(),
+                                expectedCart2.getProduct().getThumbnailImageUrl(),
+                                expectedCart2.getProduct().getPrice(),
+                                expectedCart2.getQuantity()
+                        )
                 );
     }
 
     @ParameterizedTest
     @CsvSource({"1", "-1"})
     @DisplayName("사용자는 자신의 장바구니의 상품의 갯수를 수정할 수 있다.")
-    public void testWhenUpdateCartQuantityThenSuccess(int updateQuantity) throws Exception{
+    public void givenAuthenticatedUserCart_when_UpdateCartQuantity_then_Success(int updateQuantity) throws Exception{
         //given
-        String givenUid = "user-001";
-        String productUid = "album-001";
+        String givenUid = user1.getUid();
+        String productUid = cart1.getProduct().getUid();
 
         String token = tokenProvider.sign(givenUid, new Date());
         //when
@@ -157,19 +176,19 @@ class ProductCartControllerTest {
                 .andExpect(status().isOk());
         //then
         Cart actual = getCart(productUid);
+        Cart expected = cart1;
 
-
-        assertThat(actual.getQuantity()).isEqualTo(3 + updateQuantity);
+        assertThat(actual.getQuantity()).isEqualTo(expected.getQuantity() + updateQuantity);
 
     }
 
     @Test
     @DisplayName("사용자는 자신의 장바구니의 갯수를 0이하로 수정할 수 없다.")
-    public void testWhenUpdateCartQuantityUnder0ThenFailed() throws Exception{
-        String givenUid = "user-001";
-        String productUid = "album-001";
+    public void given_AuthenticatedUserCart_when_UpdateCartQuantityUnderZero_then_Failed() throws Exception{
+        String givenUid = user1.getUid();
+        String productUid = cart1.getProduct().getUid();
         String token = tokenProvider.sign(givenUid, new Date());
-        int updateQuantity = -4;
+        int updateQuantity = -100;
 
         //when
         mockMvc.perform(put("/api/product/cart")
@@ -181,16 +200,17 @@ class ProductCartControllerTest {
                 .andExpect(status().isBadRequest());
         //then
         Cart actual = getCart(productUid);
-        assertThat(actual.getQuantity()).isEqualTo(3);
+        Cart expected = cart1;
+        assertThat(actual.getQuantity()).isEqualTo(expected.getQuantity());
 
     }
 
     @Test
     @DisplayName("사용자는 자신의 장바구니에 속한 상품을 삭제할 수 있다.")
-    public void testWhenRemoveCartThenSuccess() throws Exception{
+    public void given_AuthenticatedUserCart_when_RemoveCart_then_Success() throws Exception{
         //given
-        String givenUid = "user-001";
-        String productUid = "album-001";
+        String givenUid = user1.getUid();
+        String productUid = cart1.getProduct().getUid();
         String token = tokenProvider.sign(givenUid, new Date());
         //when
         mockMvc.perform(delete("/api/product/cart/" + productUid)
@@ -199,13 +219,16 @@ class ProductCartControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk());
         //then
-        User user = userRepository.findByUid(givenUid)
+        User actualUser = userRepository.findByUid(givenUid)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        assertThat(user.getCartList().size()).isEqualTo(1);
-        assertThat(user.getCartList()).extracting("product.uid", "quantity")
+        User expectedUser = user1;
+        Cart expectedRemainCart = cart2;
+
+        assertThat(actualUser.getCartList().size()).isEqualTo(expectedUser.getCartList().size() - 1);
+        assertThat(actualUser.getCartList()).extracting("product.uid", "quantity")
                 .contains(
-                        tuple("book-001", 2)
+                        tuple(expectedRemainCart.getProduct().getUid(), expectedRemainCart.getQuantity())
                 );
     }
 

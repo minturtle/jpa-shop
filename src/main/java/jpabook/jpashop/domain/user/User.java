@@ -3,6 +3,7 @@ package jpabook.jpashop.domain.user;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.order.Order;
+import lombok.Builder;
 import lombok.Getter;
 
 import jakarta.persistence.*;
@@ -57,14 +58,17 @@ public class User extends BaseEntity {
     private AddressInfo addressInfo;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")
+    @Builder.Default
     private List<Cart> cartList = new ArrayList<>();
 
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "user")
+    @Builder.Default
     private List<Order> orderList = new ArrayList<>();
 
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "user", orphanRemoval = true)
+    @Builder.Default
     private List<Account> accountList = new ArrayList<>();
 
     @Embedded
