@@ -17,6 +17,8 @@ public class TestDataUtils {
 
     public static final User user2;
 
+    public static final User user3;
+
     public static final Account account1;
 
     public static final Account account2;
@@ -71,6 +73,20 @@ public class TestDataUtils {
                 .version(1)
                 .kakaoOAuth2AuthInfo(new KakaoOAuth2AuthInfo("123214214"))
                 .build();
+
+        user3 = User.builder()
+                .id(3L)
+                .uid("user-003")
+                .email("user3@email.com")
+                .name("김영희")
+                .profileImageUrl("http://example.com/profiles/young.png")
+                .addressInfo(new AddressInfo("대구광역시", "달서구 123"))
+                .createdAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
+                .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
+                .version(1)
+                .googleOAuth2AuthInfo(new GoogleOAuth2AuthInfo("123214214"))
+                .build();
+
 
          account1 = Account.builder()
                 .id(1L)

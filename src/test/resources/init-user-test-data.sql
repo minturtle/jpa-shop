@@ -46,7 +46,23 @@ INSERT INTO `users` (
              NULL,
              'user-002',
              NULL
-         );
+         ),(
+            1,
+            '2024-03-31 12:00:00.000000',
+            '2024-03-31 12:00:00.000000',
+            3,
+            '대구광역시',
+            '달서구 123',
+            'user3@email.com',
+            '123214214',
+            NULL,
+            '김영희',
+            NULL,
+            'http://example.com/profiles/young.png',
+            NULL,
+            'user-003',
+            NULL
+        );
 
 INSERT INTO accounts (account_id, account_uid, name, user_id, balance, version)
 VALUES (1, 'account-001', '내 계좌', 1, 100000, 1);

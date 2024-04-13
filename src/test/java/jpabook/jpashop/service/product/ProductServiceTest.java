@@ -1,4 +1,4 @@
-package jpabook.jpashop.service;
+package jpabook.jpashop.service.product;
 
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
@@ -10,6 +10,7 @@ import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.repository.CategoryRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
+import jpabook.jpashop.service.ProductService;
 import jpabook.jpashop.testUtils.TestDataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;

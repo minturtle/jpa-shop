@@ -1,10 +1,12 @@
-package jpabook.jpashop.service;
+package jpabook.jpashop.service.user;
 
 import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.service.UserService;
+import jpabook.jpashop.testUtils.TestDataUtils;
 import jpabook.jpashop.util.NanoIdProvider;
 import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.util.Base64;
 import java.util.List;
@@ -28,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -39,6 +43,8 @@ import static org.mockito.Mockito.*;
 @ActiveProfiles("test")
 @SpringBootTest
 @Slf4j
+@Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class UserServiceTest {
 
     @Autowired
@@ -54,10 +60,6 @@ class UserServiceTest {
     @SpyBean
     private NanoIdProvider nanoIdProvider;
 
-    @BeforeEach
-    void setUp() {
-        userRepository.deleteAll();
-    }
 
     @Test
     @DisplayName(
@@ -78,15 +80,7 @@ class UserServiceTest {
         when(passwordUtils.createSalt()).thenReturn(givenSalt);
 
 
-        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .username(username)
-                .password(password)
-                .build();
+        UserDto.UsernamePasswordUserRegisterInfo dto = createRegisterInfo(givenName, givenEmail, address, detailedAddress, imageUrl, username, password);
 
         // when
         String savedUid = userService.register(dto);
@@ -124,15 +118,7 @@ class UserServiceTest {
         String imageUrl = "http://image.com/image.png";
         String username = "username";
 
-        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .username(username)
-                .password(givenPassword)
-                .build();
+        UserDto.UsernamePasswordUserRegisterInfo dto = createRegisterInfo(givenName, givenEmail, address, detailedAddress, imageUrl, username, givenPassword);
 
         //when
         ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.register(dto);
@@ -147,26 +133,17 @@ class UserServiceTest {
     @DisplayName("이미 가입되어 회원 DB에 저장된 이메일의 유저가 Username으로 저장된 유저라면 회원가입이 실패한다.")
     public void testAlreadySavedEmail() throws Exception {
         //given
+        User alreadyExistUser = user1;
+
         String givenName = "givenName";
-        String givenEmail = "email@email.com";
+        String givenEmail = alreadyExistUser.getEmail();
         String address = "address";
         String detailedAddress = "detailedAddress";
         String imageUrl = "http://image.com/image.png";
         String password = "abc1234!";
         String username = "username";
 
-        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .username(username)
-                .password(password)
-                .build();
-
-        saveUser("usernam1", "asdsad23123!@!@#", givenEmail);
-
+        UserDto.UsernamePasswordUserRegisterInfo dto = createRegisterInfo(givenName, givenEmail, address, detailedAddress, imageUrl, username, password);
 
         //when
         ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.register(dto);
@@ -182,26 +159,19 @@ class UserServiceTest {
     @DisplayName("회원가입 시도시 이미 존재하는 username이라면 회원가입에 실패한다.")
     public void testAlreadyExistsUsernameRegister() throws Exception {
         //given
+        User alreadyExistsUser = user1;
+
+
         String givenName = "givenName";
         String givenEmail = "email@email.com";
         String address = "address";
         String detailedAddress = "detailedAddress";
         String imageUrl = "http://image.com/image.png";
         String password = "abc1234!";
-        String username = "username";
+        String username = alreadyExistsUser.getUsernamePasswordAuthInfo().getUsername();
 
-        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .username(username)
-                .password(password)
-                .build();
+        UserDto.UsernamePasswordUserRegisterInfo dto = createRegisterInfo(givenName, givenEmail, address, detailedAddress, imageUrl, username, password);
 
-
-        saveUser(username, "asdsad23123!@!@#", "email2@email.com");
 
         //when
         ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.register(dto);
@@ -230,15 +200,7 @@ class UserServiceTest {
         String password = "abc1234!";
         String username = "username";
 
-        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
-                .name(givenName)
-                .email(givenEmail)
-                .address(address)
-                .detailedAddress(detailedAddress)
-                .profileImageUrl(imageUrl)
-                .username(username)
-                .password(password)
-                .build();
+        UserDto.UsernamePasswordUserRegisterInfo dto = createRegisterInfo(givenName, givenEmail, address, detailedAddress, imageUrl, username, password);
 
         //when
         for (int i = 0; i < threadSize; i++) {
@@ -260,9 +222,9 @@ class UserServiceTest {
         doneSignal.await();
         executorService.shutdown();
         //then
-        List<User> savedUserList = userRepository.findAll();
+        Optional<User> actualUser = userRepository.findByEmail(givenEmail);
 
-        assertThat(savedUserList.size()).isEqualTo(1);
+        assertThat(actualUser).isPresent();
 
         assertAll("처음 회원가입을 제외하곤 실패",
                 () -> assertThat(successCount.get()).isEqualTo(1),
@@ -274,17 +236,18 @@ class UserServiceTest {
     @DisplayName("username과 password를 입력해서 로그인할 수 있다.")
     public void testLogin() throws Exception {
         //given
-        String password = "abc1234!";
-        String username = "username";
+        User alreadyExistsUser = user1;
 
-        String savedUid = saveUser(username, password, "email@email.com");
+        String username = alreadyExistsUser.getUsernamePasswordAuthInfo().getUsername();
+        String password = "abc1234!";
+
 
 
         //when
         String actualUid = userService.login(username, password);
 
         //then
-        assertThat(savedUid).isEqualTo(actualUid);
+        assertThat(alreadyExistsUser.getUid()).isEqualTo(actualUid);
 
     }
 
@@ -292,12 +255,9 @@ class UserServiceTest {
     @DisplayName("저장되지 않은 username으로 로그인에 시도할 시 로그인에 실패한다.")
     public void testIncorrectUsername() throws Exception {
         //given
-        String password = "abc1234!";
-        String username = "username";
         String incorrectUsername = "username11";
+        String password = "abc1234!";
 
-
-        saveUser(username, password, "email@email.com");
 
 
         //when
@@ -314,16 +274,12 @@ class UserServiceTest {
     @DisplayName("잘못된 비밀번호로 로그인에 시도할시 로그인에 실패한다.")
     public void testIncorrectPassword() throws Exception {
         //given
-        String password = "abc1234!";
-        String username = "username";
-        String incorrectPassword = "abcd1234!";
-
-
-        saveUser(username, password, "email@email.com");
+        String existUsername = user1.getUsernamePasswordAuthInfo().getUsername();
+        String incorrectPassword = "12314a3214!";
 
 
         //when
-        ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.login(username, incorrectPassword);
+        ThrowableAssert.ThrowingCallable throwingCallable = () -> userService.login(existUsername, incorrectPassword);
         //then
         assertThatThrownBy(throwingCallable)
                 .isInstanceOf(AuthenticateFailedException.class)
@@ -335,39 +291,33 @@ class UserServiceTest {
     @DisplayName("카카오 인증 시도시, 이미 카카오 이메일과 kakaoUid가 회원 DB에 저장되어 있다면 해당 유저의 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
     public void testUserAlreadyHasKakaoAuthInfo() throws Exception {
         //given
-        String givenUid = "uid";
-        String givenEmail = "email@kakao.com";
-        String kakaoUid = "123141244124";
+        User alreadyExistsKakaoUser = user2;
 
-        saveKakaoUser(givenUid, givenEmail, kakaoUid);
 
         //when
-        UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, givenEmail);
+        UserDto.OAuthLoginResult result = userService.loginKakao(alreadyExistsKakaoUser.getUid(), alreadyExistsKakaoUser.getEmail());
 
         //then
         assertThat(result).extracting("uid", "isAdditionalInfoNeed")
-                .contains(givenUid, false);
+                .contains(alreadyExistsKakaoUser.getUid(), false);
     }
 
     @Test
     @DisplayName("카카오 인증 시도시, 카카오 이메일을 사용하나 kakaoUid가 회원 DB에 저장되어 있지 않다면 해당 유저에 kakaoUid 정보를 저장하고 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
     public void testUserAlreadyHasKakaoEmail() throws Exception {
         //given
-
-        String username = "username";
-        String password = "abc1234!";
-        String email = "abcd@kakao.com";
+        User alreadyExistsUser = user1;
+        String email = alreadyExistsUser.getEmail();
         String kakaoUid = "21312412421";
-        String savedUid = saveUser(username, password, email);
 
         //when
         UserDto.OAuthLoginResult result = userService.loginKakao(kakaoUid, email);
 
         //then
-        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+        User actual = userRepository.findByUid(alreadyExistsUser.getUid()).orElseThrow(RuntimeException::new);
 
         assertThat(result).extracting("uid", "isAdditionalInfoNeed")
-                .contains(savedUid, false);
+                .contains(alreadyExistsUser.getUid(), false);
         assertThat(actual.getKakaoOAuth2AuthInfo().getKakaoUid()).isEqualTo(kakaoUid);
 
     }
@@ -445,18 +395,14 @@ class UserServiceTest {
     @DisplayName("Google 인증 시도시, 이미 구글 이메일과 googleUid가 회원 DB에 저장되어 있다면 해당 유저의 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
     public void testGoogleAuth() throws Exception{
         //given
-        String givenUid = "uid";
-        String givenEmail = "email@kakao.com";
-        String googleUid = "123141244124";
-
-        saveGoogleUser(givenUid, givenEmail, googleUid);
+        User alreadyExistUser = user3;
 
         //when
-        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, givenEmail);
+        UserDto.OAuthLoginResult result = userService.loginGoogle(alreadyExistUser.getUid(), alreadyExistUser.getEmail());
 
         //then
         assertThat(result).extracting("uid", "isAdditionalInfoNeed")
-                .contains(givenUid, false);
+                .contains(alreadyExistUser.getUid(), false);
 
     }
 
@@ -464,20 +410,18 @@ class UserServiceTest {
     @DisplayName("구글 인증 시도시, 구글 이메일을 사용하나 googleUid가 회원 DB에 저장되어 있지 않다면 해당 유저에 googleUid 정보를 저장하고 uid와 추가정보가 필요없다는 결과값을 리턴한다.")
     public void testGoogleNoAuthInfo() throws Exception{
         //given
-        String username = "username";
-        String password = "abc1234!";
-        String email = "abcd@google.com";
-        String googleUid = "21312412421";
-        String savedUid = saveUser(username, password, email);
+        User alreadyExistsUser = user1;
+        String googleUid = "2221324124";
+
 
         //when
-        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, email);
+        UserDto.OAuthLoginResult result = userService.loginGoogle(googleUid, alreadyExistsUser.getEmail());
 
         //then
-        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+        User actual = userRepository.findByUid(alreadyExistsUser.getUid()).orElseThrow(RuntimeException::new);
 
         assertThat(result).extracting("uid", "isAdditionalInfoNeed")
-                .contains(savedUid, false);
+                .contains(alreadyExistsUser.getUid(), false);
         assertThat(actual.getGoogleOAuth2AuthInfo().getGoogleUid()).isEqualTo(googleUid);
 
     }
@@ -513,16 +457,13 @@ class UserServiceTest {
     @DisplayName("사용자의 변경하고자 하는 이름, 주소, 프로필 이미지 정보를 회원 DB에 업데이트 할 수있다.")
     void testUpdateUser() throws Exception {
         // given
-        String username = "username";
-        String password = "asdsadsad2132134!";
-        String email = "email@email.com";
+        User user = user1;
 
         String updatedName = "updatedName";
         String updatedAddress = "updatedAddress";
         String updatedDetailAddress = "updatedDetailAddress";
         String updatedProfileImage = "http://image.com/update.png";
 
-        String savedUid = saveUser(username, password, email);
 
         // when
         UserDto.UpdateDefaultUserInfo updateDto = UserDto.UpdateDefaultUserInfo.builder()
@@ -533,13 +474,13 @@ class UserServiceTest {
                 .build();
 
 
-        userService.updateUserInfo(savedUid, updateDto);
+        userService.updateUserInfo(user.getUid(), updateDto);
 
         // then
 
-        User actual = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+        User actual = userRepository.findByUid(user.getUid()).orElseThrow(RuntimeException::new);
         assertThat(actual).extracting("uid", "email", "name", "profileImageUrl", "addressInfo")
-                .contains(savedUid, email, updatedName, updatedProfileImage, new AddressInfo(updatedAddress, updatedDetailAddress));
+                .contains(user.getUid(), user.getEmail(), updatedName, updatedProfileImage, new AddressInfo(updatedAddress, updatedDetailAddress));
 
     }
 
@@ -547,9 +488,7 @@ class UserServiceTest {
     @DisplayName("동시에 유저의 정보를 수정 요청하면 첫번째 요청의 정보만 DB에 반영되고, 두번째 요청은 실패한다.")
     void testUpdateConcurrency() throws Exception{
         // given
-        String username = "username";
-        String password = "asdsadsad2132134!";
-        String email = "email@email.com";
+        User user = user1;
 
         String updatedName = "updatedName";
         String updatedAddress = "updatedAddress";
@@ -570,7 +509,6 @@ class UserServiceTest {
         AtomicInteger failCount = new AtomicInteger();
 
 
-        String savedUid = saveUser(username, password, email);
 
 
         for(int i = 0 ; i <threadSize; i++){
@@ -578,7 +516,7 @@ class UserServiceTest {
                 try {
                     // when
                     userService.updateUserInfo(
-                            savedUid,
+                            user.getUid(),
                             updateDto
                     );
                     successCount.getAndIncrement();
@@ -606,20 +544,18 @@ class UserServiceTest {
     @DisplayName("사용자의 이전 비밀번호와 새 비밀번호를 입력받아 새 비밀번호로 업데이트 할 수 있다.")
     void testUpdatePassword() throws Exception{
         // given
-        String username = "username";
-        String password = "asdsadsad2132134!";
-        String email = "email@email.com";
+        User user = user1;
+        String userPassword = "abc1234!";
         String updatedPassword = "update123!";
 
 
-        String savedUid = saveUser(username, password, email);
         // when
-        userService.updatePassword(savedUid, new UserDto.UpdatePassword(password, updatedPassword));
+        userService.updatePassword(user.getUid(), new UserDto.UpdatePassword(userPassword, updatedPassword));
         // then
-        User user = userRepository.findByUid(savedUid).orElseThrow(RuntimeException::new);
+        User actual = userRepository.findByUid(user.getUid()).orElseThrow(RuntimeException::new);
 
-        byte[] actualSalt = user.getUsernamePasswordAuthInfo().getSaltBytes();
-        String actualPassword = user.getUsernamePasswordAuthInfo().getPassword();
+        byte[] actualSalt = actual.getUsernamePasswordAuthInfo().getSaltBytes();
+        String actualPassword = actual.getUsernamePasswordAuthInfo().getPassword();
 
         assertThat(passwordUtils.matches(updatedPassword, actualSalt, actualPassword)).isTrue();
     }
@@ -646,15 +582,15 @@ class UserServiceTest {
     @DisplayName("사용자의 비밀번호를 업데이트 할때, ID/PW 인증 정보가 존재하지 않는다면 오류를 출력한다.")
     void testUser() throws Exception{
         // given
-        String givenUid = "uid";
+        User givenUser = user2;
+
         String password = "asdsadsad2132134!";
         String updatedPassword = "update123!";
 
-        userRepository.save(createTestUser(givenUid, "email@email.com"));
 
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
-                ()->userService.updatePassword(givenUid, new UserDto.UpdatePassword(password, updatedPassword));
+                ()->userService.updatePassword(givenUser.getUid(), new UserDto.UpdatePassword(password, updatedPassword));
         // then
         assertThatThrownBy(throwingCallable)
                 .isInstanceOf(UserAuthTypeException.class)
@@ -666,17 +602,13 @@ class UserServiceTest {
     @DisplayName("사용자의 비밀번호를 업데이트 할때, 회원 DB의 비밀번호와 입력한 이전 비밀번호가 일치하지 않는 경우, 오류를 throw한다.")
     void testUpdatePasswordIncorrectPw() throws Exception{
         // given
-        String username = "username";
-        String password = "asdsadsad2132134!";
+        User user = user1;
         String incorrectPassword = "sadsaf21321@";
-        String email = "email@email.com";
         String updatedPassword = "update123!";
 
-
-        String savedUid = saveUser(username, password, email);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
-                ()->userService.updatePassword(savedUid, new UserDto.UpdatePassword(incorrectPassword, updatedPassword));
+                ()->userService.updatePassword(user.getUid(), new UserDto.UpdatePassword(incorrectPassword, updatedPassword));
 
         // then
         assertThatThrownBy(throwingCallable)
@@ -689,15 +621,13 @@ class UserServiceTest {
     @DisplayName("사용자의 비밀번호를 업데이트 할때, 비밀번호의 조건(8자 이상, 영어,숫자,특수문자) 조건을 만족하지 못한다면 오류를 throw한다.")
     void testUpdatePasswordInvalid() throws Exception{
         // given
-        String username = "username";
-        String password = "asdsadsad2132134!";
-        String email = "email@email.com";
+        User user = user1;
+        String password = "abc1234!";
         String updatedPassword = "aa!";
 
-        String savedUid = saveUser(username, password, email);
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
-                ()->userService.updatePassword(savedUid, new UserDto.UpdatePassword(password, updatedPassword));
+                ()->userService.updatePassword(user.getUid(), new UserDto.UpdatePassword(password, updatedPassword));
         // then
         assertThatThrownBy(throwingCallable)
                 .isInstanceOf(PasswordValidationException.class)
@@ -710,23 +640,15 @@ class UserServiceTest {
     @DisplayName("사용자의 uid로 이에 해당하는 이름, 이메일, 주소, 프로필 이미지 정보를 조회할 수 있다.")
     void testGetUserInfo() throws Exception{
         // given
-        String username = "username";
-        String password = "asdsadsad2132134!";
-        String email = "email@email.com";
-        String givenName = "givenName";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
+        User givenUser = user1;
 
-
-        String savedUid = saveUser(username, password, email);
 
         // when
-        UserDto.Detail result = userService.getUserInfo(savedUid);
+        UserDto.Detail result = userService.getUserInfo(givenUser.getUid());
 
         // then
         assertThat(result).extracting("userUid", "name", "email", "address", "detailedAddress", "profileImage")
-                .contains(savedUid, givenName, email, address, detailedAddress, imageUrl);
+                .contains(givenUser.getUid(), givenUser.getName(), givenUser.getEmail(), givenUser.getAddressInfo().getAddress(), givenUser.getAddressInfo().getDetailedAddress(), givenUser.getProfileImageUrl());
     }
 
     @Test
@@ -745,55 +667,15 @@ class UserServiceTest {
     }
 
 
-
-    private void saveGoogleUser(String uid, String email, String googleUid){
-        User newUser = createTestUser(uid, email);
-        newUser.setGoogleOAuth2AuthInfo(googleUid);
-        userRepository.save(newUser);
-
-    }
-
-    private void saveKakaoUser(String uid, String email, String kakaoUid){
-        User newUser = createTestUser(uid, email);
-        newUser.setKakaoOAuth2AuthInfo(kakaoUid);
-        userRepository.save(newUser);
-    }
-
-    private String saveUser(String username, String password, String email) throws PasswordValidationException, AlreadyExistsUserException {
-        String givenName = "givenName";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
-
-        UserDto.UsernamePasswordUserRegisterInfo dto = UserDto.UsernamePasswordUserRegisterInfo.builder()
+    private static UserDto.UsernamePasswordUserRegisterInfo createRegisterInfo(String givenName, String givenEmail, String address, String detailedAddress, String imageUrl, String username, String password) {
+        return UserDto.UsernamePasswordUserRegisterInfo.builder()
                 .name(givenName)
-                .email(email)
+                .email(givenEmail)
                 .address(address)
                 .detailedAddress(detailedAddress)
                 .profileImageUrl(imageUrl)
                 .username(username)
                 .password(password)
                 .build();
-
-        return userService.register(dto);
-    }
-
-
-
-    private User createTestUser(String uid, String email) {
-        String givenName = "givenName";
-        String address = "address";
-        String detailedAddress = "detailedAddress";
-        String imageUrl = "http://image.com/image.png";
-
-        User newUser = new User(
-                uid,
-                email,
-                givenName,
-                imageUrl,
-                address,
-                detailedAddress
-        );
-        return newUser;
     }
 }

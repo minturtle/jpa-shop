@@ -1,4 +1,4 @@
-package jpabook.jpashop.service;
+package jpabook.jpashop.service.product;
 
 import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.product.Album;
@@ -9,6 +9,7 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
+import jpabook.jpashop.service.CartService;
 import jpabook.jpashop.testUtils.TestDataUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
