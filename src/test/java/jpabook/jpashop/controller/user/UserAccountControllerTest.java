@@ -9,6 +9,7 @@ import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.enums.user.account.CashFlowStatus;
 import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.repository.AccountRepository;
+import jpabook.jpashop.testUtils.TestDataUtils;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
+import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -53,16 +55,17 @@ class UserAccountControllerTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
-    private final Long givenAccountBalance = 100000L;
 
     @Test
     @DisplayName("회원 인증이 완료된 유저가 새로운 계좌를 추가해 잔고가 0원인 채로 DB에 저장할 수 있다.")
-    public void testCreateAccount() throws Exception{
+    public void given_AuthenticatedUser_when_CreateAccount_then_CreatedWithBalanceIsZero() throws Exception{
         //given
-        String givenUid = "user-001";
+        String givenUid = user2.getUid();
         String givenToken = tokenProvider.sign(givenUid, new Date());
 
-        UserAccountRequest.Create createAccountForm = new UserAccountRequest.Create("내 계좌");
+        String givenNewAccountName = "내 계좌";
+
+        UserAccountRequest.Create createAccountForm = new UserAccountRequest.Create(givenNewAccountName);
         String createAccountFormString = objectMapper.writeValueAsString(createAccountForm);
 
 
@@ -81,16 +84,18 @@ class UserAccountControllerTest {
 
         assertThat(account.getUser().getUid()).isEqualTo(givenUid);
         assertThat(account).extracting("uid", "name", "balance")
-                .contains(actual.getAccountUid(), "내 계좌", 0L);
+                .contains(actual.getAccountUid(), givenNewAccountName, 0L);
     }
 
     @Test
     @DisplayName("회원인증이 완료된 유저는 자기가 가진 가상계좌의 리스트를 조회할 수 있다.")
-    public void testGetAccountList() throws Exception{
+    public void given_AuthenticatedUserAccount_when_GetUsersAccount_then_ReturnList() throws Exception{
         //given
-        String givenUid = "user-001";
-        String givenAccountUid = "account-001";
-        String givenAccountName = "내 계좌";
+        String givenUid = user1.getUid();
+
+        Account givenAccount = account1;
+        Account givenAccount2 = account2;
+
 
         String givenToken = tokenProvider.sign(givenUid, new Date());
 
@@ -104,21 +109,24 @@ class UserAccountControllerTest {
         });
 
         assertThat(actual).extracting("accountUid", "accountName", "balance")
-                .contains(tuple(givenAccountUid, givenAccountName, givenAccountBalance));
+                .contains(
+                        tuple(givenAccount.getUid(), givenAccount.getName(), givenAccount.getBalance()),
+                        tuple(givenAccount2.getUid(), givenAccount2.getName(), givenAccount2.getBalance())
+                );
     }
 
 
     @Test
     @DisplayName("사용자는 DB에 존재하는 자신의 가상 계좌에 금액을 추가해 DB에 반영할 수 있다.")
-    void testDeposit() throws Exception{
+    void given_AuthenticatedUserAccount_when_Deposit_then_Success() throws Exception{
         // given
-        String givenUid = "user-001";
-        String givenAccountUid = "account-001";
+        String givenUserUid = user1.getUid();
+        Account givenAccount = account1;
         Integer givenDepositAmount = 500;
 
-        String givenToken = tokenProvider.sign(givenUid, new Date());
+        String givenToken = tokenProvider.sign(givenUserUid, new Date());
 
-        String reqBody = createDepositRequestJson(givenAccountUid, givenDepositAmount);
+        String reqBody = createDepositRequestJson(givenAccount.getUid(), givenDepositAmount);
 
 
         // when
@@ -132,14 +140,14 @@ class UserAccountControllerTest {
         // then
         UserAccountResponse.CashflowResult result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), UserAccountResponse.CashflowResult.class);
 
-        Account account = accountRepository.findByUid(givenAccountUid)
+        Account account = accountRepository.findByUid(givenAccount.getUid())
                 .orElseThrow(RuntimeException::new);
 
 
         assertThat(result).extracting("accountUid", "amount", "type", "status")
-                        .contains(givenAccountUid, givenDepositAmount, CashFlowType.DEPOSIT, CashFlowStatus.DONE);
+                        .contains(givenAccount.getUid(), givenDepositAmount, CashFlowType.DEPOSIT, CashFlowStatus.DONE);
 
-        assertThat(account.getBalance()).isEqualTo(givenAccountBalance + givenDepositAmount);
+        assertThat(account.getBalance()).isEqualTo(givenAccount.getBalance() + givenDepositAmount);
 
     }
 
@@ -147,13 +155,13 @@ class UserAccountControllerTest {
     @DisplayName("사용자가 가상계좌에 입금하는 경우 자신의 가상계좌가 아니라면 403 오류와 함께 DB에 반영되지 않는다.")
     void testWhenDepositToOthersAccountThenThrowForbidden() throws Exception{
         // given
-        String givenUid = "user-002";
-        String givenAccountUid = "account-001";
+        String givenOtherUserUid = user2.getUid();
+        Account givenOtherAccount = account1;
         Integer givenDepositAmount = 500;
 
-        String givenToken = tokenProvider.sign(givenUid, new Date());
+        String givenToken = tokenProvider.sign(givenOtherUserUid, new Date());
 
-        String reqBody = createDepositRequestJson(givenAccountUid, givenDepositAmount);
+        String reqBody = createDepositRequestJson(givenOtherAccount.getUid(), givenDepositAmount);
 
         // when
         mockMvc.perform(post("/api/user/account/deposit")
@@ -164,9 +172,9 @@ class UserAccountControllerTest {
                 .andDo(print()).andExpect(status().isForbidden());
 
         // then
-        Account account = accountRepository.findByUid(givenAccountUid)
+        Account account = accountRepository.findByUid(givenOtherAccount.getUid())
                 .orElseThrow(RuntimeException::new);
-        assertThat(account.getBalance()).isEqualTo(givenAccountBalance);
+        assertThat(account.getBalance()).isEqualTo(givenOtherAccount.getBalance());
     }
 
 
