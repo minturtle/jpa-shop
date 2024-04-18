@@ -35,6 +35,9 @@ public class QAlbum extends EntityPathBase<Album> {
     //inherited
     public final StringPath description = _super.description;
 
+    //inherited
+    public final StringPath dtype = _super.dtype;
+
     public final StringPath etc = createString("etc");
 
     //inherited

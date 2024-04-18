@@ -1,6 +1,7 @@
 package jpabook.jpashop.domain.product;
 
 
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @SuperBuilder
 @NoArgsConstructor
+@DiscriminatorValue("MOVIE")
 public class Movie extends Product{
 
 

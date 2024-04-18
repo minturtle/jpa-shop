@@ -180,7 +180,7 @@ class ProductRepositoryTest {
                 Optional.of(new ProductDto.PriceRange(1500, 2000)),
                 Optional.of(albumCategory.getUid()),
                 SortOption.BY_NAME,
-                ProductType.ALL
+                ProductType.ALBUM
         );
         //when
         List<ProductDto.Preview> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));

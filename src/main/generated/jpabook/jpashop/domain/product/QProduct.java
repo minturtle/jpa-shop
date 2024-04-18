@@ -31,6 +31,8 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final StringPath description = createString("description");
 
+    public final StringPath dtype = createString("dtype");
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     //inherited

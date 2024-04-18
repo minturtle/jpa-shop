@@ -85,13 +85,13 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
             case ALL -> {
             }
             case BOOK -> {
-                query.where(product.instanceOf(Book.class));
+                query.where(product.dtype.eq("BOOK"));
             }
             case ALBUM -> {
-                query.where(product.instanceOf(Album.class));
+                query.where(product.dtype.eq("ALBUM"));
             }
             case MOVIE -> {
-                query.where(product.instanceOf(Movie.class));
+                query.where(product.dtype.eq("MOVIE"));
             }
         }
 

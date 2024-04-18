@@ -36,6 +36,9 @@ public class QBook extends EntityPathBase<Book> {
     public final StringPath description = _super.description;
 
     //inherited
+    public final StringPath dtype = _super.dtype;
+
+    //inherited
     public final NumberPath<Long> id = _super.id;
 
     public final StringPath isbn = createString("isbn");
