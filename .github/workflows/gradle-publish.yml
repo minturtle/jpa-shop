@@ -52,6 +52,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: packaged-jar
+        path: target/*.jar
     - name: Deploy to Server using SSH Key
       uses: appleboy/ssh-action@master
       with:
