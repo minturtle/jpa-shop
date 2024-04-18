@@ -56,11 +56,11 @@ class ProductRepositoryTest {
 
 
         // when
-        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
 
 
         // then
-        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple(album.getUid() , album.getName(), album.getPrice(), album.getThumbnailImageUrl()),
                         tuple(book.getUid(), book.getName(), book.getPrice(), book.getThumbnailImageUrl()),
@@ -84,10 +84,10 @@ class ProductRepositoryTest {
 
 
         //when
-        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
 
         //then
-        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple(album.getUid(), album.getName(), album.getPrice(), album.getThumbnailImageUrl())
                 );
@@ -108,11 +108,11 @@ class ProductRepositoryTest {
         );
 
         //when
-        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
 
 
         //then
-        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple(book.getUid(), book.getName(), book.getPrice(), book.getThumbnailImageUrl())
                 );
@@ -132,11 +132,11 @@ class ProductRepositoryTest {
                 ProductType.ALL
         );
         //when
-        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
 
 
         //then
-        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple(album.getUid(), album.getName(), album.getPrice(), album.getThumbnailImageUrl()),
                         tuple(book.getUid(), book.getName(), book.getPrice(), book.getThumbnailImageUrl())
@@ -158,7 +158,7 @@ class ProductRepositoryTest {
                 ProductType.ALL
         );
         //when
-        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
 
         //then
         String[] expectedUidList = expectedUidListString.split(":");
@@ -183,11 +183,11 @@ class ProductRepositoryTest {
                 ProductType.ALL
         );
         //when
-        List<Product> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, PageRequest.of(0, searchSize));
 
 
         //then
-        assertThat(result).extracting("uid", "name", "price", "thumbnailImageUrl")
+        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple(album.getUid(), album.getName(), album.getPrice(), album.getThumbnailImageUrl())
                 );

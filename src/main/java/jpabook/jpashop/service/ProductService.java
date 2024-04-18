@@ -40,17 +40,13 @@ public class ProductService {
 
     public PaginationListDto<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Pageable pageable) {
         log.info("search product logic started");
-        List<Product> searchResult = productRepository.search(searchCondition, pageable);
+        List<ProductDto.Preview> searchResult = productRepository.search(searchCondition, pageable);
         Long count = productRepository.getCount(searchCondition);
-
-
-        List<ProductDto.Preview> dtoList = searchResult.stream().map(p -> modelMapper.map(p, ProductDto.Preview.class)).toList();
-
 
         log.info("search product logic finished");
         return PaginationListDto.<ProductDto.Preview>builder()
                 .count(count)
-                .data(dtoList)
+                .data(searchResult)
                 .build();
     }
 
