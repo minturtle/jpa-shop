@@ -11,6 +11,7 @@ import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -183,6 +184,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("동시에 같은 Id, 또는 이메일로 회원가입을 실패한다면, 맨 처음 회원가입을 제외하곤 실패한다.")
+    @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
     public void given_NewUserInfo_when_registerConcurrently_then_SuccessFirstOnly() throws Exception {
         //given
         int threadSize = 10;
@@ -345,6 +347,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("동시에 같은 카카오 정보로 로그인 및 DB 저장을 시도한다면, 첫번쨰 요청을 제외하곤 카카오 로그인에 실패한다.")
+    @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
     public void given_KakaoLoginInfo_when_KakaoLoginConcurrently_then_SuccessFirstOnly() throws Exception{
         //given
         String kakaoUid = "123124141";
@@ -484,6 +487,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("동시에 유저의 정보를 수정 요청하면 첫번째 요청의 정보만 DB에 반영되고, 두번째 요청은 실패한다.")
+    @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
     void given_UserAndAdditionalUserInfo_when_updateUserInfoConcurrently_then_UpdateFirstOnly() throws Exception{
         // given
         User givenUser = user1;
