@@ -1,3 +1,10 @@
+buildscript {
+	ext {
+		queryDslVersion = "5.1.0"
+	}
+}
+
+
 plugins {
 	id 'org.springframework.boot' version '3.2.2'
 	id 'io.spring.dependency-management' version '1.0.12.RELEASE'
@@ -29,10 +36,29 @@ dependencies {
 	//database dependecies
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	runtimeOnly 'com.h2database:h2'
+	implementation 'com.mysql:mysql-connector-j:8.3.0'
+	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+	implementation "com.querydsl:querydsl-core"
+	implementation "com.querydsl:querydsl-collections"
+	annotationProcessor "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+
+	//authentication dependencies
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
 
 	// util dependencies
 	annotationProcessor 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
+	implementation 'com.aventrix.jnanoid:jnanoid:2.0.0'
+	implementation 'org.modelmapper:modelmapper:3.2.0'
+
+
+
 
 	// test dependecies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -41,6 +67,31 @@ dependencies {
 
 }
 
+
+// == QueryDSL 추가 설정 == //
+// QueryDSL 생성 파일 위치 -> 이를 설정해주지 않으면 build 디렉토리에 생성되는데, 인텔리제이에서 문제가 될수도 있음
+// IntelliJ 빌드 시 스캔하는 영역과 Gradle 빌드 시 스캔하는 영역이 달라서 발생하는 오류 해결
+def generated = 'src/main/generated'
+
+tasks.withType(JavaCompile) {
+	options.getGeneratedSourceOutputDirectory().set(file(generated))
+}
+
+// java source set 에 QueryDSL Q class 위치 추가
+sourceSets {
+	main.java.srcDirs += [ generated ]
+}
+
+
+// gradle clean 시에 QClass 디렉토리 삭제
+clean {
+	delete file(generated)
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+}
+test {
+	// 테스트 JVM 인코딩 설정
+	systemProperty 'file.encoding', 'UTF-8'
 }

@@ -1,26 +1,25 @@
 package jpabook.jpashop.domain.order;
 
-import jdk.jfr.Timestamp;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
+import lombok.Builder;
 import lombok.Getter;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "orders")
 @Getter
+@SuperBuilder
+@NoArgsConstructor
 public class Order extends BaseEntity {
 
-
-    public void cancel(){
-        this.status = OrderStatus.CANCEL;
-        orderItems.forEach(OrderItem::cancel);
-    }
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
@@ -38,17 +37,32 @@ public class Order extends BaseEntity {
     @Embedded
     private AddressInfo deliveryInfo;
 
+    @Embedded
+    private Payment payment;
+
+
     @Enumerated(value = EnumType.STRING)
     @Column(name="order_status")
-    private OrderStatus status;
+    @Builder.Default
+    private OrderStatus status = OrderStatus.ORDERED;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderItem> orderItems = new ArrayList<>();
+    @Builder.Default
+    private List<OrderProduct> orderProducts = new ArrayList<>();
 
 
-    public void addOrderItem(OrderItem orderItem){
-        orderItems.add(orderItem);
-        orderItem.setOrder(this);
+    public void addOrderProduct(OrderProduct orderProduct){
+        orderProducts.add(orderProduct);
+        orderProduct.setOrder(this);
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public void cancel(){
+        this.status = OrderStatus.CANCELED;
+        orderProducts.forEach(OrderProduct::cancel);
     }
 
 }

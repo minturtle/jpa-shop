@@ -19,6 +19,12 @@ public class AddressInfo {
     private String address;
     private String detailedAddress;
 
+
+    public AddressInfo(AddressInfo addressInfo) {
+        this.address = addressInfo.getAddress();
+        this.detailedAddress = addressInfo.getDetailedAddress();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,16 +1,16 @@
 package jpabook.jpashop.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+
+import java.util.Optional;
 
 public abstract class UserDto {
 
 
     @AllArgsConstructor
-    @Builder
     @Data
+    @NoArgsConstructor
     public abstract static class RegisterInfo{
         private String name;
         private String email;
@@ -19,23 +19,129 @@ public abstract class UserDto {
         private String profileImageUrl;
     }
 
-    @Builder
-    @Data
+    @Getter
+    @Setter
+    @NoArgsConstructor
     public static class UsernamePasswordUserRegisterInfo extends RegisterInfo{
+
+        @Builder
+        public UsernamePasswordUserRegisterInfo(
+                String name,
+                String email,
+                String address,
+                String detailedAddress,
+                String profileImageUrl,
+                String username,
+                String password
+        ) {
+            super(name, email, address, detailedAddress, profileImageUrl);
+            this.username = username;
+            this.password = password;
+        }
+
         private String username;
         private String password;
+
+        public String getUsername() {
+            return username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
     }
 
 
+
+    @Getter
+    public static class KakaoUserRegisterInfo extends RegisterInfo {
+
+
+        @Builder
+        public KakaoUserRegisterInfo(
+                String name,
+                String email,
+                String address,
+                String detailedAddress,
+                String profileImageUrl,
+                String kakaoUid
+        ) {
+            super(name, email, address, detailedAddress, profileImageUrl);
+            this.kakaoUid = kakaoUid;
+        }
+
+        private String kakaoUid;
+    }
+
+
+
+    @Getter
+    public static class GoogleUserRegisterInfo extends RegisterInfo{
+
+        @Builder
+        public GoogleUserRegisterInfo(
+                String name,
+                String email,
+                String address,
+                String detailedAddress,
+                String profileImageUrl,
+                String googleUid
+        ) {
+            super(name, email, address, detailedAddress, profileImageUrl);
+            this.googleUid = googleUid;
+        }
+
+        private String googleUid;
+    }
 
 
     @AllArgsConstructor
     @Builder
     @Data
     public static class Detail{
+        private String userUid;
+        private String name;
+        private String email;
+        private String address;
+        private String detailedAddress;
+        private String profileImage;
+    }
+
+
+    @AllArgsConstructor
+    @Builder
+    @Data
+    public static class UpdateDefaultUserInfo {
+
+
+        private Optional<String> updatedName;
+
+        private Optional<String> updatedAddress;
+
+        private Optional<String> updatedDetailAddress;
+
+        private Optional<String> updatedProfileImageUrl;
 
     }
 
+    @AllArgsConstructor
+    @Builder
+    @Data
+    public static class UpdatePassword {
+        @NotNull
+        private String beforePassword;
+
+        @NotNull
+        private String afterPassword;
+    }
+
+    @AllArgsConstructor
+    @Getter
+    public static class OAuthLoginResult {
+        private String uid;
+        private boolean isAdditionalInfoNeed;
+
+    }
 
 }
 
