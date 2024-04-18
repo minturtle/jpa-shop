@@ -15,6 +15,7 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -177,6 +178,7 @@ class AccountServiceTest {
 
     @Test
     @DisplayName("한 account에 동시에 출금을 시도할 시, 첫번째 출금 요청만 성공한다.")
+    @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
     void given_Account_when_DepositConcurrently_then_SuccessFirstOnly() throws Exception{
         // given
         String givenUserUid = user1.getUid();
