@@ -20,6 +20,7 @@ import java.util.Objects;
 @Inheritance(strategy = InheritanceType.JOINED)
 @NoArgsConstructor
 @SuperBuilder
+@DiscriminatorColumn(name = "dtype")
 public abstract class Product extends BaseEntity {
 
 
@@ -48,7 +49,6 @@ public abstract class Product extends BaseEntity {
 
     private String thumbnailImageUrl;
 
-
     @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -63,6 +63,9 @@ public abstract class Product extends BaseEntity {
     @Builder.Default
     private List<Cart> cartList = new ArrayList<>();
 
+    @Column(name = "dtype", insertable = false, updatable = false)
+    private String dtype;
+
 
     public void addStock(int quantity){
         this.stockQuantity += quantity;
@@ -74,6 +77,7 @@ public abstract class Product extends BaseEntity {
     }
 
     public void addCategory(Category category) {
+
         ProductCategory productCategory = new ProductCategory(this, category);
         this.categories.add(productCategory);
     }

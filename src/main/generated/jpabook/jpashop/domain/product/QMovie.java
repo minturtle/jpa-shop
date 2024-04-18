@@ -38,6 +38,9 @@ public class QMovie extends EntityPathBase<Movie> {
     public final StringPath director = createString("director");
 
     //inherited
+    public final StringPath dtype = _super.dtype;
+
+    //inherited
     public final NumberPath<Long> id = _super.id;
 
     //inherited
