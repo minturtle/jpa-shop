@@ -38,6 +38,13 @@ jobs:
 
     - name: Build with Gradle
       run: ./gradlew build
+      
+    - name: Upload test reports
+      if: always()  
+      uses: actions/upload-artifact@v2
+      with:
+        name: Gradle Test Reports
+        path: build/reports/tests/test/
   deploy:
     needs: build
     runs-on: ubuntu-latest
