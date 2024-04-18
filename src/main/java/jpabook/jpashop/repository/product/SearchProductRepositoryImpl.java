@@ -1,6 +1,7 @@
 package jpabook.jpashop.repository.product;
 
 
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jpabook.jpashop.domain.product.Album;
@@ -27,9 +28,14 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<Product> search(ProductDto.SearchCondition searchCondition, Pageable pageable) {
+    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Pageable pageable) {
 
-        JPAQuery<Product> query = jpaQueryFactory.select(product)
+        JPAQuery<ProductDto.Preview> query = jpaQueryFactory.select(Projections.constructor(
+                ProductDto.Preview.class,
+                        product.uid,
+                        product.name,
+                        product.price,
+                        product.thumbnailImageUrl))
                 .from(product);
 
         setUpWherePredicationQueries(query, searchCondition);
