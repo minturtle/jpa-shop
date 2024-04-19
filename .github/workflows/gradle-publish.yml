@@ -55,7 +55,6 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
         source: "build/libs/app.jar"
         target: "/home/ubuntu/jpashop/builds"
     - name: Restart Service
@@ -64,7 +63,6 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        port: ${{ secrets.SERVER_PORT }}
         script: |
           cd /home/ubuntu/jpashop
           sudo docker compose restart
