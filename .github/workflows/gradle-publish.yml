@@ -69,7 +69,7 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         source: "./artifacts/app.jar" 
-        target: "/home/ubuntu/jpashop/builds"
+        target: "/home/ubuntu/jpashop/builds/app.jar"
 
     - name: Restart Service
       uses: appleboy/ssh-action@master
