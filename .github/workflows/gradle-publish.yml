@@ -60,6 +60,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/ubuntu/jpashop/builds
-          mv /home/runner/work/jpa-shop/jpa-shop/artifacts/*.jar ./app.jar 
+          mv ./artifacts/*.jar ./app.jar  
           sudo docker compose restart
+
 
