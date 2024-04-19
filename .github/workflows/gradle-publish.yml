@@ -54,14 +54,6 @@ jobs:
       with:
         name: packaged-jar
         path: ./artifacts
-    - name: Remove previous jar file
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          rm /home/ubuntu/jpashop/builds/app.jar
     - name: Deploy to Server
       uses: appleboy/scp-action@master
       with:
