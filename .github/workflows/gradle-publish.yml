@@ -28,7 +28,16 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew clean build
 
-      
+    - name: Rename JAR
+      run: |
+        mv $(find build/libs -name "*.jar" ! -name "*-plain.jar") build/libs/app.jar
+
+    - name: Upload JAR
+      uses: actions/upload-artifact@v2
+      with:
+        name: packaged-jar
+        path: build/libs/app.jar
+        
     - name: Upload test reports
       if: always()  
       uses: actions/upload-artifact@v2
@@ -40,15 +49,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - name: Rename JAR
-      run: |
-        mv $(find build/libs -name "*.jar" ! -name "*-plain.jar") build/libs/app.jar
-
-    - name: Upload JAR
-      uses: actions/upload-artifact@v2
+    - name: Download JAR
+      uses: actions/download-artifact@v2
       with:
         name: packaged-jar
-        path: build/libs/app.jar
+        path: ./artifacts
     - name: Deploy to Server
       uses: appleboy/scp-action@master
       with:
