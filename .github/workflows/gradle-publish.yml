@@ -46,9 +46,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/download-artifact@v2
+    - name: Download JAR
+      uses: actions/download-artifact@v2
       with:
         name: packaged-jar
+        path: ./artifacts
 
     - name: Deploy to Server using SSH Key
       uses: appleboy/ssh-action@master
@@ -58,5 +60,5 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd /home/ubuntu/jpashop/builds
-          mv $GITHUB_WORKSPACE/*.jar ./app.jar
+          mv ./artifacts/*.jar ./app.jar
           sudo docker compose restart
