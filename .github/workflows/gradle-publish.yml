@@ -61,7 +61,17 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         source: "./artifacts/app.jar" 
-        target: "/home/ubuntu/jpashop/builds/app.jar"
+        target: "/home/ubuntu/jpashop"
+    - name: Move jar File in Server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          mv /home/ubuntu/jpashop/artifacts/app.jar /home/ubuntu/jpashop/builds/app.jar
+          rm -rf /home/ubuntu/jpashop/artifacts
+
 
     - name: Restart Service
       uses: appleboy/ssh-action@master
