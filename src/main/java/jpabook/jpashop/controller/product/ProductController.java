@@ -2,6 +2,7 @@ package jpabook.jpashop.controller.product;
 
 
 import jpabook.jpashop.aop.annotations.Loggable;
+import jpabook.jpashop.dto.CursorListDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.controller.common.response.ProductResponse;
 import jpabook.jpashop.dto.ProductDto;
@@ -40,24 +41,17 @@ public class ProductController {
             ){
 
 
-        if(minPrice != null && maxPrice != null && minPrice > maxPrice){
-            throw new IllegalArgumentException(ProductExceptionMessages.PRICE_RANGE_INVALID.getMessage());
-        }
+        validPriceRange(minPrice, maxPrice);
 
-        ProductDto.PriceRange priceRange = null;
-        if(minPrice != null && maxPrice != null){
-            priceRange = new ProductDto.PriceRange(minPrice, maxPrice);
-        }
+        ProductDto.PriceRange priceRange = createPriceRange(minPrice, maxPrice);
+
+
+        ProductDto.SearchCondition searchCondition = createSearchCondition(query, category, sortType, productType, priceRange);
+
 
 
         PaginationListDto<ProductDto.Preview> result = productService.search(
-                new ProductDto.SearchCondition(
-                        Optional.ofNullable(query),
-                        Optional.ofNullable(priceRange),
-                        Optional.ofNullable(category),
-                        sortType,
-                        productType
-                ),
+                searchCondition,
                 PageRequest.of(page - 1, size)
         );
 
@@ -68,6 +62,37 @@ public class ProductController {
                 result.getCount(),
                 responseList
                 );
+    }
+
+
+    @GetMapping("/v2/list")
+    public CursorListDto<ProductResponse.Preview> searchCursor(
+            @RequestParam(required = false) String cursorUid,
+            @RequestParam(required = false, defaultValue = "10") Integer size,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) Integer minPrice,
+            @RequestParam(required = false) Integer maxPrice,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false, defaultValue = "BY_DATE") SortOption sortType,
+            @RequestParam(required = false, defaultValue = "ALL") ProductType productType
+
+    ){
+
+        validPriceRange(minPrice, maxPrice);
+
+        ProductDto.PriceRange priceRange = createPriceRange(minPrice, maxPrice);
+        ProductDto.SearchCondition searchCondition = createSearchCondition(query, category, sortType, productType, priceRange);
+
+        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.ofNullable(cursorUid), size);
+
+        List<ProductResponse.Preview> responseList = result
+                .stream().map(dto -> new ProductResponse.Preview(dto.getUid(), dto.getName(), dto.getPrice(), dto.getThumbnailUrl())).toList();
+
+
+        return CursorListDto.<ProductResponse.Preview>builder()
+                .cursorUid(result.get(result.size()-1).getUid())
+                .data(responseList)
+                .build();
     }
 
     @GetMapping("/{productUid}")
@@ -88,6 +113,32 @@ public class ProductController {
 
         throw new InternalErrorException(ProductExceptionMessages.ENTITY_PRODUCT_MAPPING_FAILED.getMessage());
     }
+
+
+    private static ProductDto.PriceRange createPriceRange(Integer minPrice, Integer maxPrice) {
+        ProductDto.PriceRange priceRange = null;
+        if(minPrice != null && maxPrice != null){
+            priceRange = new ProductDto.PriceRange(minPrice, maxPrice);
+        }
+        return priceRange;
+    }
+
+    private static void validPriceRange(Integer minPrice, Integer maxPrice) {
+        if(minPrice != null && maxPrice != null && minPrice > maxPrice){
+            throw new IllegalArgumentException(ProductExceptionMessages.PRICE_RANGE_INVALID.getMessage());
+        }
+    }
+
+    private static ProductDto.SearchCondition createSearchCondition(String query, String category, SortOption sortType, ProductType productType, ProductDto.PriceRange priceRange) {
+        return new ProductDto.SearchCondition(
+                Optional.ofNullable(query),
+                Optional.ofNullable(priceRange),
+                Optional.ofNullable(category),
+                sortType,
+                productType
+        );
+    }
+
 
 }
 

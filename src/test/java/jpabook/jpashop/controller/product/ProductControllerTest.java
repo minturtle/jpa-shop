@@ -7,6 +7,7 @@ import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
+import jpabook.jpashop.dto.CursorListDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.enums.product.SortOption;
 import org.junit.jupiter.api.DisplayName;
@@ -323,6 +324,68 @@ class ProductControllerTest {
                 );
 
 
+    }
+
+
+    @Test
+    @DisplayName("사용자는 커서 없이 상품을 검색해 첫 페이지를 리턴받을 수 있다.")
+    void given_NoCursor_when_Search_then_ReturnFirstPage() throws Exception{
+        // given
+        Product product1 = album;
+        Product product2 = book;
+
+        // when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
+                        .param("size", "2")
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+        // then
+        CursorListDto<ProductResponse.Preview> result = objectMapper
+                .readValue(
+                        mvcResponse.getResponse().getContentAsString(),
+                        new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
+                );
+        assertThat(result).extracting("cursorUid")
+                .isEqualTo(product2.getUid());
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
+                .containsExactly(
+                        tuple(product1.getUid(), product1.getName(), product1.getPrice(), product1.getThumbnailImageUrl()),
+                        tuple(product2.getUid(), product2.getName(), product2.getPrice(), product2.getThumbnailImageUrl())
+                );
+
+    }
+
+    @Test
+    @DisplayName("사용자는 커서를 통해 다음 페이지의 상품을 검색해 다음 페이지를 리턴받을 수 있다.")
+    void given_CursorUid_when_Search_then_ReturnNextPage() throws Exception{
+        // given
+        Product product1 = album;
+        Product product2 = book;
+        Product product3 = movie;
+
+
+        // when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
+                        .param("size", "2")
+                        .param("cursorUid", product1.getUid()
+                ))
+                .andExpect(status().isOk())
+                .andReturn();
+        // then
+        CursorListDto<ProductResponse.Preview> result = objectMapper
+                .readValue(
+                        mvcResponse.getResponse().getContentAsString(),
+                        new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
+                );
+
+        assertThat(result).extracting("cursorUid")
+                .isEqualTo(product3.getUid());
+        assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
+                .containsExactly(
+                        tuple(product2.getUid(), product2.getName(), product2.getPrice(), product2.getThumbnailImageUrl()),
+                        tuple(product3.getUid(), product3.getName(), product3.getPrice(), product3.getThumbnailImageUrl())
+                );
     }
 
 
