@@ -32,6 +32,7 @@ public abstract class ProductDto {
     }
 
 
+
     @Data
     @SuperBuilder
     @NoArgsConstructor
