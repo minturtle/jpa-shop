@@ -214,6 +214,53 @@ class ProductRepositoryTest {
 
     }
 
+
+    @Test
+    @DisplayName("물품 검색시 CursorUid 없이 검색을 수행할 경우 첫페이지의 결과를 Cursor 방식으로 받아올 수 있다.")
+    void given_NoCursorUid_when_Search_then_ReturnFirstPage() throws Exception{
+        // given
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                SortOption.BY_NAME,
+                ProductType.ALL
+        );
+        // when
+        Optional<String> cursorUid = Optional.empty();
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, cursorUid, 2);
+        // then
+        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
+                .containsExactly(
+                        tuple(album.getUid(), album.getName(), album.getPrice(), album.getThumbnailImageUrl()),
+                        tuple(book.getUid(), book.getName(), book.getPrice(), book.getThumbnailImageUrl())
+                );
+    }
+
+    @Test
+    @DisplayName("물품 검색시 CursorUid를 통해 다음 페이지의 결과를 Cursor 방식으로 받아올 수 있다.")
+    void given_CursorUid_when_Search_then_ReturnNextPage() throws Exception{
+        // given
+        ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty(),
+                SortOption.BY_NAME,
+                ProductType.ALL
+        );
+
+        Optional<String> cursorUid = Optional.of(album.getUid());
+        // when
+        List<ProductDto.Preview> result = productRepository.search(searchCondition, cursorUid, 2);
+        // then
+        assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
+                .containsExactly(
+                        tuple(book.getUid(), book.getName(), book.getPrice(), book.getThumbnailImageUrl()),
+                        tuple(movie.getUid(), movie.getName(), movie.getPrice(), movie.getThumbnailImageUrl())
+                );
+    }
+
+
     @TestConfiguration
     public static class TestConfig{
 

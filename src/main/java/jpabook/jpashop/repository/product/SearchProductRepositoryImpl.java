@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 import static jpabook.jpashop.domain.product.QProduct.product;
 import static jpabook.jpashop.domain.product.QProductCategory.productCategory;
@@ -41,6 +42,26 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
         setUpWherePredicationQueries(query, searchCondition);
 
         setUpPagenationQuries(query, pageable, searchCondition.getSortOption());
+
+        return query.fetch();
+
+
+    }
+
+
+    @Override
+    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional<String> cursorUid, int limit) {
+        JPAQuery<ProductDto.Preview> query = jpaQueryFactory.select(Projections.constructor(
+                ProductDto.Preview.class,
+                product.uid,
+                product.name,
+                product.price,
+                product.thumbnailImageUrl))
+                .from(product);
+
+        setUpWherePredicationQueries(query, searchCondition);
+
+        setUpPaginationQueries(query, cursorUid, limit);
 
         return query.fetch();
 
@@ -95,6 +116,18 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
             }
         }
 
+    }
+
+
+    private void setUpPaginationQueries(JPAQuery query, Optional<String> cursorUid, int limit) {
+        if(cursorUid.isPresent()){
+            query.where(product.uid.gt(cursorUid.get()));
+            query.limit(limit);
+            return;
+        }
+
+        query.limit(limit);
+        query.offset(0L);
     }
 
     private void setUpPagenationQuries(JPAQuery query, Pageable pageable, SortOption sortOption) {
