@@ -2,13 +2,12 @@ package jpabook.jpashop.controller.product;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jpabook.jpashop.controller.common.response.CategoryResponse;
 import jpabook.jpashop.controller.common.response.ProductResponse;
-import jpabook.jpashop.domain.product.Album;
-import jpabook.jpashop.domain.product.Book;
-import jpabook.jpashop.domain.product.Movie;
-import jpabook.jpashop.domain.product.Product;
+import jpabook.jpashop.domain.product.*;
 import jpabook.jpashop.dto.CursorListDto;
 import jpabook.jpashop.dto.PaginationListDto;
+import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -388,5 +387,30 @@ class ProductControllerTest {
                 );
     }
 
+
+    @Test
+    @DisplayName("사용자는 카테고리의 각 상품 타입에 맞게 그룹화된 정보를 조회할 수 있다.")
+    public void given_Categories_when_SearchCategory_thenReturnGroupedCategories() throws Exception{
+        //given
+        Category givenAlbumCategory = albumCategory;
+        Category givenBookCategory = bookCategory;
+        Category givenMovieCategory = movieCategory;
+
+        //when
+        MvcResult mvcResponse = mockMvc.perform(get("/api/product/category"))
+                .andExpect(status().isOk())
+                .andReturn();
+        //then
+        CategoryResponse.ListResult result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), CategoryResponse.ListResult.class);
+
+
+        assertThat(result.get(ProductType.ALBUM).getCategories()).extracting("uid", "name")
+                .contains(tuple(givenAlbumCategory.getUid(), givenAlbumCategory.getName()));
+        assertThat(result.get(ProductType.BOOK).getCategories()).extracting("uid", "name")
+                .contains(tuple(givenBookCategory.getUid(), givenBookCategory.getName()));
+        assertThat(result.get(ProductType.MOVIE).getCategories()).extracting("uid", "name")
+                .contains(tuple(givenMovieCategory.getUid(), givenMovieCategory.getName()));
+
+    }
 
 }

@@ -2,6 +2,8 @@ package jpabook.jpashop.controller.product;
 
 
 import jpabook.jpashop.aop.annotations.Loggable;
+import jpabook.jpashop.controller.common.response.CategoryResponse;
+import jpabook.jpashop.dto.CategoryDto;
 import jpabook.jpashop.dto.CursorListDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.controller.common.response.ProductResponse;
@@ -17,8 +19,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/product")
@@ -113,6 +114,27 @@ public class ProductController {
 
         throw new InternalErrorException(ProductExceptionMessages.ENTITY_PRODUCT_MAPPING_FAILED.getMessage());
     }
+
+    @GetMapping("/category")
+    public CategoryResponse.ListResult getCategories(){
+        List<CategoryDto.Info> categories = productService.getCategories();
+
+        CategoryResponse.ListResult result = new CategoryResponse.ListResult();
+
+
+
+        for(ProductType productType : ProductType.values()){
+            result.add(productType);
+        }
+
+
+        for(CategoryDto.Info category : categories){
+            result.get(category.getProductType()).addCategory(category.getUid(), category.getName());
+        }
+
+        return result;
+    }
+
 
 
     private static ProductDto.PriceRange createPriceRange(Integer minPrice, Integer maxPrice) {
