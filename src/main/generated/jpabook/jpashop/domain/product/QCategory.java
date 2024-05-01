@@ -23,6 +23,8 @@ public class QCategory extends EntityPathBase<Category> {
 
     public final StringPath name = createString("name");
 
+    public final EnumPath<jpabook.jpashop.enums.product.ProductType> productType = createEnum("productType", jpabook.jpashop.enums.product.ProductType.class);
+
     public final StringPath uid = createString("uid");
 
     public QCategory(String variable) {

@@ -2,6 +2,7 @@ package jpabook.jpashop.domain.product;
 
 
 import jakarta.persistence.*;
+import jpabook.jpashop.enums.product.ProductType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,8 +23,10 @@ public class Category {
     @Column(name = "category_uid", updatable = false, unique = true, nullable = false)
     private String uid;
 
-
     private String name;
+
+    @Enumerated(EnumType.STRING)
+    private ProductType productType;
 
 
 }
