@@ -6,11 +6,13 @@ import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
 import jpabook.jpashop.domain.product.Movie;
 import jpabook.jpashop.domain.product.Product;
+import jpabook.jpashop.dto.CategoryDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.common.InternalErrorException;
 import jpabook.jpashop.exception.product.ProductExceptionMessages;
+import jpabook.jpashop.repository.CategoryRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 @Service
 @Transactional
@@ -31,6 +34,7 @@ import java.util.Optional;
 public class ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
+    private final CategoryRepository categoryRepository;
     /**
      * @description 물건 리스트 검색
      * @author minseok kim
@@ -87,6 +91,14 @@ public class ProductService {
         log.info("find product by uid logic finished");
         throw new InternalErrorException(ProductExceptionMessages.PRODUCT_TYPE_MAPPAING_FAILED.getMessage());
     }
-    
-    
+
+
+    public List<CategoryDto.Info> getCategories() {
+        return StreamSupport.stream(categoryRepository.findAll().spliterator(), false)
+                .map(category -> CategoryDto.Info.builder()
+                        .uid(category.getUid())
+                        .name(category.getName())
+                        .productType(category.getProductType())
+                        .build()).toList();
+    }
 }
