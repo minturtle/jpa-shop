@@ -26,6 +26,7 @@ public class ProductResponse {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @Schema(name = "ProductResponseDetail")
     public static abstract class Detail {
 
         private String uid;
