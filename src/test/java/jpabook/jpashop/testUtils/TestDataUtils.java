@@ -7,6 +7,7 @@ import jpabook.jpashop.domain.order.OrderStatus;
 import jpabook.jpashop.domain.order.Payment;
 import jpabook.jpashop.domain.product.*;
 import jpabook.jpashop.domain.user.*;
+import jpabook.jpashop.enums.product.ProductType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -106,9 +107,9 @@ public class TestDataUtils {
                 .version(1)
                 .build();
 
-        albumCategory = new Category(1L, "category-003", "hiphop");
-        bookCategory = new Category(2L, "category-002", "self-development");
-        movieCategory = new Category(3L, "category-001", "romance");
+        albumCategory = new Category(1L, "category-003", "hiphop", ProductType.ALBUM);
+        bookCategory = new Category(2L, "category-002", "self-development", ProductType.BOOK);
+        movieCategory = new Category(3L, "category-001", "romance", ProductType.MOVIE);
 
         album = Album.builder()
                 .uid("album-001")
