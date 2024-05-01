@@ -1,15 +1,15 @@
 
-INSERT INTO categories (category_id, category_uid, name)
-VALUES (1, 'category-003', 'hiphop');
+INSERT INTO categories (category_id, category_uid, name, product_type)
+VALUES (1, 'category-003', 'hiphop', 'ALBUM');
 
 
-INSERT INTO categories (category_id, category_uid, name)
-VALUES (2, 'category-002', 'self-development');
+INSERT INTO categories (category_id, category_uid, name, product_type)
+VALUES (2, 'category-002', 'self-development', 'BOOK');
 
 
 
-INSERT INTO categories (category_id, category_uid, name)
-VALUES (3, 'category-001', 'romance');
+INSERT INTO categories (category_id, category_uid, name, product_type)
+VALUES (3, 'category-001', 'romance', 'MOVIE');
 
 
 -- save album

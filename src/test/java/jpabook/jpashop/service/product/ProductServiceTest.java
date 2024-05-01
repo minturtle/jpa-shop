@@ -2,12 +2,15 @@ package jpabook.jpashop.service.product;
 
 import jpabook.jpashop.domain.product.Album;
 import jpabook.jpashop.domain.product.Book;
+import jpabook.jpashop.domain.product.Category;
 import jpabook.jpashop.domain.product.Movie;
+import jpabook.jpashop.dto.CategoryDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.service.ProductService;
+import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,5 +151,24 @@ class ProductServiceTest {
     }
 
 
+    @Test
+    @DisplayName("상품 카테고리의 리스트를 조회할 수 있다.")
+    public void given_Categories_when_SearchCategory_then_ReturnList() throws Exception{
+        //given
+        Category givenCategory1 = albumCategory;
+        Category givenCategory2 = bookCategory;
+        Category givenCategory3 = movieCategory;
+
+        //when
+        List<CategoryDto.Info> result = productService.getCategories();
+
+        //then
+        assertThat(result).extracting("uid", "name", "productType")
+                .contains(
+                        Tuple.tuple(givenCategory1.getUid(), givenCategory1.getName(), givenCategory1.getProductType()),
+                        Tuple.tuple(givenCategory2.getUid(), givenCategory2.getName(), givenCategory2.getProductType()),
+                        Tuple.tuple(givenCategory3.getUid(), givenCategory3.getName(), givenCategory3.getProductType())
+                );
+    }
 
 }
