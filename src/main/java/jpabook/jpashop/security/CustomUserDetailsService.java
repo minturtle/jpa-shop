@@ -1,5 +1,11 @@
 package jpabook.jpashop.security;
 
+import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.domain.user.UsernamePasswordAuthInfo;
+import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.exception.user.UserExceptonMessages;
+import jpabook.jpashop.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -7,13 +13,24 @@ import org.springframework.stereotype.Component;
 
 
 @Component
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
+
+    private final UserRepository userRepository;
 
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // TODO : User 조회 기능 추가
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
 
-        return null;
+
+        UsernamePasswordAuthInfo usernamePasswordAuthInfo = user.getUsernamePasswordAuthInfo();
+
+        return new UserDto.CustomUserDetails(
+                usernamePasswordAuthInfo.getUsername(),
+                usernamePasswordAuthInfo.getPassword(),
+                usernamePasswordAuthInfo.getSalt()
+        );
     }
 }

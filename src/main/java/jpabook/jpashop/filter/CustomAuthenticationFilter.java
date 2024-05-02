@@ -9,10 +9,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 
 
 @Component
@@ -52,7 +52,7 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
             }
 
             return objectMapper.readValue(json.toString(), UserRequest.Login.class);
-        }catch (Exception e){
+        }catch (IOException e){
             throw new AuthenticationException("로그인 요청 값을 읽어들이는데 실패했습니다.") {};
         }
     }

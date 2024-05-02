@@ -2,7 +2,11 @@ package jpabook.jpashop.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public abstract class UserDto {
@@ -105,6 +109,56 @@ public abstract class UserDto {
         private String address;
         private String detailedAddress;
         private String profileImage;
+    }
+
+
+    @AllArgsConstructor
+    public static class CustomUserDetails implements UserDetails{
+
+        private final String username;
+        private final String password;
+        private final String salt;
+
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return List.of(new GrantedAuthority() {
+
+                @Override
+                public String getAuthority() {
+                    return "ROLE_USER";   // ROLE_USER
+                }
+            });
+        }
+
+        @Override
+        public String getPassword() {
+            return String.format("%s:%s", password, salt);
+        }
+
+        @Override
+        public String getUsername() {
+            return username;
+        }
+
+        @Override
+        public boolean isAccountNonExpired() {
+            return false;
+        }
+
+        @Override
+        public boolean isAccountNonLocked() {
+            return false;
+        }
+
+        @Override
+        public boolean isCredentialsNonExpired() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
+        }
     }
 
 
