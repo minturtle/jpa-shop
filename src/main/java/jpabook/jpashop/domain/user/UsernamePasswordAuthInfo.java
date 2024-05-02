@@ -36,8 +36,5 @@ public class UsernamePasswordAuthInfo {
         return Objects.hash(username, password, salt);
     }
 
-    public byte[] getSaltBytes(){
-        return Base64.getDecoder().decode(salt);
-    }
 
 }

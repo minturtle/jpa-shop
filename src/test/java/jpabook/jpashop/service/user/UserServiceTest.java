@@ -556,7 +556,7 @@ class UserServiceTest {
         // then
         User actual = userRepository.findByUid(givenUser.getUid()).orElseThrow(RuntimeException::new);
 
-        byte[] actualSalt = actual.getUsernamePasswordAuthInfo().getSaltBytes();
+        byte[] actualSalt = PasswordUtils.saltFromString(actual.getUsernamePasswordAuthInfo().getSalt());
         String actualPassword = actual.getUsernamePasswordAuthInfo().getPassword();
 
         assertThat(passwordUtils.matches(updatedPassword, actualSalt, actualPassword)).isTrue();

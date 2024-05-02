@@ -88,7 +88,7 @@ public class UserService {
 
         UsernamePasswordAuthInfo usernamePasswordAuthInfo = user.getUsernamePasswordAuthInfo();
 
-        if(!passwordUtils.matches(password, usernamePasswordAuthInfo.getSaltBytes(), usernamePasswordAuthInfo.getPassword())){
+        if(!passwordUtils.matches(password, PasswordUtils.saltFromString(usernamePasswordAuthInfo.getSalt()), usernamePasswordAuthInfo.getPassword())){
             throw new AuthenticateFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage());
         }
 
@@ -252,7 +252,7 @@ public class UserService {
             throw new UserAuthTypeException(UserExceptonMessages.NO_USERNAME_PASSWORD_AUTH_INFO.getMessage());
         }
 
-        if(!passwordUtils.matches(dto.getBeforePassword(), authInfo.getSaltBytes(), authInfo.getPassword())){
+        if(!passwordUtils.matches(dto.getBeforePassword(), PasswordUtils.saltFromString(authInfo.getSalt()), authInfo.getPassword())){
             throw new AuthenticateFailedException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
         }
 
@@ -262,8 +262,8 @@ public class UserService {
 
         findUser.setUsernamePasswordAuthInfo(
                 authInfo.getUsername(),
-                passwordUtils.encodePassword(dto.getAfterPassword(), authInfo.getSaltBytes()),
-                authInfo.getSaltBytes()
+                passwordUtils.encodePassword(dto.getAfterPassword(), PasswordUtils.saltFromString(authInfo.getSalt())),
+                PasswordUtils.saltFromString(authInfo.getSalt())
         );
 
         log.info("update user password success : userUid - {}", userUid);

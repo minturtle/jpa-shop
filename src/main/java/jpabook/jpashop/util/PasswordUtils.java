@@ -24,6 +24,9 @@ public class PasswordUtils {
     private Integer ITERATIONS;
 
 
+    public static byte[] saltFromString(String salt){
+        return Base64.getDecoder().decode(salt);
+    }
 
 
     public byte[] createSalt() {
@@ -38,6 +41,8 @@ public class PasswordUtils {
             throw new RuntimeException(e);
         }
     }
+
+
 
     public String encodePassword(String rawPassword, byte[] salt){
         try {

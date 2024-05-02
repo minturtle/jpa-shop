@@ -89,7 +89,7 @@ class UserControllerTest {
                         .contains("email@email.com", "name", "http://example.com/image.png", new AddressInfo("address", "detailedAddress")),
                 ()->assertThat(user.getUid()).isNotNull());
 
-        boolean isPasswordMatches = passwordUtils.matches("abc1234!", user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatches = passwordUtils.matches("abc1234!", PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
 
         assertAll("유저의 인증정보가 저장되어 후에 인증이 수행가능해야 한다.",
                 ()->assertThat(user.getUsernamePasswordAuthInfo().getUsername()).isEqualTo(givenUsername),
@@ -290,7 +290,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isTrue();
     }
@@ -320,7 +320,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
@@ -349,7 +349,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword,PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD.getMessage());
