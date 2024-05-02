@@ -125,7 +125,7 @@ public abstract class UserDto {
 
                 @Override
                 public String getAuthority() {
-                    return "ROLE_USER";   // ROLE_USER
+                    return "ROLE_USER";
                 }
             });
         }
@@ -142,17 +142,17 @@ public abstract class UserDto {
 
         @Override
         public boolean isAccountNonExpired() {
-            return false;
+            return true;
         }
 
         @Override
         public boolean isAccountNonLocked() {
-            return false;
+            return true;
         }
 
         @Override
         public boolean isCredentialsNonExpired() {
-            return false;
+            return true;
         }
 
         @Override
