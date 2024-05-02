@@ -2,6 +2,7 @@ package jpabook.jpashop.config;
 
 
 import jakarta.servlet.Filter;
+import jpabook.jpashop.filter.CorsFilter;
 import jpabook.jpashop.filter.JwtAuthenticateFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -28,7 +30,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
-            UsernamePasswordAuthenticationFilter authenticationFilter,
+            CorsFilter corsFilter,
+            AbstractAuthenticationProcessingFilter authenticationFilter,
             JwtAuthenticateFilter jwtAuthenticationFilter
 
     ) throws Exception{
