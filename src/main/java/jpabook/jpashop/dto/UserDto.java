@@ -115,9 +115,12 @@ public abstract class UserDto {
     @AllArgsConstructor
     public static class CustomUserDetails implements UserDetails{
 
+        @Getter
+        private final String uid;
         private final String username;
         private final String password;
         private final String salt;
+
 
         @Override
         public Collection<? extends GrantedAuthority> getAuthorities() {

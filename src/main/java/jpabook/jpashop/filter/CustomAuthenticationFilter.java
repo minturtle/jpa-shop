@@ -1,9 +1,14 @@
 package jpabook.jpashop.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jpabook.jpashop.controller.common.request.UserRequest;
+import jpabook.jpashop.controller.common.response.UserResponse;
+import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.util.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Date;
 
 
 @Component
@@ -20,11 +26,13 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
 
     private final ObjectMapper objectMapper;
 
+    private final JwtTokenProvider jwtTokenProvider;
     private static final String LOGIN_URI = "/api/user/login";
 
-    public CustomAuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper objectMapper) {
+    public CustomAuthenticationFilter(AuthenticationManager authenticationManager, ObjectMapper objectMapper, JwtTokenProvider jwtTokenProvider) {
         super(LOGIN_URI, authenticationManager);
         this.objectMapper = objectMapper;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -41,6 +49,19 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         );
 
         return this.getAuthenticationManager().authenticate(authRequest);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        UserDto.CustomUserDetails principal = (UserDto.CustomUserDetails) authResult.getPrincipal();
+
+        String token = jwtTokenProvider.sign(principal.getUid(), new Date());
+
+        UserResponse.Login responseBody = new UserResponse.Login(principal.getUid(), token);
+
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(200);
+        response.getWriter().write(objectMapper.writeValueAsString(responseBody));
     }
 
     private UserRequest.Login getLoginRequestBody(HttpServletRequest request) throws AuthenticationException {

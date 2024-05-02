@@ -28,6 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         UsernamePasswordAuthInfo usernamePasswordAuthInfo = user.getUsernamePasswordAuthInfo();
 
         return new UserDto.CustomUserDetails(
+                user.getUid(),
                 usernamePasswordAuthInfo.getUsername(),
                 usernamePasswordAuthInfo.getPassword(),
                 usernamePasswordAuthInfo.getSalt()
