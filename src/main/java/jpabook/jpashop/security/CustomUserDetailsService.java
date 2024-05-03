@@ -3,6 +3,7 @@ package jpabook.jpashop.security;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.domain.user.UsernamePasswordAuthInfo;
 import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.exception.user.CannotFindUserException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService, UidUserDetailsService {
 
     private final UserRepository userRepository;
 
@@ -33,5 +34,21 @@ public class CustomUserDetailsService implements UserDetailsService {
                 usernamePasswordAuthInfo.getPassword(),
                 usernamePasswordAuthInfo.getSalt()
         );
+    }
+
+
+    @Override
+    public UserDetails loadUserByUid(String uid) throws CannotFindUserException {
+        User user = userRepository.findByUid(uid)
+                .orElseThrow(CannotFindUserException::new);
+
+        return new UserDto.CustomUserDetails(
+                user.getUid(),
+                null,
+                null,
+                null
+        );
+
+
     }
 }
