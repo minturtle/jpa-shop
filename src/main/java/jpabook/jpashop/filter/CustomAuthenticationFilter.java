@@ -6,8 +6,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jpabook.jpashop.controller.common.request.UserRequest;
+import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.controller.common.response.UserResponse;
 import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 
 
@@ -62,6 +65,16 @@ public class CustomAuthenticationFilter extends AbstractAuthenticationProcessing
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(200);
         response.getWriter().write(objectMapper.writeValueAsString(responseBody));
+    }
+
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        ErrorResponse errorResponse = new ErrorResponse(UserExceptonMessages.LOGIN_FAILED.getMessage(), Arrays.toString(failed.getStackTrace()));
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
     }
 
     private UserRequest.Login getLoginRequestBody(HttpServletRequest request) throws AuthenticationException {
