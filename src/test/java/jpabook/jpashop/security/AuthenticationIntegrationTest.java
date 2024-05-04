@@ -79,6 +79,25 @@ public class AuthenticationIntegrationTest {
 
     }
 
+    @Test
+    @DisplayName("액세스 토큰이 만료된 경우 401 UnAuthorized를 반환한다.")
+    public void given_ExpiredAccessToken_when_RequestNeedAuthAPI_then_Return401() throws Exception{
+        //given
+        User givenUser = TestDataUtils.user1;
+
+        String givenAccessToken = jwtTokenProvider.sign(givenUser.getUid(), new Date(1L));
+        //when
+        MvcResult mvcResult = mockMvc.perform(get("/api/health-check")
+                .header("Authorization", "Bearer " + givenAccessToken))
+                .andDo(print())
+                .andReturn();
+        //then
+        ErrorResponse responseBody = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorResponse.class);
+
+        assertThat(mvcResult.getResponse().getStatus()).isEqualTo(401);
+        assertThat(responseBody.getMessage()).isEqualTo(UserExceptonMessages.EXPIRED_TOKEN.getMessage());
+    }
+
 
 
 }

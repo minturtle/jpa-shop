@@ -23,7 +23,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     private final ObjectMapper objectMapper;
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
 
         ErrorResponse errorResponse = new ErrorResponse(UserExceptonMessages.AUTHENTICATION_FAILED.getMessage(),  Arrays.toString(authException.getStackTrace()));
 
