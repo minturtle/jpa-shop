@@ -39,9 +39,7 @@ public class UserController {
 
     @PostMapping("/login")
     public UserResponse.Login login(@RequestBody UserRequest.Login loginDto) throws AuthenticateFailedException {
-        String uid = userService.login(loginDto.getUserId(), loginDto.getPassword());
-
-        return new UserResponse.Login(uid, jwtTokenProvider.sign(uid, new Date()));
+        return null;
     }
 
     @GetMapping("/info")

@@ -58,7 +58,7 @@ public class TestDataUtils {
                 .createdAt(LocalDateTime.parse("2024-03-31T12:00:00"))
                 .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00"))
                 .version(1)
-                .usernamePasswordAuthInfo(new UsernamePasswordAuthInfo("honggildong", "Jf2rTvFrXb8QTZfoz3szoVM0jZIS2xrXmVdBL05IL5t77TYgFT/4b/DAqqxd2+6lK/jdxkjWF3sc0Nm5VwRgSulvUEuuR774o2C5z08FjVdgvBgUWrmI6tPdPK7YMAWOPjRXet/qL5rjgjYGo16fOpDZAEStdsK9G9dhg3iJ5Jtoh2Cngq3uo6t2Souc0jt5i2D1qolHVG+bTQmIbgWSgKFBq+5yWm0bHGaCeFJMpAaN8izjjlIl6cVYkeKKlEdI", "salt"))
+                .usernamePasswordAuthInfo(new UsernamePasswordAuthInfo("honggildong", "Jf2rTvFrXb8QTZfoz3szoVM0jZIS2xrXmVdBL05IL5t77TYgFT/4b/DAqqxd2+6lK/jdxkjWF3sc0Nm5VwRgSulvUEuuR774o2C5z08FjVdgvBgUWrmI6tPdPK7YMAWOPjRXet/qL5rjgjYGo16fOpDZAEStdsK9G9dhg3iJ5Jtoh2Cngq3uo6t2Souc0jt5i2D1qolHVG+bTQmIbgWSgKFBq+5yWm0bHGaCeFJMpAaN8izjjlIl6cVYkeKKlEdI"))
                 .build();
 
         // Building the second user instance
