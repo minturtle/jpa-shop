@@ -33,7 +33,8 @@ public class SecurityConfig {
             HttpSecurity http,
             CorsFilter corsFilter,
             AbstractAuthenticationProcessingFilter authenticationFilter,
-            JwtAuthenticateFilter jwtAuthenticationFilter
+            JwtAuthenticateFilter jwtAuthenticationFilter,
+            AuthenticationEntryPoint authenticationEntryPoint
 
     ) throws Exception{
         return http
@@ -56,6 +57,9 @@ public class SecurityConfig {
                 //JWT토큰 사용에 따른 session disable
                 .sessionManagement(sessionManagement->{
                     sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                })
+                .exceptionHandling(exceptionHandling->{
+                    exceptionHandling.authenticationEntryPoint(authenticationEntryPoint);
                 })
                 .addFilterAt(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
