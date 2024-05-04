@@ -31,8 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService, UidUserDeta
         return new UserDto.CustomUserDetails(
                 user.getUid(),
                 usernamePasswordAuthInfo.getUsername(),
-                usernamePasswordAuthInfo.getPassword(),
-                usernamePasswordAuthInfo.getSalt()
+                usernamePasswordAuthInfo.getPassword()
         );
     }
 
@@ -44,7 +43,6 @@ public class CustomUserDetailsService implements UserDetailsService, UidUserDeta
 
         return new UserDto.CustomUserDetails(
                 user.getUid(),
-                null,
                 null,
                 null
         );

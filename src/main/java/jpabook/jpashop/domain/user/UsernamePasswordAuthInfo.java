@@ -19,21 +19,18 @@ public class UsernamePasswordAuthInfo {
     private String username;
     @Column(columnDefinition = "VARCHAR(512)")
     private String password;
-    @Column(columnDefinition = "VARCHAR(256)")
-    private String salt;
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         UsernamePasswordAuthInfo that = (UsernamePasswordAuthInfo) o;
-        return Objects.equals(username, that.username) && Objects.equals(password, that.password) && Objects.equals(salt, that.salt);
+        return Objects.equals(username, that.username) && Objects.equals(password, that.password);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(username, password, salt);
+        return Objects.hash(username, password);
     }
 
 

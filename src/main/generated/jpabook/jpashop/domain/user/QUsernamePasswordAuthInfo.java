@@ -21,8 +21,6 @@ public class QUsernamePasswordAuthInfo extends BeanPath<UsernamePasswordAuthInfo
 
     public final StringPath password = createString("password");
 
-    public final StringPath salt = createString("salt");
-
     public final StringPath username = createString("username");
 
     public QUsernamePasswordAuthInfo(String variable) {

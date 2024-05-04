@@ -12,8 +12,8 @@ spring:
       ddl-auto: create
   security:
     password:
-      iterations: 100000
-      hashwidth: 192
+
+
 nanoId:
   size : 10
 

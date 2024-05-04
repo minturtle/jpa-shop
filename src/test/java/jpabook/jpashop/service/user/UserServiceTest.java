@@ -7,7 +7,6 @@ import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.service.UserService;
 import jpabook.jpashop.util.NanoIdProvider;
-import jpabook.jpashop.util.PasswordUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.*;
@@ -20,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -53,7 +53,7 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @SpyBean
-    private PasswordUtils passwordUtils;
+    private PasswordEncoder passwordEncoder;
 
 
     @SpyBean
@@ -73,11 +73,6 @@ class UserServiceTest {
         String givenImageUrl = "http://image.com/image.png";
         String givenUsername = "givenUsername";
         String givenPassword = "abc1234!";
-        byte[] givenSalt = Base64.getDecoder().decode("salt");
-
-
-        when(passwordUtils.createSalt()).thenReturn(givenSalt);
-
 
         UserDto.UsernamePasswordUserRegisterInfo dto = createRegisterInfo(givenName, givenEmail, givenAddress, givenDetailedAddress, givenImageUrl, givenUsername, givenPassword);
 
@@ -95,7 +90,6 @@ class UserServiceTest {
                 .contains(givenName, givenEmail, new AddressInfo(givenAddress, givenDetailedAddress), givenImageUrl);
 
         assertThat(usernamePasswordAuthInfo.getUsername()).isEqualTo(givenUsername);
-        assertThat(usernamePasswordAuthInfo.getSalt()).isEqualTo("salt");
         assertAll("verify givenPassword encode",
                 () -> assertThat(usernamePasswordAuthInfo.getPassword()).isNotNull(),
                 () -> assertThat(usernamePasswordAuthInfo.getPassword()).isNotEqualTo(givenPassword)
@@ -556,10 +550,9 @@ class UserServiceTest {
         // then
         User actual = userRepository.findByUid(givenUser.getUid()).orElseThrow(RuntimeException::new);
 
-        byte[] actualSalt = PasswordUtils.saltFromString(actual.getUsernamePasswordAuthInfo().getSalt());
         String actualPassword = actual.getUsernamePasswordAuthInfo().getPassword();
 
-        assertThat(passwordUtils.matches(updatedPassword, actualSalt, actualPassword)).isTrue();
+        assertThat(passwordEncoder.matches(updatedPassword, actualPassword)).isTrue();
     }
 
 

@@ -88,8 +88,8 @@ public class User extends BaseEntity {
         this.addressInfo = new AddressInfo(address, detailedAddress);
     }
 
-    public void setUsernamePasswordAuthInfo(String username, String encodedPassword, byte[] salt){
-        this.usernamePasswordAuthInfo = new UsernamePasswordAuthInfo(username, encodedPassword, new String(Base64.getEncoder().encode(salt)));
+    public void setUsernamePasswordAuthInfo(String username, String encodedPassword){
+        this.usernamePasswordAuthInfo = new UsernamePasswordAuthInfo(username, encodedPassword);
     }
 
     public void setKakaoOAuth2AuthInfo(String kakaoUid) {

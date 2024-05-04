@@ -10,7 +10,6 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.JwtTokenProvider;
-import jpabook.jpashop.util.PasswordUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,7 +53,7 @@ class UserControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordUtils passwordUtils;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
@@ -89,7 +89,7 @@ class UserControllerTest {
                         .contains("email@email.com", "name", "http://example.com/image.png", new AddressInfo("address", "detailedAddress")),
                 ()->assertThat(user.getUid()).isNotNull());
 
-        boolean isPasswordMatches = passwordUtils.matches("abc1234!", PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatches = passwordEncoder.matches("abc1234!", user.getUsernamePasswordAuthInfo().getPassword());
 
         assertAll("유저의 인증정보가 저장되어 후에 인증이 수행가능해야 한다.",
                 ()->assertThat(user.getUsernamePasswordAuthInfo().getUsername()).isEqualTo(givenUsername),
@@ -290,7 +290,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordEncoder.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isTrue();
     }
@@ -320,7 +320,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordEncoder.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
@@ -349,7 +349,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword,PasswordUtils.saltFromString(user.getUsernamePasswordAuthInfo().getSalt()), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordEncoder.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD.getMessage());

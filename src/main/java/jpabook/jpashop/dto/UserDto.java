@@ -119,7 +119,6 @@ public abstract class UserDto {
         private final String uid;
         private final String username;
         private final String password;
-        private final String salt;
 
 
         @Override
@@ -135,7 +134,7 @@ public abstract class UserDto {
 
         @Override
         public String getPassword() {
-            return String.format("%s:%s", password, salt);
+            return password;
         }
 
         @Override

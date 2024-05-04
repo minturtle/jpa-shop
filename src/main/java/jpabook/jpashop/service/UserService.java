@@ -8,11 +8,11 @@ import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.util.NanoIdProvider;
-import jpabook.jpashop.util.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordUtils passwordUtils;
+    private final PasswordEncoder passwordEncoder;
     private final NanoIdProvider nanoIdProvider;
 
     /**
@@ -47,9 +47,8 @@ public class UserService {
         validDuplicationUsername(registerInfo.getUsername());
         validPasswordExpression(registerInfo.getPassword());
 
-        byte[] salt = passwordUtils.createSalt();
-        String encodedPassword = passwordUtils
-                .encodePassword(registerInfo.getPassword(), salt);
+        String encodedPassword = passwordEncoder
+                .encode(registerInfo.getPassword());
 
         String uid = nanoIdProvider.createNanoId();
 
@@ -63,7 +62,7 @@ public class UserService {
                 registerInfo.getDetailedAddress()
         );
 
-        newUser.setUsernamePasswordAuthInfo(registerInfo.getUsername(), encodedPassword, salt);
+        newUser.setUsernamePasswordAuthInfo(registerInfo.getUsername(), encodedPassword);
 
 
         saveProcess(newUser);
@@ -88,7 +87,7 @@ public class UserService {
 
         UsernamePasswordAuthInfo usernamePasswordAuthInfo = user.getUsernamePasswordAuthInfo();
 
-        if(!passwordUtils.matches(password, PasswordUtils.saltFromString(usernamePasswordAuthInfo.getSalt()), usernamePasswordAuthInfo.getPassword())){
+        if(!passwordEncoder.matches(password, usernamePasswordAuthInfo.getPassword())){
             throw new AuthenticateFailedException(UserExceptonMessages.LOGIN_FAILED.getMessage());
         }
 
@@ -252,7 +251,7 @@ public class UserService {
             throw new UserAuthTypeException(UserExceptonMessages.NO_USERNAME_PASSWORD_AUTH_INFO.getMessage());
         }
 
-        if(!passwordUtils.matches(dto.getBeforePassword(), PasswordUtils.saltFromString(authInfo.getSalt()), authInfo.getPassword())){
+        if(!passwordEncoder.matches(dto.getBeforePassword(), authInfo.getPassword())){
             throw new AuthenticateFailedException(UserExceptonMessages.INVALID_PASSWORD.getMessage());
         }
 
@@ -262,8 +261,7 @@ public class UserService {
 
         findUser.setUsernamePasswordAuthInfo(
                 authInfo.getUsername(),
-                passwordUtils.encodePassword(dto.getAfterPassword(), PasswordUtils.saltFromString(authInfo.getSalt())),
-                PasswordUtils.saltFromString(authInfo.getSalt())
+                passwordEncoder.encode(dto.getAfterPassword())
         );
 
         log.info("update user password success : userUid - {}", userUid);
