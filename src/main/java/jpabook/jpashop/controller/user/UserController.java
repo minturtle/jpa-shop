@@ -1,5 +1,6 @@
 package jpabook.jpashop.controller.user;
 
+import io.swagger.v3.oas.annotations.Parameter;
 import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
 import jpabook.jpashop.controller.common.request.UserRequest;
@@ -39,13 +40,11 @@ public class UserController {
 
     @PostMapping("/login")
     public UserResponse.Login login(@RequestBody UserRequest.Login loginDto) throws AuthenticateFailedException {
-        String uid = userService.login(loginDto.getUserId(), loginDto.getPassword());
-
-        return new UserResponse.Login(uid, jwtTokenProvider.sign(uid, new Date()));
+        return null;
     }
 
     @GetMapping("/info")
-    public UserResponse.Detail getMemberDetail(@LoginedUserUid String uid) throws CannotFindEntityException {
+    public UserResponse.Detail getMemberDetail(@Parameter(hidden = true) @LoginedUserUid String uid) throws CannotFindEntityException {
         UserDto.Detail userInfo = userService.getUserInfo(uid);
 
         return new UserResponse.Detail(

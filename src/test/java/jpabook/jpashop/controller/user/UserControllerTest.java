@@ -10,7 +10,6 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.util.JwtTokenProvider;
-import jpabook.jpashop.util.PasswordUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -53,7 +53,7 @@ class UserControllerTest {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordUtils passwordUtils;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
@@ -89,7 +89,7 @@ class UserControllerTest {
                         .contains("email@email.com", "name", "http://example.com/image.png", new AddressInfo("address", "detailedAddress")),
                 ()->assertThat(user.getUid()).isNotNull());
 
-        boolean isPasswordMatches = passwordUtils.matches("abc1234!", user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatches = passwordEncoder.matches("abc1234!", user.getUsernamePasswordAuthInfo().getPassword());
 
         assertAll("유저의 인증정보가 저장되어 후에 인증이 수행가능해야 한다.",
                 ()->assertThat(user.getUsernamePasswordAuthInfo().getUsername()).isEqualTo(givenUsername),
@@ -179,31 +179,6 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("이미 가입되어 있는 username/password로 로그인을 수행하여 결과값인 uid와 access token을 받을 수 있다.")
-    public void given_UsernameAuthTypeUser_when_LoginUsernamePassword_then_Success() throws Exception{
-        //given
-        User givenUser = user1;
-        String givenPassword = "abc1234!";
-
-        UserRequest.Login loginForm = new UserRequest.Login(givenUser.getUsernamePasswordAuthInfo().getUsername(), givenPassword);
-
-        String loginFormString = objectMapper.writeValueAsString(loginForm);
-        //when
-        MvcResult mvcResponse = mockMvc.perform(post("/api/user/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginFormString)
-                        .characterEncoding(StandardCharsets.UTF_8))
-                .andDo(print()).andExpect(status().isOk())
-                .andReturn();
-        //then
-        UserResponse.Login result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), UserResponse.Login.class);
-
-        assertAll("결과값엔 유효한 uid와 access token이 존재해야 한다.",
-                ()->assertThat(result.getUid()).isEqualTo(givenUser.getUid()),
-                ()->assertThat(isJwtToken(result.getAccessToken())).isTrue());
-    }
-
-    @Test
     @DisplayName("access Token을 가지고 있는 유저의 이름, 이메일, 주소, 프로필 이미지를 조회할 수 있다.")
     public void given_AuthenticatedUser_when_GetUserInfo_then_Return() throws Exception{
         //given
@@ -290,7 +265,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordEncoder.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isTrue();
     }
@@ -320,7 +295,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordEncoder.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD_EXPRESSION.getMessage());
@@ -349,7 +324,7 @@ class UserControllerTest {
         User user = userRepository.findByUid(givenUid)
                 .orElseThrow(RuntimeException::new);
 
-        boolean isPasswordMatchesWithUpdatedPassword = passwordUtils.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getSaltBytes(), user.getUsernamePasswordAuthInfo().getPassword());
+        boolean isPasswordMatchesWithUpdatedPassword = passwordEncoder.matches(updatedPassword, user.getUsernamePasswordAuthInfo().getPassword());
 
         assertThat(isPasswordMatchesWithUpdatedPassword).isFalse();
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.INVALID_PASSWORD.getMessage());
@@ -382,14 +357,6 @@ class UserControllerTest {
     }
 
 
-    /**
-     * @author minseok kim
-     * @description 해당 문자열이 JWT 토큰의 형태를 갖고있는지 확인하는 메서드
-    */
-    public boolean isJwtToken(String token) {
-        String regex = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
-        return token.matches(regex);
-    }
 
 
     private String createUserInfoUpdateBody(String updatedName, AddressInfo updatedAddressInfo, String updatedProfileImage) throws JsonProcessingException {

@@ -3,11 +3,16 @@ package jpabook.jpashop.controller.common.argumentResolvers;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
+import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.exception.user.CannotFindUserException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -20,7 +25,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @RequiredArgsConstructor
 public class LoginedUserUidArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -35,18 +39,16 @@ public class LoginedUserUidArgumentResolver implements HandlerMethodArgumentReso
 
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer, NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        Authentication authentication = (Authentication) SecurityContextHolder.getContext().getAuthentication();
 
-        String token = getJwtToken(request.getHeader(HttpHeaders.AUTHORIZATION));
-        return jwtTokenProvider.verify(token);
+        if(authentication == null || !(authentication.getPrincipal() instanceof UserDto.CustomUserDetails userDetails)){
+            throw new CannotFindUserException();
+        }
+
+        return userDetails.getUid();
+
 
     }
 
-    private String getJwtToken(String tokenHeader) {
-            String[] tokenHeaderValues = tokenHeader.split(" ");
-            if(!tokenHeaderValues[0].equals("Bearer")){
-                throw new JwtException(UserExceptonMessages.INVALID_TOKEN.getMessage());
-            }
-            return tokenHeaderValues[1];
-    }
+
 }

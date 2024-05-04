@@ -11,7 +11,6 @@ INSERT INTO `users` (
     `name`,
     `password`,
     `profile_image_url`,
-    `salt`,
     `user_uid`,
     `username`
 ) VALUES (
@@ -25,9 +24,8 @@ INSERT INTO `users` (
              NULL,
              NULL,
              '홍길동',
-             'Jf2rTvFrXb8QTZfoz3szoVM0jZIS2xrXmVdBL05IL5t77TYgFT/4b/DAqqxd2+6lK/jdxkjWF3sc0Nm5VwRgSulvUEuuR774o2C5z08FjVdgvBgUWrmI6tPdPK7YMAWOPjRXet/qL5rjgjYGo16fOpDZAEStdsK9G9dhg3iJ5Jtoh2Cngq3uo6t2Souc0jt5i2D1qolHVG+bTQmIbgWSgKFBq+5yWm0bHGaCeFJMpAaN8izjjlIl6cVYkeKKlEdI',
+             '$2a$10$s7IlazN6a7xeqxK3idIDcOUJXgKuyw8zlTfZws0nZpBsl1NRizI6.',
              'http://example.com/profiles/hong.png',
-             'salt',
              'user-001',
              'honggildong'
          ), (
@@ -43,7 +41,6 @@ INSERT INTO `users` (
              '김철수',
              NULL,
              'http://example.com/profiles/kim.png',
-             NULL,
              'user-002',
              NULL
          ),(
@@ -59,7 +56,6 @@ INSERT INTO `users` (
             '김영희',
             NULL,
             'http://example.com/profiles/young.png',
-            NULL,
             'user-003',
             NULL
         );
