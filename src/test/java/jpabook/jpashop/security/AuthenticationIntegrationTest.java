@@ -171,6 +171,31 @@ public class AuthenticationIntegrationTest {
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.LOGIN_FAILED.getMessage());
     }
 
+    @Test
+    @DisplayName("잘못된 password로 로그인을 시도할 경우 401 UnAuthorized를 반환한다.")
+    public void given_invalidPassword_when_login_then_return401() throws Exception{
+        //given
+        User givenUser = user1;
+
+        UserRequest.Login loginForm = new UserRequest.Login(givenUser.getUsernamePasswordAuthInfo().getUsername(), "invalidPassword");
+
+        String loginFormString = objectMapper.writeValueAsString(loginForm);
+        //when
+        MvcResult mvcResponse = mockMvc.perform(post("/api/user/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginFormString)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print())
+                .andReturn();
+        //then
+        ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);
+
+        assertThat(mvcResponse.getResponse().getStatus()).isEqualTo(401);
+        assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.LOGIN_FAILED.getMessage());
+
+    }
+
+
 
     /**
      * @author minseok kim
