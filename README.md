@@ -9,7 +9,8 @@
   - MySql
   - H2 Database
   - Swagger
-
+  - Spring Security
+  
 ### 기능적 요구사항
 
 1. 상품
