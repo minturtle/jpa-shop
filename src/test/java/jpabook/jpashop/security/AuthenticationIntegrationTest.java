@@ -98,6 +98,25 @@ public class AuthenticationIntegrationTest {
         assertThat(responseBody.getMessage()).isEqualTo(UserExceptonMessages.EXPIRED_TOKEN.getMessage());
     }
 
+    @Test
+    @DisplayName("액세스 토큰이 유효하지 않은 경우 401 UnAuthorized를 반환한다.")
+    public void given_InvalidAccessToken_when_RequestNeedAuthAPI_then_Return401() throws Exception{
+        //given
+
+        //when
+        MvcResult mvcResult = mockMvc.perform(get("/api/health-check")
+                        .header("Authorization", "Bearer " + "invalidToken"))
+                .andDo(print())
+                .andReturn();
+
+
+        //then
+        ErrorResponse responseBody = objectMapper.readValue(mvcResult.getResponse().getContentAsString(), ErrorResponse.class);
+
+        assertThat(mvcResult.getResponse().getStatus()).isEqualTo(401);
+        assertThat(responseBody.getMessage()).isEqualTo(UserExceptonMessages.INVALID_TOKEN.getMessage());
+    }
+
 
 
 }
