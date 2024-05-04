@@ -179,31 +179,6 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("이미 가입되어 있는 username/password로 로그인을 수행하여 결과값인 uid와 access token을 받을 수 있다.")
-    public void given_UsernameAuthTypeUser_when_LoginUsernamePassword_then_Success() throws Exception{
-        //given
-        User givenUser = user1;
-        String givenPassword = "abc1234!";
-
-        UserRequest.Login loginForm = new UserRequest.Login(givenUser.getUsernamePasswordAuthInfo().getUsername(), givenPassword);
-
-        String loginFormString = objectMapper.writeValueAsString(loginForm);
-        //when
-        MvcResult mvcResponse = mockMvc.perform(post("/api/user/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginFormString)
-                        .characterEncoding(StandardCharsets.UTF_8))
-                .andDo(print()).andExpect(status().isOk())
-                .andReturn();
-        //then
-        UserResponse.Login result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), UserResponse.Login.class);
-
-        assertAll("결과값엔 유효한 uid와 access token이 존재해야 한다.",
-                ()->assertThat(result.getUid()).isEqualTo(givenUser.getUid()),
-                ()->assertThat(isJwtToken(result.getAccessToken())).isTrue());
-    }
-
-    @Test
     @DisplayName("access Token을 가지고 있는 유저의 이름, 이메일, 주소, 프로필 이미지를 조회할 수 있다.")
     public void given_AuthenticatedUser_when_GetUserInfo_then_Return() throws Exception{
         //given
@@ -382,14 +357,6 @@ class UserControllerTest {
     }
 
 
-    /**
-     * @author minseok kim
-     * @description 해당 문자열이 JWT 토큰의 형태를 갖고있는지 확인하는 메서드
-    */
-    public boolean isJwtToken(String token) {
-        String regex = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
-        return token.matches(regex);
-    }
 
 
     private String createUserInfoUpdateBody(String updatedName, AddressInfo updatedAddressInfo, String updatedProfileImage) throws JsonProcessingException {

@@ -2,7 +2,9 @@ package jpabook.jpashop.security;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jpabook.jpashop.controller.common.request.UserRequest;
 import jpabook.jpashop.controller.common.response.ErrorResponse;
+import jpabook.jpashop.controller.common.response.UserResponse;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.testUtils.TestDataUtils;
@@ -12,18 +14,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import static jpabook.jpashop.testUtils.TestDataUtils.user1;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @Transactional
@@ -117,6 +123,39 @@ public class AuthenticationIntegrationTest {
         assertThat(responseBody.getMessage()).isEqualTo(UserExceptonMessages.INVALID_TOKEN.getMessage());
     }
 
+    @Test
+    @DisplayName("이미 가입되어 있는 username/password로 로그인을 수행하여 결과값인 uid와 access token을 받을 수 있다.")
+    public void given_UsernameAuthTypeUser_when_LoginUsernamePassword_then_Success() throws Exception{
+        //given
+        User givenUser = user1;
+        String givenPassword = "abc1234!";
 
+        UserRequest.Login loginForm = new UserRequest.Login(givenUser.getUsernamePasswordAuthInfo().getUsername(), givenPassword);
+
+        String loginFormString = objectMapper.writeValueAsString(loginForm);
+        //when
+        MvcResult mvcResponse = mockMvc.perform(post("/api/user/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginFormString)
+                        .characterEncoding(StandardCharsets.UTF_8))
+                .andDo(print()).andExpect(status().isOk())
+                .andReturn();
+        //then
+        UserResponse.Login result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), UserResponse.Login.class);
+
+        assertAll("결과값엔 유효한 uid와 access token이 존재해야 한다.",
+                ()->assertThat(result.getUid()).isEqualTo(givenUser.getUid()),
+                ()->assertThat(isJwtToken(result.getAccessToken())).isTrue());
+    }
+
+
+    /**
+     * @author minseok kim
+     * @description 해당 문자열이 JWT 토큰의 형태를 갖고있는지 확인하는 메서드
+     */
+    public boolean isJwtToken(String token) {
+        String regex = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
+        return token.matches(regex);
+    }
 
 }
