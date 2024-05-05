@@ -1,6 +1,5 @@
 package jpabook.jpashop.controller.user;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import jpabook.jpashop.aop.annotations.Loggable;
 import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
 import jpabook.jpashop.controller.common.request.UserRequest;
@@ -13,7 +12,6 @@ import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;
 import jpabook.jpashop.exception.user.UserAuthTypeException;
 import jpabook.jpashop.service.UserService;
-import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.*;
 
 import org.modelmapper.ModelMapper;
@@ -30,7 +28,6 @@ public class UserController {
 
     private final UserService userService;
     private final ModelMapper modelMapper;
-    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/new")
     public void signIn(@RequestBody UserRequest.Create newMemberInfo) throws PasswordValidationException, AlreadyExistsUserException {
@@ -44,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public UserResponse.Detail getMemberDetail(@Parameter(hidden = true) @LoginedUserUid String uid) throws CannotFindEntityException {
+    public UserResponse.Detail getMemberDetail(@LoginedUserUid String uid) throws CannotFindEntityException {
         UserDto.Detail userInfo = userService.getUserInfo(uid);
 
         return new UserResponse.Detail(
