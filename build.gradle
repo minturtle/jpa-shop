@@ -65,6 +65,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	testCompileOnly 'org.projectlombok:lombok'
+	testImplementation 'org.mock-server:mockserver-netty:5.15.0'
+
 
 }
 
