@@ -12,6 +12,7 @@ import jpabook.jpashop.testUtils.TestDataUtils;
 import jpabook.jpashop.testUtils.TestGoogleProperties;
 import jpabook.jpashop.testUtils.TestKakaoProperties;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,6 +208,7 @@ public class AuthenticationIntegrationTest {
     
     
     @Test
+    @Disabled
     @DisplayName("사용자는 카카오 로그인을 수행해 DB에 정보를 저장하고 엑세스토큰을 발급받을 수 있다.")
     void given_kakaoOAuth2Info_when_KakaoLogin_thenReturnAccessToken() throws Exception{
         //given

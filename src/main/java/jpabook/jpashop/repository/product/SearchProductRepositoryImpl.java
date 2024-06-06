@@ -61,7 +61,7 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
 
         setUpWherePredicationQueries(query, searchCondition);
 
-        setUpPaginationQueries(query, cursorUid, limit);
+        setUpPaginationQueries(query, cursorUid, limit, searchCondition.getSortOption());
 
         return query.fetch();
 
@@ -119,11 +119,17 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
     }
 
 
-    private void setUpPaginationQueries(JPAQuery query, Optional<String> cursorUid, int limit) {
+    private void setUpPaginationQueries(JPAQuery query, Optional<String> cursorUid, int limit, SortOption sortOption) {
         if(cursorUid.isPresent()){
             query.where(product.uid.gt(cursorUid.get()));
             query.limit(limit);
             return;
+        }
+
+        switch (sortOption){
+            case BY_DATE -> query.orderBy(product.createdAt.desc());
+            case BY_NAME -> query.orderBy(product.name.asc());
+            case BY_PRICE -> query.orderBy(product.price.asc());
         }
 
         query.limit(limit);

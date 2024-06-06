@@ -223,7 +223,7 @@ class ProductRepositoryTest {
                 Optional.empty(),
                 Optional.empty(),
                 Optional.empty(),
-                SortOption.BY_NAME,
+                SortOption.BY_DATE,
                 ProductType.ALL
         );
         // when
@@ -232,8 +232,8 @@ class ProductRepositoryTest {
         // then
         assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
-                        tuple(album.getUid(), album.getName(), album.getPrice(), album.getThumbnailImageUrl()),
-                        tuple(book.getUid(), book.getName(), book.getPrice(), book.getThumbnailImageUrl())
+                        tuple(movie.getUid(), movie.getName(), movie.getPrice(), movie.getThumbnailImageUrl()),
+                        tuple(album.getUid(), album.getName(), album.getPrice(), album.getThumbnailImageUrl())
                 );
     }
 
