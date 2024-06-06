@@ -7,13 +7,20 @@ import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.controller.common.response.UserResponse;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
+import jpabook.jpashop.testUtils.OAuth2MockServerUtils;
 import jpabook.jpashop.testUtils.TestDataUtils;
+import jpabook.jpashop.testUtils.TestGoogleProperties;
+import jpabook.jpashop.testUtils.TestKakaoProperties;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -26,16 +33,18 @@ import java.util.Date;
 
 import static jpabook.jpashop.testUtils.TestDataUtils.user1;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import(AuthenticationIntegrationTest.TestConfig.class)
 public class AuthenticationIntegrationTest {
 
 
@@ -48,6 +57,8 @@ public class AuthenticationIntegrationTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private OAuth2MockServerUtils oAuth2MockServerUtils;
 
     @Test
     @DisplayName("엑세스토큰 없이 인증이 필요한 API에 접근할 시 401 UnAuthorized를 반환한다.")
@@ -194,7 +205,27 @@ public class AuthenticationIntegrationTest {
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.LOGIN_FAILED.getMessage());
 
     }
+    
+    
+    @Test
+    @Disabled
+    @DisplayName("사용자는 카카오 로그인을 수행해 DB에 정보를 저장하고 엑세스토큰을 발급받을 수 있다.")
+    void given_kakaoOAuth2Info_when_KakaoLogin_thenReturnAccessToken() throws Exception{
+        //given
+        oAuth2MockServerUtils.setUpKakaoOAuth2MockServer();
+        //when
+        MvcResult mvcResult = mockMvc.perform(get("/api/login/kakao/callback")
+                        .param("code", TestKakaoProperties.KAKAO_AUTH_CODE))
+                .andExpect(status().is3xxRedirection())
+                .andDo(print())
+                .andReturn();
+        //then
+        String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
 
+
+        oAuth2MockServerUtils.close();
+    }
+    
 
 
     /**
@@ -205,5 +236,32 @@ public class AuthenticationIntegrationTest {
         String regex = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
         return token.matches(regex);
     }
+
+    @TestConfiguration
+    public static class TestConfig {
+
+        @Bean
+        public TestGoogleProperties testGoogleProperties() {
+            return new TestGoogleProperties();
+        }
+
+
+        @Bean
+        public TestKakaoProperties testKakaoProperties() {
+            return new TestKakaoProperties();
+        }
+
+        @Bean
+        public OAuth2MockServerUtils oAuth2MockServerUtils(
+                TestGoogleProperties testGoogleProperties,
+                TestKakaoProperties testKakaoProperties
+
+        ) {
+            return new OAuth2MockServerUtils(testGoogleProperties, testKakaoProperties);
+        }
+
+    }
+
+
 
 }
