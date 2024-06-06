@@ -22,6 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -345,8 +348,8 @@ class ProductControllerTest {
                         mvcResponse.getResponse().getContentAsString(),
                         new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
                 );
-        assertThat(result).extracting("cursorUid")
-                .isEqualTo(product2.getUid());
+        assertThat(LocalDateTime.parse(result.getCursor(), DateTimeFormatter.ISO_DATE_TIME))
+                .isEqualTo(product2.getCreatedAt());
 
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
@@ -358,17 +361,17 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("사용자는 커서를 통해 다음 페이지의 상품을 검색해 다음 페이지를 리턴받을 수 있다.")
-    void given_CursorUid_when_Search_then_ReturnNextPage() throws Exception{
+    void given_cursor_when_Search_then_ReturnNextPage() throws Exception{
         // given
-        Product product1 = album;
-        Product product2 = book;
-        Product product3 = movie;
+        Product product1 = movie;
+        Product product2 = album;
+        Product product3 = book;
 
 
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
                         .param("size", "2")
-                        .param("cursorUid", product1.getUid()
+                        .param("cursorValue", product1.getCreatedAt().toString()
                 ))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -379,8 +382,8 @@ class ProductControllerTest {
                         new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
                 );
 
-        assertThat(result).extracting("cursorUid")
-                .isEqualTo(product3.getUid());
+        assertThat(LocalDateTime.parse(result.getCursor(), DateTimeFormatter.ISO_DATE_TIME))
+                .isEqualTo(product3.getCreatedAt());
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
                         tuple(product2.getUid(), product2.getName(), product2.getPrice(), product2.getThumbnailImageUrl()),

@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 public class CursorListDto<T> {
 
-    private String cursorUid;
+    private String cursor;
     private List<T> data;
 
 }

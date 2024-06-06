@@ -13,6 +13,8 @@ import jpabook.jpashop.enums.product.SortOption;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +38,9 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
                         product.uid,
                         product.name,
                         product.price,
-                        product.thumbnailImageUrl))
+                        product.thumbnailImageUrl,
+                        product.createdAt
+                        ))
                 .from(product);
 
         setUpWherePredicationQueries(query, searchCondition);
@@ -50,18 +54,21 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
 
 
     @Override
-    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional<String> cursorUid, int limit) {
+    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional cursor, int limit) {
         JPAQuery<ProductDto.Preview> query = jpaQueryFactory.select(Projections.constructor(
-                ProductDto.Preview.class,
-                product.uid,
-                product.name,
-                product.price,
-                product.thumbnailImageUrl))
+                        ProductDto.Preview.class,
+                        product.uid,
+                        product.name,
+                        product.price,
+                        product.thumbnailImageUrl,
+                        product.createdAt
+                    )
+                )
                 .from(product);
 
         setUpWherePredicationQueries(query, searchCondition);
 
-        setUpPaginationQueries(query, cursorUid, limit, searchCondition.getSortOption());
+        setUpPaginationQueries(query, cursor, limit, searchCondition.getSortOption());
 
         return query.fetch();
 
@@ -119,22 +126,23 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
     }
 
 
-    private void setUpPaginationQueries(JPAQuery query, Optional<String> cursorUid, int limit, SortOption sortOption) {
-        if(cursorUid.isPresent()){
-            query.where(product.uid.gt(cursorUid.get()));
-            query.limit(limit);
-            return;
-        }
-
+    private void setUpPaginationQueries(JPAQuery query, Optional cursorOptional, int limit, SortOption sortOption) {
         switch (sortOption){
-            case BY_DATE -> query.orderBy(product.createdAt.desc());
-            case BY_NAME -> query.orderBy(product.name.asc());
-            case BY_PRICE -> query.orderBy(product.price.asc());
+            case BY_DATE:
+                setUpDatePagination(query, cursorOptional);
+                break;
+            case BY_NAME:
+                setUpNamePagination(query, cursorOptional);
+                break;
+            case BY_PRICE:
+                setUpPricePagination(query, cursorOptional);
+                break;
         }
 
         query.limit(limit);
         query.offset(0L);
     }
+
 
     private void setUpPagenationQuries(JPAQuery query, Pageable pageable, SortOption sortOption) {
         query.offset(pageable.getOffset());
@@ -147,5 +155,45 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
             case BY_PRICE -> query.orderBy(product.price.asc());
         }
     }
+    private static void setUpPricePagination(JPAQuery query, Optional cursorOptional) {
+        if(cursorOptional.isPresent() && !(cursorOptional.get() instanceof Integer)){
+            throw new IllegalArgumentException("cursor type is not matched");
+        }
+
+        if(cursorOptional.isPresent()){
+            query.where(product.price.lt((Integer) cursorOptional.get()));
+        }
+
+
+        query.orderBy(product.price.asc());
+    }
+
+    private static void setUpNamePagination(JPAQuery query, Optional cursorOptional) {
+        if(cursorOptional.isPresent() && !(cursorOptional.get() instanceof String)){
+            throw new IllegalArgumentException("cursor type is not matched");
+        }
+
+
+        if(cursorOptional.isPresent()){
+            query.where(product.name.gt((String) cursorOptional.get()));
+        }
+
+        query.orderBy(product.name.asc());
+        return;
+    }
+
+    private static void setUpDatePagination(JPAQuery query, Optional cursorOptional) {
+        if(cursorOptional.isPresent() && !(cursorOptional.get() instanceof LocalDateTime)){
+            throw new IllegalArgumentException("cursor type is not matched");
+        }
+
+        if(cursorOptional.isPresent()){
+            query.where(product.createdAt.before((LocalDateTime) cursorOptional.get()));
+        }
+        query.orderBy(product.createdAt.desc());
+    }
+
+
+
 
 }
