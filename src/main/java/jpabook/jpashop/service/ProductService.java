@@ -54,9 +54,9 @@ public class ProductService {
                 .build();
     }
 
-    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional cursorUid, int limit) {
+    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional cursor, int limit) {
         log.info("search product logic started");
-        List<ProductDto.Preview> searchResult = productRepository.search(searchCondition, cursorUid, limit);
+        List<ProductDto.Preview> searchResult = productRepository.search(searchCondition, cursor, limit);
         log.info("search product logic finished");
         return searchResult;
     }

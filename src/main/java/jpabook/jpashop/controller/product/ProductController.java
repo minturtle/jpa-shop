@@ -19,6 +19,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -57,7 +59,7 @@ public class ProductController {
         );
 
         List<ProductResponse.Preview> responseList = result.getData()
-                .stream().map(dto -> new ProductResponse.Preview(dto.getUid(), dto.getName(), dto.getPrice(), dto.getThumbnailUrl())).toList();
+                .stream().map(dto -> new ProductResponse.Preview(dto.getUid(), dto.getName(), dto.getPrice(), dto.getThumbnailUrl(), dto.getCreatedAt())).toList();
 
         return new PaginationListDto<>(
                 result.getCount(),
@@ -68,7 +70,7 @@ public class ProductController {
 
     @GetMapping("/v2/list")
     public CursorListDto<ProductResponse.Preview> searchCursor(
-            @RequestParam(required = false) String cursorUid,
+            @RequestParam(required = false) String cursorValue,
             @RequestParam(required = false, defaultValue = "10") Integer size,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Integer minPrice,
@@ -80,21 +82,25 @@ public class ProductController {
     ){
 
         validPriceRange(minPrice, maxPrice);
+        Optional cursorOptional = Optional.empty();
+
+
+
+        if(cursorValue != null){
+            cursorOptional = setUpCursorOptional(cursorValue, sortType);
+        }
+
 
         ProductDto.PriceRange priceRange = createPriceRange(minPrice, maxPrice);
         ProductDto.SearchCondition searchCondition = createSearchCondition(query, category, sortType, productType, priceRange);
 
-        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.ofNullable(cursorUid), size);
-
-        List<ProductResponse.Preview> responseList = result
-                .stream().map(dto -> new ProductResponse.Preview(dto.getUid(), dto.getName(), dto.getPrice(), dto.getThumbnailUrl())).toList();
+        List<ProductDto.Preview> result = productService.search(searchCondition, cursorOptional, size);
 
 
-        return CursorListDto.<ProductResponse.Preview>builder()
-                .cursorUid(result.get(result.size()-1).getUid())
-                .data(responseList)
-                .build();
+
+        return createProductListResponse(result, sortType);
     }
+
 
     @GetMapping("/{productUid}")
     public ProductResponse.Detail findById(
@@ -136,6 +142,19 @@ public class ProductController {
     }
 
 
+    private static Optional setUpCursorOptional(String cursorValue, SortOption sortOption) {
+        switch (sortOption){
+            case BY_DATE:
+                return Optional.of(LocalDateTime.parse(cursorValue, DateTimeFormatter.ISO_DATE_TIME));
+            case BY_PRICE:
+                return Optional.of(Integer.parseInt(cursorValue));
+            case BY_NAME:
+                return Optional.of(cursorValue);
+            default:
+                throw new IllegalArgumentException(ProductExceptionMessages.SORT_TYPE_INVALID.getMessage());
+        }
+    }
+
 
     private static ProductDto.PriceRange createPriceRange(Integer minPrice, Integer maxPrice) {
         ProductDto.PriceRange priceRange = null;
@@ -161,6 +180,35 @@ public class ProductController {
         );
     }
 
+    private static CursorListDto<ProductResponse.Preview> createProductListResponse(List<ProductDto.Preview> result, SortOption sortOption) {
+        List<ProductResponse.Preview> responseList = result
+                .stream().map(dto -> new ProductResponse.Preview(dto.getUid(), dto.getName(), dto.getPrice(), dto.getThumbnailUrl(), dto.getCreatedAt())).toList();
+
+        String cursor = null;
+
+        if(!result.isEmpty()){
+            ProductDto.Preview lastProduct = result.get(result.size() - 1);
+            switch (sortOption){
+                case BY_DATE:
+                    cursor = lastProduct.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME);
+                    break;
+                case BY_PRICE:
+                    cursor = Integer.toString(lastProduct.getPrice());
+                    break;
+                case BY_NAME:
+                    cursor = lastProduct.getName();
+                    break;
+                default:
+                    throw new IllegalArgumentException(ProductExceptionMessages.SORT_TYPE_INVALID.getMessage());
+            }
+        }
+
+
+        return CursorListDto.<ProductResponse.Preview>builder()
+                .cursor(cursor)
+                .data(responseList)
+                .build();
+    }
 
 }
 

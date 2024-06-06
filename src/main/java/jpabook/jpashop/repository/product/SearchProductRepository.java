@@ -13,6 +13,6 @@ public interface SearchProductRepository {
 
     Long getCount(ProductDto.SearchCondition searchCondition);
 
-    List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional cursorUid, int limit);
+    List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional cursor, int limit);
 
 }

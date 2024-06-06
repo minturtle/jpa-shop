@@ -7,6 +7,7 @@ import jpabook.jpashop.enums.product.SortOption;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public abstract class ProductDto {
@@ -91,6 +92,8 @@ public abstract class ProductDto {
         private String name;
         private int price;
         private String thumbnailUrl;
+        private LocalDateTime createdAt;
+
     }
 
 
