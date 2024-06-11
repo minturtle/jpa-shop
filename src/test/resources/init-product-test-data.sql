@@ -38,7 +38,11 @@ VALUES (3, 'movie-001', 'Movie Name', 3000, 8, 'http://example.com/movie_thumbna
 INSERT INTO movie (product_id, director, actor)
 VALUES (3, 'Director Name', 'Actor Name');
 
+INSERT INTO products (product_id, product_uid, name, price, stock_quantity, thumbnail_image_url, description, created_at, modified_at, dtype)
+VALUES (4, 'movie-002', 'Movie Name2', 4000, 8, 'http://example.com/movie2_thumbnail.jpg', 'Movie description2', '2024-03-01 12:00:00', '2024-03-02 12:00:00', 'MOVIE');
 
+INSERT INTO movie (product_id, director, actor)
+VALUES (4, 'Director Name2', 'Actor Name2');
 
 INSERT INTO product_category (product_category_id, product_id, category_id)
 VALUES (1, 1, 1);

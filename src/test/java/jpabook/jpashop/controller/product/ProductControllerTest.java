@@ -50,8 +50,9 @@ class ProductControllerTest {
     void given_Product_when_SearchProductWithoutSearchCondition_then_ReturnDefaultOrderRegisterDate() throws Exception{
         // given
         Product product1 = movie;
-        Product product2 = album;
-        Product product3 = book;
+        Product product2 = movie2;
+        Product product3 = album;
+        Product product4 = book;
 
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/list"))
@@ -61,13 +62,15 @@ class ProductControllerTest {
         PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
 
 
-        assertThat(result.getCount()).isEqualTo(3);
+        assertThat(result.getCount()).isEqualTo(4);
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
                         tuple(product1.getUid(), product1.getName(), product1.getPrice(), product1.getThumbnailImageUrl()),
                         tuple(product2.getUid(), product2.getName(), product2.getPrice(), product2.getThumbnailImageUrl()),
-                        tuple(product3.getUid(), product3.getName(), product3.getPrice(), product3.getThumbnailImageUrl())
-                );
+                        tuple(product3.getUid(), product3.getName(), product3.getPrice(), product3.getThumbnailImageUrl()),
+                        tuple(product4.getUid(), product4.getName(), product4.getPrice(), product4.getThumbnailImageUrl())
+
+                        );
     }
 
     @Test
@@ -348,7 +351,7 @@ class ProductControllerTest {
                         mvcResponse.getResponse().getContentAsString(),
                         new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
                 );
-        assertThat(LocalDateTime.parse(result.getCursor(), DateTimeFormatter.ISO_DATE_TIME))
+        assertThat(LocalDateTime.parse(result.getCursor(), DateTimeFormatter.ISO_DATE_TIME ))
                 .isEqualTo(product2.getCreatedAt());
 
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
