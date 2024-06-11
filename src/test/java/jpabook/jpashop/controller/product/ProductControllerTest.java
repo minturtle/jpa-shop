@@ -183,7 +183,7 @@ class ProductControllerTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"BY_DATE:movie-001,album-001,book-001", "BY_NAME:album-001,book-001,movie-001", "BY_PRICE:book-001,album-001,movie-001"}, delimiter = ':')
+    @CsvSource(value = {"BY_DATE:movie-001,movie-002,album-001,book-001", "BY_NAME:album-001,book-001,movie-001,movie-002", "BY_PRICE:book-001,album-001,movie-001,movie-002"}, delimiter = ':')
     @DisplayName("사용자는 검색시 검색결과를 원하는대로 정렬할 수 있다.")
     public void given_product_when_SearchWithOrder_then_ReturnOrderedList(SortOption productSortOption, String expectedString) throws Exception{
         //given
@@ -199,7 +199,7 @@ class ProductControllerTest {
         PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
         String[] expected = expectedString.split(",");
 
-        assertThat(result.getCount()).isEqualTo(3);
+        assertThat(result.getCount()).isEqualTo(4);
         assertThat(result.getData()).extracting("productUid")
                 .containsExactly((Object[])expected);
     }
