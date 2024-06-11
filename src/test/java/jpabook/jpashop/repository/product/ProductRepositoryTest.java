@@ -260,7 +260,7 @@ class ProductRepositoryTest {
                 ProductType.ALL
         );
 
-        Optional<String> cursorValue = Optional.of(album.getName());
+        Optional<String> cursorValue = Optional.of(album.getUid());
         // when
         List<ProductDto.Preview> result = productRepository.search(searchCondition, cursorValue, 2);
         // then
