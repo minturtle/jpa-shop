@@ -89,12 +89,14 @@ class ProductControllerTest {
         PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
 
         Movie expectedProduct = movie;
+        Movie expectedProduct2 = movie2;
 
 
-        assertThat(result.getCount()).isEqualTo(1);
+        assertThat(result.getCount()).isEqualTo(2);
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .contains(
-                        tuple(expectedProduct.getUid(), expectedProduct.getName(), expectedProduct.getPrice(), expectedProduct.getThumbnailImageUrl())
+                        tuple(expectedProduct.getUid(), expectedProduct.getName(), expectedProduct.getPrice(), expectedProduct.getThumbnailImageUrl()),
+                        tuple(expectedProduct2.getUid(), expectedProduct2.getName(), expectedProduct2.getPrice(), expectedProduct2.getThumbnailImageUrl())
                 );
     }
 
@@ -337,7 +339,7 @@ class ProductControllerTest {
     void given_NoCursor_when_Search_then_ReturnFirstPage() throws Exception{
         // given
         Product product1 = movie;
-        Product product2 = album;
+        Product product2 = movie2;
 
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
