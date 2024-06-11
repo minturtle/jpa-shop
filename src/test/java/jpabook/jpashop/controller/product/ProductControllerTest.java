@@ -368,7 +368,7 @@ class ProductControllerTest {
     @DisplayName("사용자는 커서를 통해 다음 페이지의 상품을 검색해 다음 페이지를 리턴받을 수 있다.")
     void given_cursor_when_Search_then_ReturnNextPage() throws Exception{
         // given
-        Product product1 = movie;
+        Product product1 = movie2;
         Product product2 = album;
         Product product3 = book;
 
@@ -376,7 +376,7 @@ class ProductControllerTest {
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
                         .param("size", "2")
-                        .param("cursorValue", product1.getCreatedAt().toString()
+                        .param("cursor", product1.getUid()
                 ))
                 .andExpect(status().isOk())
                 .andReturn();
