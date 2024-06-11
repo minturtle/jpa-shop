@@ -54,7 +54,7 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
 
 
     @Override
-    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional cursor, int limit) {
+    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional<String> cursor, int limit) {
         JPAQuery<ProductDto.Preview> query = jpaQueryFactory.select(Projections.constructor(
                         ProductDto.Preview.class,
                         product.uid,
