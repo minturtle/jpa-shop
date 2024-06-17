@@ -387,8 +387,8 @@ class ProductControllerTest {
                         new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
                 );
 
-        assertThat(LocalDateTime.parse(result.getCursor(), DateTimeFormatter.ISO_DATE_TIME))
-                .isEqualTo(product3.getCreatedAt());
+        assertThat(result.getCursor())
+                .isEqualTo(product3.getUid());
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
                         tuple(product2.getUid(), product2.getName(), product2.getPrice(), product2.getThumbnailImageUrl()),
