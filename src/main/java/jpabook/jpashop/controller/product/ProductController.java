@@ -91,7 +91,7 @@ public class ProductController {
 
 
 
-        return createProductListResponse(result, sortType);
+        return createProductListResponse(result);
     }
 
 
@@ -158,7 +158,7 @@ public class ProductController {
         );
     }
 
-    private static CursorListDto<ProductResponse.Preview> createProductListResponse(List<ProductDto.Preview> result, SortOption sortOption) {
+    private static CursorListDto<ProductResponse.Preview> createProductListResponse(List<ProductDto.Preview> result) {
         List<ProductResponse.Preview> responseList = result
                 .stream().map(dto -> new ProductResponse.Preview(dto.getUid(), dto.getName(), dto.getPrice(), dto.getThumbnailUrl(), dto.getCreatedAt())).toList();
 
@@ -166,19 +166,8 @@ public class ProductController {
 
         if(!result.isEmpty()){
             ProductDto.Preview lastProduct = result.get(result.size() - 1);
-            switch (sortOption){
-                case BY_DATE:
-                    cursor = lastProduct.getCreatedAt().format(DateTimeFormatter.ISO_DATE_TIME);
-                    break;
-                case BY_PRICE:
-                    cursor = Integer.toString(lastProduct.getPrice());
-                    break;
-                case BY_NAME:
-                    cursor = lastProduct.getName();
-                    break;
-                default:
-                    throw new IllegalArgumentException(ProductExceptionMessages.SORT_TYPE_INVALID.getMessage());
-            }
+            cursor = lastProduct.getUid();
+
         }
 
 
