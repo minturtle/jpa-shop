@@ -19,6 +19,13 @@ import java.util.Arrays;
 @Slf4j
 public class ProductControllerAdvice {
 
+
+    /**
+     * @author minseok kim
+     * @description 상품 주문, 카트 추가 및 수정에 대해 수량 추가가 불가능할 시 나타나는 오류
+     * @param e Exception 객체
+     * @return 400 Http Code With ErrorResponse Object
+     */
     @ExceptionHandler({CartQuantityException.class, InvalidStockQuantityException.class})
     public ResponseEntity<ErrorResponse> badRequest(Exception e){
         log.info("method execution failed-400 : {}", e.getMessage());
