@@ -338,8 +338,8 @@ class ProductControllerTest {
     @DisplayName("사용자는 커서 없이 상품을 검색해 첫 페이지를 리턴받을 수 있다.")
     void given_NoCursor_when_Search_then_ReturnFirstPage() throws Exception{
         // given
-        Product product1 = movie;
-        Product product2 = movie2;
+        Product product1 = movie2;
+        Product product2 = movie;
 
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
