@@ -2,6 +2,7 @@ package jpabook.jpashop.repository.product;
 
 
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jpabook.jpashop.domain.product.Album;
@@ -54,7 +55,7 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
 
 
     @Override
-    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional cursor, int limit) {
+    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional<String> cursor, int limit) {
         JPAQuery<ProductDto.Preview> query = jpaQueryFactory.select(Projections.constructor(
                         ProductDto.Preview.class,
                         product.uid,
@@ -126,7 +127,7 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
     }
 
 
-    private void setUpPaginationQueries(JPAQuery query, Optional cursorOptional, int limit, SortOption sortOption) {
+    private void setUpPaginationQueries(JPAQuery query, Optional<String> cursorOptional, int limit, SortOption sortOption) {
         switch (sortOption){
             case BY_DATE:
                 setUpDatePagination(query, cursorOptional);
@@ -155,42 +156,60 @@ public class SearchProductRepositoryImpl implements SearchProductRepository {
             case BY_PRICE -> query.orderBy(product.price.asc());
         }
     }
-    private static void setUpPricePagination(JPAQuery query, Optional cursorOptional) {
-        if(cursorOptional.isPresent() && !(cursorOptional.get() instanceof Integer)){
-            throw new IllegalArgumentException("cursor type is not matched");
+    private static void setUpPricePagination(JPAQuery query, Optional<String> cursorOptional) {
+        query.orderBy(product.price.asc()).orderBy(product.uid.asc());
+
+        if(cursorOptional.isEmpty()){
+            return;
         }
 
-        if(cursorOptional.isPresent()){
-            query.where(product.price.lt((Integer) cursorOptional.get()));
-        }
+
+        JPAQuery<Integer> subQuery = new JPAQuery<>().select(product.price)
+                .from(product)
+                .where(product.uid.eq(cursorOptional.get()));
+
+        query
+                .where(product.price.gt(subQuery))
+                .where(product.uid.gt(cursorOptional.get()));
 
 
-        query.orderBy(product.price.asc());
     }
 
-    private static void setUpNamePagination(JPAQuery query, Optional cursorOptional) {
-        if(cursorOptional.isPresent() && !(cursorOptional.get() instanceof String)){
-            throw new IllegalArgumentException("cursor type is not matched");
+    private static void setUpNamePagination(JPAQuery query, Optional<String> cursorOptional) {
+        query.orderBy(product.name.asc()).orderBy(product.uid.asc());
+
+
+        if(cursorOptional.isEmpty()){
+            return;
         }
 
+        JPAQuery<String> subQuery = new JPAQuery<>().select(product.name)
+                .from(product)
+                .where(product.uid.eq(cursorOptional.get()));
 
-        if(cursorOptional.isPresent()){
-            query.where(product.name.gt((String) cursorOptional.get()));
-        }
 
-        query.orderBy(product.name.asc());
-        return;
+        query
+                .where(product.name.gt(subQuery))
+                .where(product.uid.gt(cursorOptional.get()));
+
     }
 
-    private static void setUpDatePagination(JPAQuery query, Optional cursorOptional) {
-        if(cursorOptional.isPresent() && !(cursorOptional.get() instanceof LocalDateTime)){
-            throw new IllegalArgumentException("cursor type is not matched");
+    private static void setUpDatePagination(JPAQuery query, Optional<String> cursorOptional) {
+        query.orderBy(product.createdAt.desc()).orderBy(product.uid.desc());
+
+
+        if(cursorOptional.isEmpty()){
+            return;
         }
 
-        if(cursorOptional.isPresent()){
-            query.where(product.createdAt.before((LocalDateTime) cursorOptional.get()));
-        }
-        query.orderBy(product.createdAt.desc());
+        JPAQuery<LocalDateTime> subQuery = new JPAQuery<>().select(product.createdAt)
+                .from(product)
+                .where(product.uid.eq(cursorOptional.get()));
+
+        query
+                .where(product.createdAt.before(subQuery))
+                .where(product.uid.lt(cursorOptional.get()));
+
     }
 
 

@@ -45,6 +45,10 @@ class ProductRepositoryTest {
     @DisplayName("이미 저장된 상품의 리스트를 아무 검색 필터 조건 없이 검색할 수 있다.")
     void testSearchWithNoCondition() throws Exception{
         // given
+        Product expected1 = album;
+        Product expected2 = book;
+        Product expected3 = movie;
+        Product expected4 = movie2;
         int searchSize = 10;
         ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
                 Optional.empty(),
@@ -62,9 +66,11 @@ class ProductRepositoryTest {
         // then
         assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
-                        tuple(album.getUid() , album.getName(), album.getPrice(), album.getThumbnailImageUrl()),
-                        tuple(book.getUid(), book.getName(), book.getPrice(), book.getThumbnailImageUrl()),
-                        tuple(movie.getUid(), movie.getName(), movie.getPrice(), movie.getThumbnailImageUrl())
+                        tuple(expected1.getUid() , expected1.getName(), expected1.getPrice(), expected1.getThumbnailImageUrl()),
+                        tuple(expected2.getUid(), expected2.getName(), expected2.getPrice(), expected2.getThumbnailImageUrl()),
+                        tuple(expected3.getUid(), expected3.getName(), expected3.getPrice(), expected3.getThumbnailImageUrl()),
+                        tuple(expected4.getUid(), expected4.getName(), expected4.getPrice(), expected4.getThumbnailImageUrl())
+
                 );
     }
 
@@ -144,7 +150,7 @@ class ProductRepositoryTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"BY_NAME,album-001:book-001:movie-001", "BY_DATE,movie-001:album-001:book-001", "BY_PRICE,book-001:album-001:movie-001"})
+    @CsvSource(value = {"BY_NAME,album-001:book-001:movie-001:movie-002", "BY_DATE,movie-001:movie-002:album-001:book-001", "BY_PRICE,book-001:album-001:movie-001:movie-002"})
     @DisplayName("다양한 정렬기준을 통해 물품 검색 결과를 정렬할 수 있다.")
     public void testOrder(SortOption sortOption, String expectedUidListString) throws Exception{
         //given
@@ -210,7 +216,7 @@ class ProductRepositoryTest {
         //when
         Long result = productRepository.getCount(searchCondition);
         //then
-        assertThat(result).isEqualTo(3L);
+        assertThat(result).isEqualTo(4L);
 
     }
 
@@ -219,6 +225,9 @@ class ProductRepositoryTest {
     @DisplayName("물품 검색시 CursorValue 없이 검색을 수행할 경우 첫페이지의 결과를 Cursor 방식으로 받아올 수 있다.")
     void given_Nocursor_when_Search_then_ReturnFirstPage() throws Exception{
         // given
+        Product expected1 = movie2;
+        Product expected2 = movie;
+
         ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
                 Optional.empty(),
                 Optional.empty(),
@@ -230,10 +239,12 @@ class ProductRepositoryTest {
         Optional<String> cursorValue = Optional.empty();
         List<ProductDto.Preview> result = productRepository.search(searchCondition, cursorValue, 2);
         // then
+
+
         assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
-                        tuple(movie.getUid(), movie.getName(), movie.getPrice(), movie.getThumbnailImageUrl()),
-                        tuple(album.getUid(), album.getName(), album.getPrice(), album.getThumbnailImageUrl())
+                        tuple(expected1.getUid(), expected1.getName(), expected1.getPrice(), expected1.getThumbnailImageUrl()),
+                        tuple(expected2.getUid(), expected2.getName(), expected2.getPrice(), expected2.getThumbnailImageUrl())
                 );
     }
 
@@ -249,7 +260,7 @@ class ProductRepositoryTest {
                 ProductType.ALL
         );
 
-        Optional<String> cursorValue = Optional.of(album.getName());
+        Optional<String> cursorValue = Optional.of(album.getUid());
         // when
         List<ProductDto.Preview> result = productRepository.search(searchCondition, cursorValue, 2);
         // then

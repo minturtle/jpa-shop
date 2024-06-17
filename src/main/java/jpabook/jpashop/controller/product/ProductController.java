@@ -70,7 +70,7 @@ public class ProductController {
 
     @GetMapping("/v2/list")
     public CursorListDto<ProductResponse.Preview> searchCursor(
-            @RequestParam(required = false) String cursorValue,
+            @RequestParam(required = false) String cursor,
             @RequestParam(required = false, defaultValue = "10") Integer size,
             @RequestParam(required = false) String query,
             @RequestParam(required = false) Integer minPrice,
@@ -82,19 +82,12 @@ public class ProductController {
     ){
 
         validPriceRange(minPrice, maxPrice);
-        Optional cursorOptional = Optional.empty();
-
-
-
-        if(cursorValue != null){
-            cursorOptional = setUpCursorOptional(cursorValue, sortType);
-        }
 
 
         ProductDto.PriceRange priceRange = createPriceRange(minPrice, maxPrice);
         ProductDto.SearchCondition searchCondition = createSearchCondition(query, category, sortType, productType, priceRange);
 
-        List<ProductDto.Preview> result = productService.search(searchCondition, cursorOptional, size);
+        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.ofNullable(cursor), size);
 
 
 
@@ -140,21 +133,6 @@ public class ProductController {
 
         return result;
     }
-
-
-    private static Optional setUpCursorOptional(String cursorValue, SortOption sortOption) {
-        switch (sortOption){
-            case BY_DATE:
-                return Optional.of(LocalDateTime.parse(cursorValue, DateTimeFormatter.ISO_DATE_TIME));
-            case BY_PRICE:
-                return Optional.of(Integer.parseInt(cursorValue));
-            case BY_NAME:
-                return Optional.of(cursorValue);
-            default:
-                throw new IllegalArgumentException(ProductExceptionMessages.SORT_TYPE_INVALID.getMessage());
-        }
-    }
-
 
     private static ProductDto.PriceRange createPriceRange(Integer minPrice, Integer maxPrice) {
         ProductDto.PriceRange priceRange = null;

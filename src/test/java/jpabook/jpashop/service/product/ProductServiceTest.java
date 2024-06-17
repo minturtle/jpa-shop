@@ -56,7 +56,7 @@ class ProductServiceTest {
         PaginationListDto<ProductDto.Preview> actual = productService.search(searchCondition, PageRequest.of(0, searchSize));
 
         // then
-        assertThat(actual.getCount()).isEqualTo(3L);
+        assertThat(actual.getCount()).isEqualTo(4L);
         assertThat(actual.getData()).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple(givenAlbum.getUid(), givenAlbum.getName(), givenAlbum.getPrice(), givenAlbum.getThumbnailImageUrl()),
@@ -81,7 +81,7 @@ class ProductServiceTest {
                 ProductType.ALL
         );
         // when
-        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.of(givenAlbum.getName()), searchSize);
+        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.of(givenAlbum.getUid()), searchSize);
 
         // then
         assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")
