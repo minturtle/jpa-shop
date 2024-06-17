@@ -81,7 +81,7 @@ class ProductServiceTest {
                 ProductType.ALL
         );
         // when
-        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.of(givenAlbum.getName()), searchSize);
+        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.of(givenAlbum.getUid()), searchSize);
 
         // then
         assertThat(result).extracting("uid", "name", "price", "thumbnailUrl")

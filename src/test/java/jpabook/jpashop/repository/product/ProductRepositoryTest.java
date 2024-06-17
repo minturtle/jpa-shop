@@ -225,8 +225,8 @@ class ProductRepositoryTest {
     @DisplayName("물품 검색시 CursorValue 없이 검색을 수행할 경우 첫페이지의 결과를 Cursor 방식으로 받아올 수 있다.")
     void given_Nocursor_when_Search_then_ReturnFirstPage() throws Exception{
         // given
-        Product expected1 = movie;
-        Product expected2 = movie2;
+        Product expected1 = movie2;
+        Product expected2 = movie;
 
         ProductDto.SearchCondition searchCondition = new ProductDto.SearchCondition(
                 Optional.empty(),
@@ -260,7 +260,7 @@ class ProductRepositoryTest {
                 ProductType.ALL
         );
 
-        Optional<String> cursorValue = Optional.of(album.getName());
+        Optional<String> cursorValue = Optional.of(album.getUid());
         // when
         List<ProductDto.Preview> result = productRepository.search(searchCondition, cursorValue, 2);
         // then
