@@ -1,6 +1,8 @@
 package jpabook.jpashop.controller.product;
 
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.exception.product.CartQuantityException;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
@@ -26,7 +28,11 @@ public class ProductControllerAdvice {
      * @param e Exception 객체
      * @return 400 Http Code With ErrorResponse Object
      */
+
     @ExceptionHandler({CartQuantityException.class, InvalidStockQuantityException.class})
+    @ApiResponses({
+            @ApiResponse(responseCode = "400")
+    })
     public ResponseEntity<ErrorResponse> badRequest(Exception e){
         log.info("method execution failed-400 : {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.BAD_REQUEST);

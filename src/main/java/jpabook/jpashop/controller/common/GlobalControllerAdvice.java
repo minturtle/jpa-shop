@@ -1,6 +1,8 @@
 package jpabook.jpashop.controller.common;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
@@ -26,6 +28,9 @@ public class GlobalControllerAdvice {
      * @return 404 Http Code With ErrorResponse Object
     */
     @ExceptionHandler({CannotFindEntityException.class})
+    @ApiResponses({
+            @ApiResponse(responseCode = "404")
+    })
     public ResponseEntity<ErrorResponse> notfound(Exception e){
         log.info("method execution failed-404 : {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.NOT_FOUND);
@@ -40,6 +45,9 @@ public class GlobalControllerAdvice {
      * @return 409 Http Code With ErrorResponse Object
     */
     @ExceptionHandler({OptimisticLockingFailureException.class})
+    @ApiResponses({
+            @ApiResponse(responseCode = "409")
+    })
     public ResponseEntity<ErrorResponse> conflict(Exception e){
         log.info("method execution failed-409 : {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.CONFLICT);
@@ -52,6 +60,9 @@ public class GlobalControllerAdvice {
      * @return 401 Http Code With ErrorResponse Object
     */
     @ExceptionHandler({ExpiredJwtException.class})
+    @ApiResponses({
+            @ApiResponse(responseCode = "401")
+    })
     public ResponseEntity<ErrorResponse> unAuthorized(Exception e){
         log.info("method execution failed-401 : {}", e.getMessage());
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.UNAUTHORIZED);
@@ -65,6 +76,9 @@ public class GlobalControllerAdvice {
      * @return 500 Http Code With ErrorResponse Object
     */
     @ExceptionHandler({InternalErrorException.class, Exception.class})
+    @ApiResponses({
+            @ApiResponse(responseCode = "500")
+    })
     public ResponseEntity<ErrorResponse> unexpectedException(Exception e){
         log.warn("method execution failed-500 : {} - unexpected exception", e.getMessage());
         return new ResponseEntity<>(new ErrorResponse(e.getMessage(), Arrays.toString(e.getStackTrace())), HttpStatus.INTERNAL_SERVER_ERROR);
