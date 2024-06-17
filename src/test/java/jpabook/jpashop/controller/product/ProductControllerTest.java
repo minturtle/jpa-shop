@@ -353,8 +353,8 @@ class ProductControllerTest {
                         mvcResponse.getResponse().getContentAsString(),
                         new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
                 );
-        assertThat(LocalDateTime.parse(result.getCursor(), DateTimeFormatter.ISO_DATE_TIME ))
-                .isEqualTo(product2.getCreatedAt());
+        assertThat(result.getCursor())
+                .isEqualTo(product2.getUid());
 
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
