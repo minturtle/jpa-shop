@@ -67,7 +67,7 @@ class CartServiceTest {
         Cart givenCart2 = cart2;
 
         // when
-        List<CartDto.Detail> result = cartService.findCartByUserUid(givenUserUid);
+        List<CartDto.Detail> result = cartService.findCartByUser(givenUserUid);
 
         // then
         assertThat(result).extracting(

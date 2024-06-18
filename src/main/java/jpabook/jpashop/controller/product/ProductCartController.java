@@ -53,7 +53,7 @@ public class ProductCartController {
      )
     @GetMapping("")
     public List<CartResponse.Info> getCart(@LoginedUserUid String userUid) throws CannotFindEntityException {
-        return cartService.findCartByUserUid(userUid).stream().map(dto->modelMapper.map(dto, CartResponse.Info.class)).toList();
+        return cartService.findCartByUser(userUid).stream().map(dto->modelMapper.map(dto, CartResponse.Info.class)).toList();
     }
 
 
