@@ -110,17 +110,13 @@ public class AccountService {
         );
 
     }
-    public List<AccountDto.Info> findByUser(String userUid) throws CannotFindEntityException {
+    public List<AccountDto.Info> findAccountsByUser(String userUid) throws CannotFindEntityException {
         User user = userRepository.findByUid(userUid)
                 .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
         return user.getAccountList().stream().map(a -> new AccountDto.Info(a.getUid(), a.getName(), a.getBalance())).toList();
 
     }
 
-    private Account findAccountOrThrow(String accountUid) throws CannotFindEntityException {
-        return accountRepository.findByUid(accountUid)
-                .orElseThrow(() -> new CannotFindEntityException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
-    }
 
     private Account findAccountWithPessimisticLockOrThrow(String accountUid) throws CannotFindEntityException{
         return accountRepository.findByUidWithPessimisticLock(accountUid)
