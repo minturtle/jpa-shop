@@ -8,6 +8,7 @@ import jpabook.jpashop.dto.AccountDto;
 import jpabook.jpashop.enums.user.account.CashFlowStatus;
 import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
+import jpabook.jpashop.exception.user.CannotFindUserException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.exception.user.account.AccountExceptionMessages;
 import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
@@ -37,13 +38,13 @@ public class AccountService {
 
 
     /**
-     * @param dto Account 추가에 필요한 정보가 있는 dto
+     * User의 Account를 추가하는 메서드
+     * @param dto 사용자 고유식별자, 계좌 이름, 초기 계좌 금액이 담긴 dto
      * @return 생성된 Account의 고유 식별자
-     * @throws CannotFindEntityException 유저 정보를 조회할 수 없을때
+     * @throws CannotFindUserException 유저 정보를 조회할 수 없을 시
      * @author minseok kim
-     * @description User의 Account를 추가하는 메서드
      */
-    public String addAccount(AccountDto.Create dto) throws CannotFindEntityException {
+    public String addAccount(AccountDto.Create dto) throws CannotFindUserException {
         log.info("add Account Logic started : user-{}, balance-{}won", dto.getUserUid(), dto.getBalance());
         User user = findUserOrThrow(dto);
 
@@ -55,12 +56,13 @@ public class AccountService {
     }
 
     /**
-     * @author minseok kim
-     * @description Account에 츨금하는 메서드
-     * @param dto 출금에 필요한 정보가 담긴 dto
+     *
+     * Account에 츨금하는 메서드
+     * @param dto 출금하는 사람의 고유 식별자, 계좌 고유 식별자, 출금액이 담긴 dto
      * @exception CannotFindEntityException Account의 고유식별자로 account를 조회할 수 없을 때
      * @exception InvalidBalanceValueException 출금금액이 잔고보다 클 때
      * @exception OptimisticLockingFailureException 동시에 입/출금요청이 들어와 업데이트 된 경우
+     * @author minseok kim
     */
     @Transactional(rollbackFor = {CannotFindEntityException.class, InvalidBalanceValueException.class})
     public AccountDto.CashFlowResult withdraw(AccountDto.CashFlowRequest dto) throws CannotFindEntityException, InvalidBalanceValueException, OptimisticLockingFailureException {
@@ -82,8 +84,8 @@ public class AccountService {
 
 
     /**
+     * Account에 입금하는 메서드
      * @author minseok kim
-     * @description Account에 입금하는 메서드
      * @param dto 입금에 필요한 정보가 담긴 dto
      * @exception CannotFindEntityException Account의 고유식별자로 account를 조회할 수 없을 때
      * @exception InvalidBalanceValueException 입금 후 금액이 시스템에서 정의한 계좌 최고액보다 클 때
@@ -110,17 +112,13 @@ public class AccountService {
         );
 
     }
-    public List<AccountDto.Info> findByUser(String userUid) throws CannotFindEntityException {
+    public List<AccountDto.Info> findAccountsByUser(String userUid) throws CannotFindEntityException {
         User user = userRepository.findByUid(userUid)
                 .orElseThrow(() -> new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
         return user.getAccountList().stream().map(a -> new AccountDto.Info(a.getUid(), a.getName(), a.getBalance())).toList();
 
     }
 
-    private Account findAccountOrThrow(String accountUid) throws CannotFindEntityException {
-        return accountRepository.findByUid(accountUid)
-                .orElseThrow(() -> new CannotFindEntityException(AccountExceptionMessages.CANNOT_FIND_ACCOUNT.getMessage()));
-    }
 
     private Account findAccountWithPessimisticLockOrThrow(String accountUid) throws CannotFindEntityException{
         return accountRepository.findByUidWithPessimisticLock(accountUid)
@@ -134,9 +132,9 @@ public class AccountService {
     }
 
 
-    private User findUserOrThrow(AccountDto.Create dto) throws CannotFindEntityException {
+    private User findUserOrThrow(AccountDto.Create dto) throws CannotFindUserException {
         return userRepository.findByUid(dto.getUserUid())
-                .orElseThrow(()->new CannotFindEntityException(UserExceptonMessages.CANNOT_FIND_USER.getMessage()));
+                .orElseThrow(()->new CannotFindUserException();
     }
 
 }
