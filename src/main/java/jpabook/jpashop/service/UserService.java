@@ -32,11 +32,12 @@ public class UserService {
     private final NanoIdProvider nanoIdProvider;
 
     /**
-     * @description 회원가입(Username, Password) 메서드
+     * Username, Password 기반의 회원가입 메서드
      * @author minseok kim
      * @param registerInfo 회원가입 정보
      * @return 저장된 사용자의 uid
-     * @throws
+     * @throws PasswordValidationException 비밀번호가 8자리 이상, 영문, 숫자, 특수문자 한글자 이상 조건을 만족하지 못한 경우
+     * @throws AlreadyExistsUserException username 또는 email이 이미 존재하는 경우
     */
     @Transactional(rollbackFor = {PasswordValidationException.class, AlreadyExistsUserException.class, RuntimeException.class})
     public String register(UserDto.UsernamePasswordUserRegisterInfo registerInfo) throws PasswordValidationException, AlreadyExistsUserException {
@@ -73,12 +74,15 @@ public class UserService {
     }
 
     /**
+     * username/password 로그인 메서드
      * @author minseok kim
-     * @description username/password 인증 시도
-     * @param
+     * @param username 사용자가 입력한 로그인 ID
+     * @param password 사용자가 입력한 비밀번호
      * @return 인증된 사용자의 uid
-     * @exception
+     * @exception AuthenticateFailedException 로그인 실패시
+     * @deprecated 이 메서드는 Spring Security의 도입으로 CustomUsernamePasswordAuthenticateFilter에 대체되었습니다.
     */
+    @Deprecated
     public String login(String username, String password) throws AuthenticateFailedException {
         log.info("login user : username - {}", username);
 
@@ -97,8 +101,8 @@ public class UserService {
 
 
     /**
+     * 카카오 인증, 존재하지 않는 유저라면 DB에 사용자의 정보를 저장한 후 uid를 리턴한다.
      * @author minseok kim
-     * @description 카카오 인증, 존재하지 않는 유저라면 DB에 사용자의 정보를 저장한 후 uid를 리턴한다.
      * @param kakaoUid 카카오에서 전달한 유저의 uid
      * @param email 사용자의 카카오 이메일
      * @return
@@ -141,8 +145,8 @@ public class UserService {
 
 
     /**
+     * 구글 인증, 존재하지 않는 유저라면 DB에 사용자의 정보를 저장한 후 uid를 리턴한다.
      * @author minseok kim
-     * @description 구글 인증, 존재하지 않는 유저라면 DB에 사용자의 정보를 저장한 후 uid를 리턴한다.
      * @param googleUid 카카오에서 전달한 유저의 uid
      * @param email 사용자의 카카오 이메일
      * @return
@@ -178,7 +182,7 @@ public class UserService {
     }
 
     /**
-     * @description 사용자 정보 조회 API
+     * 사용자 정보 조회 API
      * @author minseok kim
      * @param userUid 사용자의 고유 식별자
      * @throws CannotFindEntityException 고유 식별자로 유저 정보 조회에 실패했을 시
@@ -202,7 +206,7 @@ public class UserService {
 
 
     /**
-     * @description 사용자의 이름, 주소, 프로필 이미지를 변경하는 메서드
+     * 사용자의 이름, 주소, 프로필 이미지를 변경하는 메서드
      * @author minseok kim
      * @param userUid 사용자의 고유 식별자
      * @param dto : 업데이트된 유저 정보
@@ -230,7 +234,7 @@ public class UserService {
 
 
     /**
-     * @description 사용자의 비밀번호를 업데이트 하는 메서드
+     * 사용자의 비밀번호를 업데이트 하는 메서드
      * @author minseok kim
      * @param userUid 사용자의 고유 식별자
      * @param dto 비밀번호 업데이트에 필요한 정보
