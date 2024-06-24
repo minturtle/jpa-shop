@@ -9,6 +9,7 @@ import java.net.URLEncoder;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.StringBody.subString;
 
 public class OAuth2MockServerUtils {
     private final TestGoogleProperties googleProperties;
@@ -78,12 +79,7 @@ public class OAuth2MockServerUtils {
                         .withMethod("POST")
                         .withHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
                         .withPath("/oauth/token")
-                        .withBody("" +
-                                        "code=" + TestKakaoProperties.KAKAO_AUTH_CODE
-                                        + "&grant_type=authorization_code"
-                                        + "&client_id=" + kakaoProperties.getClientId()
-                                // + "&redirect_uri=" + URLEncoder.encode(kakaoProperties.getRedirectUri())
-                        ))
+                        .withBody(subString("code=" + TestKakaoProperties.KAKAO_AUTH_CODE)))
                 .respond(response()
                         .withStatusCode(200)
                         .withContentType(MediaType.APPLICATION_JSON)
@@ -100,9 +96,8 @@ public class OAuth2MockServerUtils {
         // 카카오 서버가 유저 정보를 리턴하는 것을 모킹
         mockServer.when(request()
                 .withPath("/v2/user/me")
-                .withMethod("POST")
+                .withMethod("GET")
                 .withHeader("Authorization", "Bearer " + TestKakaoProperties.KAKAO_ACCESS_TOKEN)
-                .withHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8")
         ).respond(response()
                 .withStatusCode(200)
                 .withContentType(MediaType.APPLICATION_JSON)

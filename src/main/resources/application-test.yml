@@ -15,21 +15,21 @@ spring:
       client:
         provider:
           kakao:
-            authorization-uri: http://localhost:1080/oauth/authorize
-            token-uri: http://localhost:1080/oauth/token
-            user-info-uri: http://localhost:1080/v2/user/me
+            authorization-uri: http://localhost:1090/oauth/authorize
+            token-uri: http://localhost:1090/oauth/token
+            user-info-uri: http://localhost:1090/v2/user/me
             user-name-attribute: id
         registration:
           google:
             client-id: testClientId
             client-secret: testClientPW
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: http://localhost:8081/login/oauth2/code/kakao
             scope: profile,email
           kakao:
             client-id: testClientId
             client-secret: testClientPW
             client-authentication-method: client_secret_post
-            redirect-uri: http://localhost:8080/api/login/oauth2/code/kakao
+            redirect-uri: http://localhost:8081/login/oauth2/code/kakao
             authorization-grant-type: authorization_code
             client-name: kakao
             scope: profile, account_email

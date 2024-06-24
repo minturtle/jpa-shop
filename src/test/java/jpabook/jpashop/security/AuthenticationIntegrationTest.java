@@ -12,7 +12,6 @@ import jpabook.jpashop.testUtils.TestDataUtils;
 import jpabook.jpashop.testUtils.TestGoogleProperties;
 import jpabook.jpashop.testUtils.TestKakaoProperties;
 import jpabook.jpashop.util.JwtTokenProvider;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +21,22 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static jpabook.jpashop.testUtils.TestDataUtils.user1;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -208,20 +211,37 @@ public class AuthenticationIntegrationTest {
     
     
     @Test
-    @Disabled
     @DisplayName("사용자는 카카오 로그인을 수행해 DB에 정보를 저장하고 엑세스토큰을 발급받을 수 있다.")
     void given_kakaoOAuth2Info_when_KakaoLogin_thenReturnAccessToken() throws Exception{
         //given
         oAuth2MockServerUtils.setUpKakaoOAuth2MockServer();
+
+
         //when
-        MvcResult mvcResult = mockMvc.perform(get("/api/login/kakao/callback")
-                        .param("code", TestKakaoProperties.KAKAO_AUTH_CODE))
+        MvcResult attemptLoginResponse = mockMvc.perform(get("/oauth2/authorization/kakao"))
                 .andExpect(status().is3xxRedirection())
                 .andDo(print())
                 .andReturn();
         //then
-        String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
 
+        String state = getState(attemptLoginResponse.getResponse().getRedirectedUrl());
+        MockHttpSession session = (MockHttpSession) attemptLoginResponse.getRequest().getSession();
+
+
+        // 카카오 로그인 완료시
+        MvcResult oAuth2Result = mockMvc.perform(get("/login/oauth2/code/kakao")
+                        .param("code", TestKakaoProperties.KAKAO_AUTH_CODE)
+                        .param("state", state)
+                        .session(session)
+        )
+                .andDo(print())
+                .andReturn();
+
+
+        UserResponse.Login result = objectMapper.readValue(oAuth2Result.getResponse().getContentAsString(), UserResponse.Login.class);
+        assertAll("결과값엔 유효한 uid와 access token이 존재해야 한다.",
+                ()->assertThat(result.getUid()).isNotNull(),
+                ()->assertThat(isJwtToken(result.getAccessToken())).isTrue());
 
         oAuth2MockServerUtils.close();
     }
@@ -235,6 +255,22 @@ public class AuthenticationIntegrationTest {
     public boolean isJwtToken(String token) {
         String regex = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
         return token.matches(regex);
+    }
+
+    private String getState(String redirectedUrl) throws URISyntaxException {
+        URI uri = new URI(redirectedUrl);
+        String query = uri.getQuery();
+
+
+        Map<String, String> queryParams = new HashMap<>();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            String key = pair.substring(0, idx);
+            String value = pair.substring(idx + 1);
+            queryParams.put(key, value);
+        }
+        return queryParams.get("state");
     }
 
     @TestConfiguration
