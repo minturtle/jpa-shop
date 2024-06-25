@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JPA Shop</title>
     <link th:href="@{/css/home-style.css}" rel="stylesheet" />
+    <link th:href="@{/css/global-style.css}" rel="stylesheet" />
 </head>
 <body>
 <header>
@@ -12,7 +13,9 @@
 </header>
 <main>
     <div class="menu-container">
-        <div class="menu-item">상품 조회</div>
+        <a th:href="@{/product/list}">
+            <div class="menu-item">상품 조회</div>
+        </a>
         <div class="menu-item">로그인/회원관리</div>
         <div class="menu-item">장바구니 관리</div>
         <div class="menu-item">주문 관리</div>

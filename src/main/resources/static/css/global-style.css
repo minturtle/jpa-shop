@@ -1,0 +1,26 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 20px;
+    font-size: 24px;
+}
+
+footer {
+    background-color: #e0e0e0;
+    padding: 10px;
+    font-size: 12px;
+}
+
+/* a 태그의 밑줄 제거 */
+a {
+    text-decoration: none;
+    color: inherit; /* 링크의 기본 색상을 상속받도록 설정 */
+}
