@@ -79,8 +79,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
 
 
         String email = (String) accountInfo.get("email");
-        String name = (String) profile.get("profile_nickname");
-        String profileImage = (String) profile.get("profile_image");
+        String name = (String) profile.get("nickname");
+        String profileImage = (String) profile.get("profile_image_url");
 
 
         Optional<User> userOptional = userRepository.findByEmail(email);
