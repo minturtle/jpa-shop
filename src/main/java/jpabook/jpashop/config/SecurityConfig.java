@@ -55,7 +55,12 @@ public class SecurityConfig {
                                     "/api/user/login",
                                     "/api/login/**",
                                     "/oauth2/**",
-                                    "/login/**"
+                                    "/login/**",
+                                    "/",
+                                    "/css/**",
+                                    "/scripts/**",
+                                    "/plugin/**",
+                                    "/fonts/**"
                             ).permitAll()
                             .anyRequest().authenticated();
                 })

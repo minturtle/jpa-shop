@@ -1,0 +1,50 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #e0e0e0;
+    padding: 20px;
+    text-align: center;
+    font-size: 24px;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.menu-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px; /* 최대 너비 설정 */
+    padding: 0 20px; /* 좌우 패딩 추가 */
+    box-sizing: border-box;
+}
+
+.menu-item {
+    background-color: #3498db;
+    color: white;
+    padding: 40px;
+    text-align: center;
+    font-size: 18px;
+    flex: 1;
+    min-width: 200px; /* 최소 너비 설정 */
+    margin: 0 10px; /* 좌우 간격 설정 */
+    border-radius: 4px;
+}
+
+footer {
+    background-color: #e0e0e0;
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+}
