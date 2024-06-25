@@ -1,5 +1,12 @@
 package jpabook.jpashop.security;
 
+import jpabook.jpashop.domain.user.KakaoOAuth2AuthInfo;
+import jpabook.jpashop.domain.user.User;
+import jpabook.jpashop.dto.UserDto;
+import jpabook.jpashop.enums.user.OAuth2RegistrationType;
+import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.util.NanoIdProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -10,35 +17,96 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 
 @Component
-public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+@RequiredArgsConstructor
+public class CustomOAuth2UserService extends DefaultOAuth2UserService{
 
-
-    private final OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
+    private final UserRepository userRepository;
+    private final NanoIdProvider nanoIdProvider;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = delegate.loadUser(userRequest);
+        OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // 로그인 진행 중인 서비스를 구분
         // 네이버로 로그인 진행 중인지, 구글로 로그인 진행 중인지, ... 등을 구분
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        OAuth2RegistrationType registrationType = OAuth2RegistrationType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 
         // OAuth2 로그인 진행 시 키가 되는 필드 값(Primary Key와 같은 의미)
-        // 구글의 경우 기본적으로 코드를 지원
-        // 하지만 네이버, 카카오 등은 기본적으로 지원 X
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails()
                 .getUserInfoEndpoint()
                 .getUserNameAttributeName();
 
-        // OAuth2UserService를 통해 가져온 OAuth2User의 attribute 등을 담을 클래스
+        String uid = saveOrUpdate(oAuth2User, registrationType);
 
 
-        return new DefaultOAuth2User(
+        return new UserDto.CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                null,null);
+                oAuth2User.getAttributes(),userNameAttributeName,
+                uid
+        );
     }
+
+
+    /**
+     * OAuth2 User의 정보를 최신화해 저장
+     * @author minseok kim
+     * @param
+     * @return
+     * @throws
+    */
+    private String saveOrUpdate(OAuth2User user, OAuth2RegistrationType registrationType){
+        switch (registrationType){
+            case KAKAO:
+                return saveOrUpdateKakao(user);
+            case GOOGLE:
+                return saveOrUpdateGoogle(user);
+        }
+
+        throw new IllegalArgumentException();
+    }
+
+
+    private String saveOrUpdateKakao(OAuth2User user){
+        String kakaoUid = user.getName();
+        Map<String, Object> accountInfo = (Map)user.getAttribute("kakao_account");
+
+        String email = (String) accountInfo.get("email");
+        String name = (String) accountInfo.get("name");
+        String profileImage = (String) ((Map) accountInfo.get("profile")).get("profile_image_url");
+
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if(userOptional.isEmpty()){
+            String uid = nanoIdProvider.createNanoId();
+            User newUser = User.of(
+                    uid,
+                    email,
+                    name,
+                    profileImage,
+                    new KakaoOAuth2AuthInfo(kakaoUid)
+            );
+
+            userRepository.save(newUser);
+
+            return uid;
+        }
+
+        User savedUser = userOptional.get();
+        savedUser.setKakaoOAuth2AuthInfo(kakaoUid);
+        savedUser.setName(name);
+        savedUser.setProfileImageUrl(profileImage);
+
+        return savedUser.getUid();
+    }
+
+    private String saveOrUpdateGoogle(OAuth2User user){
+        return "st";
+    }
+
 }

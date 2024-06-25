@@ -115,7 +115,11 @@ public class OAuth2MockServerUtils {
                         "            \"is_default_nickname\": false\n" +
                         "        },\n" +
                         "        \"name_needs_agreement\":false, \n" +
-                        "        \"name\":\"홍길동\"\n" +
+                        "        \"name\":\"홍길동\", \n"+
+                        " \"email_needs_agreement\":false, \n" +
+                                "        \"is_email_valid\": true,   \n" +
+                                "        \"is_email_verified\": true,\n" +
+                                "        \"email\": \"sample@sample.com\"" +
                         "    }\n" +
                         "}")
         );

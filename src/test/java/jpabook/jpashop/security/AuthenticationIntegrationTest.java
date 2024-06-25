@@ -220,10 +220,7 @@ public class AuthenticationIntegrationTest {
         //when
         MvcResult attemptLoginResponse = mockMvc.perform(get("/oauth2/authorization/kakao"))
                 .andExpect(status().is3xxRedirection())
-                .andDo(print())
                 .andReturn();
-        //then
-
         String state = getState(attemptLoginResponse.getResponse().getRedirectedUrl());
         MockHttpSession session = (MockHttpSession) attemptLoginResponse.getRequest().getSession();
 
@@ -233,11 +230,12 @@ public class AuthenticationIntegrationTest {
                         .param("code", TestKakaoProperties.KAKAO_AUTH_CODE)
                         .param("state", state)
                         .session(session)
-        )
+                )
                 .andDo(print())
                 .andReturn();
 
 
+        //then
         UserResponse.Login result = objectMapper.readValue(oAuth2Result.getResponse().getContentAsString(), UserResponse.Login.class);
         assertAll("결과값엔 유효한 uid와 access token이 존재해야 한다.",
                 ()->assertThat(result.getUid()).isNotNull(),

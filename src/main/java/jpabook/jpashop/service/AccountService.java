@@ -134,7 +134,7 @@ public class AccountService {
 
     private User findUserOrThrow(AccountDto.Create dto) throws CannotFindUserException {
         return userRepository.findByUid(dto.getUserUid())
-                .orElseThrow(()->new CannotFindUserException();
+                .orElseThrow(()->new CannotFindUserException());
     }
 
 }

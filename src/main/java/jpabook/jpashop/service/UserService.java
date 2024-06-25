@@ -54,7 +54,7 @@ public class UserService {
         String uid = nanoIdProvider.createNanoId();
 
 
-        User newUser = new User(
+        User newUser =  User.of(
                 uid,
                 registerInfo.getEmail(),
                 registerInfo.getName(),
@@ -130,7 +130,7 @@ public class UserService {
 
         String uid = nanoIdProvider.createNanoId();
 
-        User newUser = new User(uid, email, "손님", null, null, null);
+        User newUser =  User.of(uid, email, "손님", null, null, null);
 
         newUser.setKakaoOAuth2AuthInfo(kakaoUid);
 
@@ -171,7 +171,7 @@ public class UserService {
         }
         String uid = nanoIdProvider.createNanoId();
 
-        User newUser = new User(uid, email, "손님", null, null, null);
+        User newUser = User.of(uid, email, "손님", null, null, null);
 
         newUser.setGoogleOAuth2AuthInfo(googleUid);
 
