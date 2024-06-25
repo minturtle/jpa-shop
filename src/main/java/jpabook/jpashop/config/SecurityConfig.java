@@ -4,6 +4,7 @@ package jpabook.jpashop.config;
 import jakarta.servlet.Filter;
 import jpabook.jpashop.filter.CorsFilter;
 import jpabook.jpashop.filter.JwtAuthenticateFilter;
+import jpabook.jpashop.security.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationFilter;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -35,7 +37,9 @@ public class SecurityConfig {
             CorsFilter corsFilter,
             AbstractAuthenticationProcessingFilter authenticationFilter,
             JwtAuthenticateFilter jwtAuthenticationFilter,
-            AuthenticationEntryPoint authenticationEntryPoint
+            AuthenticationEntryPoint authenticationEntryPoint,
+            CustomOAuth2UserService customOAuth2UserService,
+            SimpleUrlAuthenticationSuccessHandler customOAuth2SuccessHandler
 
     ) throws Exception{
         return http
@@ -49,13 +53,22 @@ public class SecurityConfig {
                                     "/api/product/**",
                                     "/api/user/new",
                                     "/api/user/login",
-                                    "/api/login/**"
+                                    "/api/login/**",
+                                    "/oauth2/**",
+                                    "/login/**"
                             ).permitAll()
                             .anyRequest().authenticated();
                 })
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .oauth2Login(Customizer.withDefaults())
+                .oauth2Login(oauth2Login ->
+                        oauth2Login
+                                .userInfoEndpoint(userInfoEndpoint ->
+                                        userInfoEndpoint
+                                                .userService(customOAuth2UserService)  // OAuth2 사용자 서비스 설정
+                                )
+                                .successHandler(customOAuth2SuccessHandler)  // 커스텀 성공 핸들러 등록
+                )
                 .rememberMe(AbstractHttpConfigurer::disable)  //remember me disable
                 //JWT토큰 사용에 따른 session disable
                 .sessionManagement(sessionManagement->{
