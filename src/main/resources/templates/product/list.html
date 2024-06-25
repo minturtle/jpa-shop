@@ -43,14 +43,15 @@
     </div>
 </div>
 <main>
-    <div class="product-container">
-            <div class="product-item" th:each="product : ${products}">
-                <div class="product-image"><img th:src="${product.getThumbnailUrl()}" alt="img"></div>
-                <div class="product-name" th:text="${product.getName()}"></div>
-                <div class="product-price" th:text="${product.getPrice()}"></div>
-            </div>
+    <div class="product-container" id="product-container">
+<!--            <div class="product-item" th:each="product : ${products}">-->
+<!--                <div class="product-image"><img th:src="${product.getThumbnailUrl()}" alt="img"></div>-->
+<!--                <div class="product-name" th:text="${product.getName()}"></div>-->
+<!--                <div class="product-price" th:text="${product.getPrice()}"></div>-->
+<!--            </div>-->
 
     </div>
+    <div id="loading" style="display: none;">Loading...</div>
 </main>
 <footer>
     본 페이지는 실제 온라인 쇼핑몰이 아닌 개인 연습용 프로젝트입니다.
