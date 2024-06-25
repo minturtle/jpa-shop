@@ -1,5 +1,6 @@
 package jpabook.jpashop.security;
 
+import jpabook.jpashop.domain.user.GoogleOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.KakaoOAuth2AuthInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.dto.UserDto;
@@ -32,10 +33,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // 네이버로 로그인 진행 중인지, 구글로 로그인 진행 중인지, ... 등을 구분
-        OAuth2RegistrationType registrationType = OAuth2RegistrationType.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
+        OAuth2RegistrationType registrationType = OAuth2RegistrationType
+                .valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
 
-        // OAuth2 로그인 진행 시 키가 되는 필드 값(Primary Key와 같은 의미)
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails()
                 .getUserInfoEndpoint()
@@ -46,7 +46,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
 
         return new UserDto.CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
-                oAuth2User.getAttributes(),userNameAttributeName,
+                oAuth2User.getAttributes(),
+                userNameAttributeName,
                 uid
         );
     }
@@ -106,7 +107,35 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
     }
 
     private String saveOrUpdateGoogle(OAuth2User user){
-        return "st";
+        String googleUid = (String) user.getAttributes().get("sub");
+        String email = (String) user.getAttributes().get("email");
+        String name = (String) user.getAttributes().get("name");
+
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+
+        if(userOptional.isEmpty()){
+            String uid = nanoIdProvider.createNanoId();
+            User newUser = User.of(
+                    uid,
+                    email,
+                    name,
+                    null,
+                    new GoogleOAuth2AuthInfo(googleUid)
+            );
+
+            userRepository.save(newUser);
+
+            return uid;
+        }
+
+
+        User savedUser = userOptional.get();
+        savedUser.setKakaoOAuth2AuthInfo(googleUid);
+        savedUser.setName(name);
+
+        return savedUser.getUid();
     }
 
 }

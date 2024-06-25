@@ -62,6 +62,24 @@ public class User extends BaseEntity {
 
     }
 
+    public static User of(
+            String uid,
+            String email,
+            String name,
+            String profileImageUrl,
+            GoogleOAuth2AuthInfo auth2AuthInfo
+    ){
+        return User.builder()
+                .uid(uid)
+                .email(email)
+                .name(name)
+                .profileImageUrl(profileImageUrl)
+                .googleOAuth2AuthInfo(auth2AuthInfo)
+                .build();
+
+    }
+
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
