@@ -25,50 +25,31 @@
 <div class="category-menu" id="categoryMenu">
     <div class="category">
         <div class="category-title">영화</div>
-        <div class="category-item">액션</div>
-        <div class="category-item">드라마</div>
-        <div class="category-item">코미디</div>
+        <div th:each="category : ${categories.get(T(jpabook.jpashop.enums.product.ProductType).MOVIE).getCategories()}">
+            <div class="category-item" th:text="${category.name}"></div>
+        </div>
     </div>
     <div class="category">
         <div class="category-title">음반</div>
-        <div class="category-item">팝</div>
-        <div class="category-item">록</div>
-        <div class="category-item">재즈</div>
+        <div th:each="category : ${categories.get(T(jpabook.jpashop.enums.product.ProductType).ALBUM).getCategories()}">
+            <div class="category-item" th:text="${category.name}"></div>
+        </div>
     </div>
     <div class="category">
         <div class="category-title">책</div>
-        <div class="category-item">소설</div>
-        <div class="category-item">자기계발</div>
-        <div class="category-item">경제</div>
+        <div th:each="category : ${categories.get(T(jpabook.jpashop.enums.product.ProductType).BOOK).getCategories()}">
+            <div class="category-item" th:text="${category.name}"></div>
+        </div>
     </div>
 </div>
 <main>
     <div class="product-container">
-        <div class="product-item">
-            <div class="product-image"></div>
-            <div class="product-name">상품 1</div>
-            <div class="product-price">15000</div>
-        </div>
-        <div class="product-item">
-            <div class="product-image"></div>
-            <div class="product-name">상품 2</div>
-            <div class="product-price">20000</div>
-        </div>
-        <div class="product-item">
-            <div class="product-image"></div>
-            <div class="product-name">상품 3</div>
-            <div class="product-price">30000</div>
-        </div>
-        <div class="product-item">
-            <div class="product-image"></div>
-            <div class="product-name">상품 4</div>
-            <div class="product-price">50000</div>
-        </div>
-        <div class="product-item">
-            <div class="product-image"></div>
-            <div class="product-name">상품 5</div>
-            <div class="product-price">12000</div>
-        </div>
+            <div class="product-item" th:each="product : ${products}">
+                <div class="product-image"><img th:src="${product.getThumbnailUrl()}" alt="img"></div>
+                <div class="product-name" th:text="${product.getName()}"></div>
+                <div class="product-price" th:text="${product.getPrice()}"></div>
+            </div>
+
     </div>
 </main>
 <footer>

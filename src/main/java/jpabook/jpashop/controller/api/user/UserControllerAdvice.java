@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller.user;
+package jpabook.jpashop.controller.api.user;
 
 
 import io.jsonwebtoken.JwtException;
