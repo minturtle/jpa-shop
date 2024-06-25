@@ -7,7 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jpabook.jpashop.controller.common.response.ErrorResponse;
+import jpabook.jpashop.controller.api.common.response.ErrorResponse;
 import jpabook.jpashop.exception.user.CannotFindUserException;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.security.UidUserDetailsService;
@@ -15,7 +15,6 @@ import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -24,7 +23,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.List;
 
 
 @Component

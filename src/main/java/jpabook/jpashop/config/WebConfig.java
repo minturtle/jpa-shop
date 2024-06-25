@@ -1,6 +1,6 @@
 package jpabook.jpashop.config;
 
-import jpabook.jpashop.controller.common.argumentResolvers.LoginedUserUidArgumentResolver;
+import jpabook.jpashop.controller.api.common.argumentResolvers.LoginedUserUidArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;

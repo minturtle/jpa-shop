@@ -1,15 +1,15 @@
-package jpabook.jpashop.controller.product;
+package jpabook.jpashop.controller.api.product;
 
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jpabook.jpashop.aop.annotations.Loggable;
-import jpabook.jpashop.controller.common.response.CategoryResponse;
+import jpabook.jpashop.controller.api.common.response.CategoryResponse;
 import jpabook.jpashop.dto.CategoryDto;
 import jpabook.jpashop.dto.CursorListDto;
 import jpabook.jpashop.dto.PaginationListDto;
-import jpabook.jpashop.controller.common.response.ProductResponse;
+import jpabook.jpashop.controller.api.common.response.ProductResponse;
 import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;

@@ -1,9 +1,9 @@
-package jpabook.jpashop.controller.product;
+package jpabook.jpashop.controller.api.product;
 
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jpabook.jpashop.controller.common.response.ErrorResponse;
+import jpabook.jpashop.controller.api.common.response.ErrorResponse;
 import jpabook.jpashop.exception.product.CartQuantityException;
 import jpabook.jpashop.exception.product.InvalidStockQuantityException;
 import lombok.extern.slf4j.Slf4j;

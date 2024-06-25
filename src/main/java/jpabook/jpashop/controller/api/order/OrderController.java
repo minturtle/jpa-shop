@@ -1,16 +1,13 @@
-package jpabook.jpashop.controller.order;
+package jpabook.jpashop.controller.api.order;
 
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jpabook.jpashop.aop.annotations.Loggable;
-import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
-import jpabook.jpashop.controller.common.request.OrderRequest;
-import jpabook.jpashop.controller.common.response.ErrorResponse;
-import jpabook.jpashop.controller.common.response.OrderResponse;
+import jpabook.jpashop.controller.api.common.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.api.common.request.OrderRequest;
+import jpabook.jpashop.controller.api.common.response.OrderResponse;
 import jpabook.jpashop.dto.OrderDto;
 import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
@@ -21,7 +18,6 @@ import jpabook.jpashop.exception.user.account.UnauthorizedAccountAccessException
 import jpabook.jpashop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.internal.asm.TypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 

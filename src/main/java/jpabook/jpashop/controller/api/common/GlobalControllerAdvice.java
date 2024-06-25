@@ -1,10 +1,9 @@
-package jpabook.jpashop.controller.common;
+package jpabook.jpashop.controller.api.common;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jpabook.jpashop.controller.common.response.ErrorResponse;
+import jpabook.jpashop.controller.api.common.response.ErrorResponse;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.common.InternalErrorException;
 import lombok.extern.slf4j.Slf4j;

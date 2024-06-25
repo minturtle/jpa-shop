@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller.common;
+package jpabook.jpashop.controller.api.common;
 
 
 import io.swagger.v3.oas.annotations.Operation;

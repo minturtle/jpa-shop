@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jpabook.jpashop.aop.annotations.Loggable;
-import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
-import jpabook.jpashop.controller.common.request.UserRequest;
-import jpabook.jpashop.controller.common.response.UserResponse;
+import jpabook.jpashop.controller.api.common.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.api.common.request.UserRequest;
+import jpabook.jpashop.controller.api.common.response.UserResponse;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
@@ -20,7 +20,6 @@ import lombok.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.Optional;
 
 @RestController

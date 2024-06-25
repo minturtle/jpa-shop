@@ -2,8 +2,8 @@ package jpabook.jpashop.controller.product;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jpabook.jpashop.controller.common.request.CartRequest;
-import jpabook.jpashop.controller.common.response.CartResponse;
+import jpabook.jpashop.controller.api.common.request.CartRequest;
+import jpabook.jpashop.controller.api.common.response.CartResponse;
 import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.repository.UserRepository;

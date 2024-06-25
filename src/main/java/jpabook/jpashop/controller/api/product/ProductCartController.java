@@ -1,13 +1,13 @@
-package jpabook.jpashop.controller.product;
+package jpabook.jpashop.controller.api.product;
 
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jpabook.jpashop.aop.annotations.Loggable;
-import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
-import jpabook.jpashop.controller.common.request.CartRequest;
-import jpabook.jpashop.controller.common.response.CartResponse;
+import jpabook.jpashop.controller.api.common.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.api.common.request.CartRequest;
+import jpabook.jpashop.controller.api.common.response.CartResponse;
 import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.product.CartQuantityException;
