@@ -16,7 +16,6 @@ public class TestKakaoProperties {
     public static final String KAKAO_AUTH_CODE = "kakao_auth_code";
     public static final String KAKAO_ACCESS_TOKEN = "kakao_access_token";
     public static final String KAKAO_REFRESH_TOKEN = "kakao_refresh_token";
-
     private String clientId;
     private String clientSecret;
     private String clientAuthenticationMethod;

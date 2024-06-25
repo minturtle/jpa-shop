@@ -3,6 +3,8 @@ package jpabook.jpashop.domain.user;
 import jpabook.jpashop.domain.BaseEntity;
 import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.order.Order;
+import jpabook.jpashop.dto.UserDto;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -18,13 +20,13 @@ import java.util.Objects;
 
 @Getter
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "users")
 @SuperBuilder
 public class User extends BaseEntity {
 
 
-    public User(
+    public static User of(
             String uid,
             String email,
             String name,
@@ -32,12 +34,51 @@ public class User extends BaseEntity {
             String address,
             String detailedAddress
     ) {
-        this.uid = uid;
-        this.email = email;
-        this.name = name;
-        this.profileImageUrl = profileImageUrl;
-        this.addressInfo = new AddressInfo(address, detailedAddress);
+        return User.builder()
+                .uid(uid)
+                .email(email)
+                .name(name)
+                .profileImageUrl(profileImageUrl)
+                .addressInfo(new AddressInfo(address, detailedAddress))
+                .build();
+
     }
+
+
+    public static User of(
+            String uid,
+            String email,
+            String name,
+            String profileImageUrl,
+            KakaoOAuth2AuthInfo auth2AuthInfo
+    ){
+        return User.builder()
+                .uid(uid)
+                .email(email)
+                .name(name)
+                .profileImageUrl(profileImageUrl)
+                .kakaoOAuth2AuthInfo(auth2AuthInfo)
+                .build();
+
+    }
+
+    public static User of(
+            String uid,
+            String email,
+            String name,
+            String profileImageUrl,
+            GoogleOAuth2AuthInfo auth2AuthInfo
+    ){
+        return User.builder()
+                .uid(uid)
+                .email(email)
+                .name(name)
+                .profileImageUrl(profileImageUrl)
+                .googleOAuth2AuthInfo(auth2AuthInfo)
+                .build();
+
+    }
+
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")

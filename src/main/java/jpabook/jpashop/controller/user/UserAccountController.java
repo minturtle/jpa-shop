@@ -57,7 +57,7 @@ public class UserAccountController {
     )
     @GetMapping("/list")
     public List<UserAccountResponse.Info> getAccountList(@LoginedUserUid String userUid) throws CannotFindEntityException {
-        return accountService.findByUser(userUid)
+        return accountService.findAccountsByUser(userUid)
                 .stream().map(ac->modelMapper.map(ac, UserAccountResponse.Info.class)).toList();
     }
 

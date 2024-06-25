@@ -163,7 +163,7 @@ class AccountServiceTest {
     @DisplayName("유저의 가상계좌 리스트를 조회할 수 있다.")
     public void given_UserHasAccount_when_getUsersAccountList_then_Return() throws Exception{
         //given
-        List<AccountDto.Info> givenUser = accountService.findByUser(user1.getUid());
+        List<AccountDto.Info> givenUser = accountService.findAccountsByUser(user1.getUid());
         Account givenAccount1 = account1;
         Account givenAccount2 = account2;
 
