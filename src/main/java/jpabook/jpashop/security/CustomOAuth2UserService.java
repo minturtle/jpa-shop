@@ -75,10 +75,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService{
     private String saveOrUpdateKakao(OAuth2User user){
         String kakaoUid = user.getName();
         Map<String, Object> accountInfo = (Map)user.getAttribute("kakao_account");
+        Map<String, Object> profile = (Map) accountInfo.get("profile");
+
 
         String email = (String) accountInfo.get("email");
-        String name = (String) accountInfo.get("name");
-        String profileImage = (String) ((Map) accountInfo.get("profile")).get("profile_image_url");
+        String name = (String) profile.get("profile_nickname");
+        String profileImage = (String) profile.get("profile_image");
 
 
         Optional<User> userOptional = userRepository.findByEmail(email);
