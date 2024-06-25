@@ -2,9 +2,9 @@ package jpabook.jpashop.controller.user;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jpabook.jpashop.controller.common.request.UserRequest;
-import jpabook.jpashop.controller.common.response.ErrorResponse;
-import jpabook.jpashop.controller.common.response.UserResponse;
+import jpabook.jpashop.controller.api.common.request.UserRequest;
+import jpabook.jpashop.controller.api.common.response.ErrorResponse;
+import jpabook.jpashop.controller.api.common.response.UserResponse;
 import jpabook.jpashop.domain.user.AddressInfo;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;

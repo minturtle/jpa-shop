@@ -1,4 +1,4 @@
-package jpabook.jpashop.controller.common.response;
+package jpabook.jpashop.controller.api.common.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

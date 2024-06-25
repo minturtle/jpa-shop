@@ -4,7 +4,7 @@ package jpabook.jpashop.controller.user;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jpabook.jpashop.controller.common.response.ErrorResponse;
+import jpabook.jpashop.controller.api.common.response.ErrorResponse;
 import jpabook.jpashop.exception.user.AlreadyExistsUserException;
 import jpabook.jpashop.exception.user.AuthenticateFailedException;
 import jpabook.jpashop.exception.user.PasswordValidationException;

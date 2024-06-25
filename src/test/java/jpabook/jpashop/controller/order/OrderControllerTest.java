@@ -2,8 +2,8 @@ package jpabook.jpashop.controller.order;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jpabook.jpashop.controller.common.request.OrderRequest;
-import jpabook.jpashop.controller.common.response.OrderResponse;
+import jpabook.jpashop.controller.api.common.request.OrderRequest;
+import jpabook.jpashop.controller.api.common.response.OrderResponse;
 import jpabook.jpashop.domain.order.Order;
 import jpabook.jpashop.domain.order.OrderProduct;
 import jpabook.jpashop.domain.order.OrderStatus;

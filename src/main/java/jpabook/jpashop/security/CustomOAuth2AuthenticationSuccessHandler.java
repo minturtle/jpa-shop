@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jpabook.jpashop.controller.common.response.UserResponse;
+import jpabook.jpashop.controller.api.common.response.UserResponse;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;

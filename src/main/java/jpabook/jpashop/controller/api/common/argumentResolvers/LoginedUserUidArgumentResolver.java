@@ -1,18 +1,12 @@
-package jpabook.jpashop.controller.common.argumentResolvers;
+package jpabook.jpashop.controller.api.common.argumentResolvers;
 
-import io.jsonwebtoken.JwtException;
-import jakarta.servlet.http.HttpServletRequest;
-import jpabook.jpashop.controller.common.annotations.LoginedUserUid;
+import jpabook.jpashop.controller.api.common.annotations.LoginedUserUid;
 import jpabook.jpashop.dto.UserDto;
 import jpabook.jpashop.exception.user.CannotFindUserException;
-import jpabook.jpashop.exception.user.UserExceptonMessages;
-import jpabook.jpashop.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
-import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;

@@ -2,8 +2,8 @@ package jpabook.jpashop.controller.product;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jpabook.jpashop.controller.common.response.CategoryResponse;
-import jpabook.jpashop.controller.common.response.ProductResponse;
+import jpabook.jpashop.controller.api.common.response.CategoryResponse;
+import jpabook.jpashop.controller.api.common.response.ProductResponse;
 import jpabook.jpashop.domain.product.*;
 import jpabook.jpashop.dto.CursorListDto;
 import jpabook.jpashop.dto.PaginationListDto;
@@ -21,9 +21,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
