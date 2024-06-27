@@ -31,28 +31,10 @@ public class ProductUIController {
     private final ProductService productService;
     @GetMapping("/list")
     public String getProductList(
-            Model model,
-            @RequestParam(required = false) String cursor,
-            @RequestParam(required = false, defaultValue = "10") Integer size,
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) Integer minPrice,
-            @RequestParam(required = false) Integer maxPrice,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false, defaultValue = "BY_DATE") SortOption sortType,
-            @RequestParam(required = false, defaultValue = "ALL") ProductType productType
+            Model model
     ){
-
-        validPriceRange(minPrice, maxPrice);
-
-
-        ProductDto.PriceRange priceRange = createPriceRange(minPrice, maxPrice);
-        ProductDto.SearchCondition searchCondition = createSearchCondition(query, category, sortType, productType, priceRange);
-
         Map<ProductType, CategoryResponse.ListInfo> categories = createCategory(productService.getCategories());
 
-
-        List<ProductDto.Preview> result = productService.search(searchCondition, Optional.ofNullable(cursor), size);
-        model.addAttribute("products", result);
         model.addAttribute("categories", categories);
         return "/product/list";
     }

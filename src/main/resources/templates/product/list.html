@@ -17,9 +17,10 @@
     <button>검색</button>
 </div>
 <div class="sort-bar">
-    <select>
-        <option>최신순</option>
-        <option>가격순</option>
+    <select id="sort-select">
+        <option value="BY_DATE">최신순</option>
+        <option value="BY_PRICE">가격순</option>
+        <option value="BY_NAME">이름순</option>
     </select>
 </div>
 <div class="category-menu" id="categoryMenu">
@@ -44,14 +45,8 @@
 </div>
 <main>
     <div class="product-container" id="product-container">
-<!--            <div class="product-item" th:each="product : ${products}">-->
-<!--                <div class="product-image"><img th:src="${product.getThumbnailUrl()}" alt="img"></div>-->
-<!--                <div class="product-name" th:text="${product.getName()}"></div>-->
-<!--                <div class="product-price" th:text="${product.getPrice()}"></div>-->
-<!--            </div>-->
-
     </div>
-    <div id="loading" style="display: none;">Loading...</div>
+    <div id="loading">Loading...</div>
 </main>
 <footer>
     본 페이지는 실제 온라인 쇼핑몰이 아닌 개인 연습용 프로젝트입니다.

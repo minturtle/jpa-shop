@@ -1,7 +1,18 @@
 let cursor = null;
 let isLoading = false;
+let sortType = 'BY_DATE';
+
 const productContainer = document.getElementById('product-container');
 const loading = document.getElementById('loading');
+
+
+document.getElementById('sort-select').addEventListener('change', (event) => {
+    sortType = event.target.value;
+    cursor = null;  // Reset cursor when changing sort type
+    productContainer.innerHTML = '';  // Clear previous products
+    loadProducts();
+});
+
 
 function toggleCategoryMenu() {
     var menu = document.getElementById("categoryMenu");
@@ -12,14 +23,17 @@ function toggleCategoryMenu() {
     }
 }
 
-function loadProducts() {
+function loadProducts(query = '') {
     if (isLoading) return;
 
     isLoading = true;
     loading.style.display = 'block';
-    let url = `/api/product/v2/list?size=10&sortType=BY_DATE&productType=ALL`;
+    let url = `/api/product/v2/list?size=10&sortType=${sortType}&productType=ALL`;
     if (cursor) {
         url += `&cursor=${cursor}`;
+    }
+    if (query) {
+        url += `&query=${encodeURIComponent(query)}`;
     }
 
     fetch(url)
@@ -70,3 +84,5 @@ window.addEventListener('scroll', handleScroll);
 window.addEventListener('DOMContentLoaded', () => {
     loadProducts();
 });
+
+
