@@ -57,7 +57,9 @@
     border: 1px solid #ddd;
     margin-top: 5px;
 }
-
+.category-item.selected {
+    background-color: #d3d3d3;
+}
 .category-item:hover {
     background-color: #ddd;
 }

@@ -2,6 +2,8 @@ let cursor = null;
 let isLoading = false;
 let sortType = 'BY_DATE';
 let query = '';
+let category = ''
+
 
 const productContainer = document.getElementById('product-container');
 const loading = document.getElementById('loading');
@@ -34,6 +36,11 @@ function handleSearch() {
 function resetSearch() {
     document.getElementById('search-input').value = '';
     query = ''
+    category = ''
+    cursor = null;  // Reset cursor when changing category
+    productContainer.innerHTML = '';
+    removeCategorySelect()
+    loadProducts()
 }
 function loadProducts() {
     if (isLoading) return;
@@ -47,6 +54,10 @@ function loadProducts() {
     if (query) {
         url += `&query=${encodeURIComponent(query)}`;
     }
+    if(category){
+        url += `&category=${category}`
+    }
+
 
     fetch(url)
         .then(response => response.json())
@@ -86,15 +97,39 @@ function loadProducts() {
         });
 }
 
+function handleCategoryClick(currentCategory) {
+    category = currentCategory;
+    cursor = null;  // Reset cursor when changing category
+    productContainer.innerHTML = '';  // Clear previous products
+    loadProducts();
+}
+
 function handleScroll() {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
         loadProducts();
     }
 }
 
+function removeCategorySelect(){
+    // 모든 카테고리 아이템에서 'selected' 클래스 제거
+    document.querySelectorAll('.category-item').forEach(i => {
+        i.classList.remove('selected');
+    });
+}
+
 window.addEventListener('scroll', handleScroll);
 window.addEventListener('DOMContentLoaded', () => {
     loadProducts();
 });
+document.querySelectorAll('.category-item').forEach(item => {
+    item.addEventListener('click', event => {
+        const category = event.target.getAttribute('id');
+        handleCategoryClick(category);
 
+        removeCategorySelect();
+        // 선택된 아이템에 'selected' 클래스 추가
+        event.target.classList.add('selected');
+
+    });
+});
 

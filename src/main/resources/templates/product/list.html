@@ -26,23 +26,25 @@
 </div>
 <div class="category-menu" id="categoryMenu">
     <div class="category">
-        <div class="category-title">영화</div>
-        <div th:each="category : ${categories.get(T(jpabook.jpashop.enums.product.ProductType).MOVIE).getCategories()}">
-            <div class="category-item" th:text="${category.name}"></div>
-        </div>
-    </div>
-    <div class="category">
         <div class="category-title">음반</div>
         <div th:each="category : ${categories.get(T(jpabook.jpashop.enums.product.ProductType).ALBUM).getCategories()}">
-            <div class="category-item" th:text="${category.name}"></div>
+            <div class="category-item" th:text="${category.name}" th:id ="${category.uid}"></div>
         </div>
     </div>
     <div class="category">
         <div class="category-title">책</div>
         <div th:each="category : ${categories.get(T(jpabook.jpashop.enums.product.ProductType).BOOK).getCategories()}">
-            <div class="category-item" th:text="${category.name}"></div>
+            <div class="category-item" th:text="${category.name}"  th:id ="${category.uid}" ></div>
         </div>
     </div>
+
+    <div class="category">
+        <div class="category-title">영화</div>
+        <div th:each="category : ${categories.get(T(jpabook.jpashop.enums.product.ProductType).MOVIE).getCategories()}">
+            <div class="category-item" th:text="${category.name}" th:id ="${category.uid}"></div>
+        </div>
+    </div>
+
 </div>
 <main>
     <div class="product-container" id="product-container">
