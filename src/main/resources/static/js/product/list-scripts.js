@@ -89,7 +89,7 @@ function loadProducts() {
                     `;
 
                     productDiv.addEventListener('click', () => {
-                        window.location.href = `/api/product/${product.productUid}`;
+                        window.location.href = `/product/${product.productUid}`;
                     });
                     productContainer.appendChild(productDiv);
                 });
