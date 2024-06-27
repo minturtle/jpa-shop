@@ -87,6 +87,10 @@ function loadProducts() {
                         <div class="product-name">${product.productName}</div>
                         <div class="product-price">${product.price}</div>
                     `;
+
+                    productDiv.addEventListener('click', () => {
+                        window.location.href = `/api/product/${product.productUid}`;
+                    });
                     productContainer.appendChild(productDiv);
                 });
                 cursor = data.cursor;
