@@ -13,8 +13,9 @@
 </header>
 <div class="search-bar">
     <button class="category-button" onclick="toggleCategoryMenu()">카테고리</button>
-    <input type="text" placeholder="내용을 입력해 주세요">
-    <button>검색</button>
+    <input type="text" id="search-input" placeholder="내용을 입력해 주세요">
+    <button onclick="handleSearch()">검색</button>
+    <button onclick="resetSearch()">초기화</button>
 </div>
 <div class="sort-bar">
     <select id="sort-select">

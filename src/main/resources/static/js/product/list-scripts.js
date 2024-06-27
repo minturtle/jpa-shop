@@ -1,6 +1,7 @@
 let cursor = null;
 let isLoading = false;
 let sortType = 'BY_DATE';
+let query = '';
 
 const productContainer = document.getElementById('product-container');
 const loading = document.getElementById('loading');
@@ -23,7 +24,18 @@ function toggleCategoryMenu() {
     }
 }
 
-function loadProducts(query = '') {
+function handleSearch() {
+    query = document.getElementById('search-input').value;
+    cursor = null;  // Reset cursor when performing a new search
+    productContainer.innerHTML = '';  // Clear previous products
+    loadProducts();
+}
+
+function resetSearch() {
+    document.getElementById('search-input').value = '';
+    query = ''
+}
+function loadProducts() {
     if (isLoading) return;
 
     isLoading = true;
