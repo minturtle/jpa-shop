@@ -3,7 +3,8 @@ let isLoading = false;
 let sortType = 'BY_DATE';
 let query = '';
 let category = ''
-
+let minPrice = ''
+let maxPrice = ''
 
 const productContainer = document.getElementById('product-container');
 const loading = document.getElementById('loading');
@@ -28,6 +29,8 @@ function toggleCategoryMenu() {
 
 function handleSearch() {
     query = document.getElementById('search-input').value;
+    minPrice = document.getElementById('min-price').value;
+    maxPrice = document.getElementById('max-price').value;
     cursor = null;  // Reset cursor when performing a new search
     productContainer.innerHTML = '';  // Clear previous products
     loadProducts();
@@ -35,10 +38,15 @@ function handleSearch() {
 
 function resetSearch() {
     document.getElementById('search-input').value = '';
+    document.getElementById('min-price').value = '';
+    document.getElementById('max-price').value='';
+
     query = ''
     category = ''
     cursor = null;  // Reset cursor when changing category
     productContainer.innerHTML = '';
+    minPrice = ''
+    maxPrice = ''
     removeCategorySelect()
     loadProducts()
 }
@@ -56,6 +64,12 @@ function loadProducts() {
     }
     if(category){
         url += `&category=${category}`
+    }
+    if(minPrice !== ''){
+        url += `&minPrice=${minPrice}`
+    }
+    if(maxPrice !== ''){
+        url += `&maxPrice=${maxPrice}`
     }
 
 
