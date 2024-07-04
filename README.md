@@ -13,8 +13,8 @@
 
 ### 문서 바로가기
 
-- [요구사항 명세서 바로가기]()
-
+- [요구사항 명세서 바로가기](https://github.com/minturtle/jpa-shop/blob/master/docs/SYSTEM_REQUIREMENTS.md)
+- [기능 약정 바로가기](https://github.com/minturtle/jpa-shop/blob/master/docs/OPERATION_CONTRACT.md)
 
 ### Domain Model
 ![Domain Model](docs/domain_model.png)
