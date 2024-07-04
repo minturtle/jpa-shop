@@ -32,6 +32,8 @@ public class TestDataUtils {
     public static final Book book;
     public static final Movie movie;
 
+    public static final Movie movie2;
+
     public static final Cart cart1;
 
     public static final Cart cart2;
@@ -148,6 +150,20 @@ public class TestDataUtils {
                 .modifiedAt(LocalDateTime.parse("2024-03-02T12:00:00"))
                 .director("Director Name")
                 .actor("Actor Name")
+                .build();
+
+
+        movie2 = Movie.builder()
+                .uid("movie-002")
+                .name("Movie Name2")
+                .price(4000)
+                .stockQuantity(8)
+                .thumbnailImageUrl("http://example.com/movie2_thumbnail.jpg")
+                .description("Movie2 description")
+                .createdAt(LocalDateTime.parse("2024-03-01T12:00:00"))
+                .modifiedAt(LocalDateTime.parse("2024-03-02T12:00:00"))
+                .director("Director Name2")
+                .actor("Actor Name2")
                 .build();
 
         cart1 = Cart.builder()

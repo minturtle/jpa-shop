@@ -22,6 +22,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -47,8 +50,9 @@ class ProductControllerTest {
     void given_Product_when_SearchProductWithoutSearchCondition_then_ReturnDefaultOrderRegisterDate() throws Exception{
         // given
         Product product1 = movie;
-        Product product2 = album;
-        Product product3 = book;
+        Product product2 = movie2;
+        Product product3 = album;
+        Product product4 = book;
 
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/list"))
@@ -58,13 +62,15 @@ class ProductControllerTest {
         PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
 
 
-        assertThat(result.getCount()).isEqualTo(3);
+        assertThat(result.getCount()).isEqualTo(4);
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
                         tuple(product1.getUid(), product1.getName(), product1.getPrice(), product1.getThumbnailImageUrl()),
                         tuple(product2.getUid(), product2.getName(), product2.getPrice(), product2.getThumbnailImageUrl()),
-                        tuple(product3.getUid(), product3.getName(), product3.getPrice(), product3.getThumbnailImageUrl())
-                );
+                        tuple(product3.getUid(), product3.getName(), product3.getPrice(), product3.getThumbnailImageUrl()),
+                        tuple(product4.getUid(), product4.getName(), product4.getPrice(), product4.getThumbnailImageUrl())
+
+                        );
     }
 
     @Test
@@ -83,12 +89,14 @@ class ProductControllerTest {
         PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
 
         Movie expectedProduct = movie;
+        Movie expectedProduct2 = movie2;
 
 
-        assertThat(result.getCount()).isEqualTo(1);
+        assertThat(result.getCount()).isEqualTo(2);
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .contains(
-                        tuple(expectedProduct.getUid(), expectedProduct.getName(), expectedProduct.getPrice(), expectedProduct.getThumbnailImageUrl())
+                        tuple(expectedProduct.getUid(), expectedProduct.getName(), expectedProduct.getPrice(), expectedProduct.getThumbnailImageUrl()),
+                        tuple(expectedProduct2.getUid(), expectedProduct2.getName(), expectedProduct2.getPrice(), expectedProduct2.getThumbnailImageUrl())
                 );
     }
 
@@ -175,7 +183,7 @@ class ProductControllerTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"BY_DATE:movie-001,album-001,book-001", "BY_NAME:album-001,book-001,movie-001", "BY_PRICE:book-001,album-001,movie-001"}, delimiter = ':')
+    @CsvSource(value = {"BY_DATE:movie-001,movie-002,album-001,book-001", "BY_NAME:album-001,book-001,movie-001,movie-002", "BY_PRICE:book-001,album-001,movie-001,movie-002"}, delimiter = ':')
     @DisplayName("사용자는 검색시 검색결과를 원하는대로 정렬할 수 있다.")
     public void given_product_when_SearchWithOrder_then_ReturnOrderedList(SortOption productSortOption, String expectedString) throws Exception{
         //given
@@ -191,7 +199,7 @@ class ProductControllerTest {
         PaginationListDto<ProductResponse.Preview> result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), new TypeReference<PaginationListDto<ProductResponse.Preview>>(){});
         String[] expected = expectedString.split(",");
 
-        assertThat(result.getCount()).isEqualTo(3);
+        assertThat(result.getCount()).isEqualTo(4);
         assertThat(result.getData()).extracting("productUid")
                 .containsExactly((Object[])expected);
     }
@@ -330,8 +338,8 @@ class ProductControllerTest {
     @DisplayName("사용자는 커서 없이 상품을 검색해 첫 페이지를 리턴받을 수 있다.")
     void given_NoCursor_when_Search_then_ReturnFirstPage() throws Exception{
         // given
-        Product product1 = album;
-        Product product2 = book;
+        Product product1 = movie2;
+        Product product2 = movie;
 
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
@@ -345,8 +353,9 @@ class ProductControllerTest {
                         mvcResponse.getResponse().getContentAsString(),
                         new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
                 );
-        assertThat(result).extracting("cursorUid")
+        assertThat(result.getCursor())
                 .isEqualTo(product2.getUid());
+
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(
                         tuple(product1.getUid(), product1.getName(), product1.getPrice(), product1.getThumbnailImageUrl()),
@@ -357,17 +366,17 @@ class ProductControllerTest {
 
     @Test
     @DisplayName("사용자는 커서를 통해 다음 페이지의 상품을 검색해 다음 페이지를 리턴받을 수 있다.")
-    void given_CursorUid_when_Search_then_ReturnNextPage() throws Exception{
+    void given_cursor_when_Search_then_ReturnNextPage() throws Exception{
         // given
-        Product product1 = album;
-        Product product2 = book;
-        Product product3 = movie;
+        Product product1 = movie2;
+        Product product2 = album;
+        Product product3 = book;
 
 
         // when
         MvcResult mvcResponse = mockMvc.perform(get("/api/product/v2/list")
                         .param("size", "2")
-                        .param("cursorUid", product1.getUid()
+                        .param("cursor", product1.getUid()
                 ))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -378,7 +387,7 @@ class ProductControllerTest {
                         new TypeReference<CursorListDto<ProductResponse.Preview>>() {}
                 );
 
-        assertThat(result).extracting("cursorUid")
+        assertThat(result.getCursor())
                 .isEqualTo(product3.getUid());
         assertThat(result.getData()).extracting("productUid", "productName", "price", "productImage")
                 .containsExactly(

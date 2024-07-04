@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 
 public class ProductResponse {
 
@@ -18,6 +20,7 @@ public class ProductResponse {
         private String productName;
         private int price;
         private String productImage;
+        private LocalDateTime createdAt;
     }
 
 

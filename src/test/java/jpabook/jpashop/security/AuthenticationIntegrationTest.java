@@ -7,22 +7,33 @@ import jpabook.jpashop.controller.common.response.ErrorResponse;
 import jpabook.jpashop.controller.common.response.UserResponse;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
+import jpabook.jpashop.testUtils.OAuth2MockServerUtils;
 import jpabook.jpashop.testUtils.TestDataUtils;
+import jpabook.jpashop.testUtils.TestGoogleProperties;
+import jpabook.jpashop.testUtils.TestKakaoProperties;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static jpabook.jpashop.testUtils.TestDataUtils.user1;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,11 +42,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Transactional
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import(AuthenticationIntegrationTest.TestConfig.class)
 public class AuthenticationIntegrationTest {
 
 
@@ -48,6 +60,8 @@ public class AuthenticationIntegrationTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private OAuth2MockServerUtils oAuth2MockServerUtils;
 
     @Test
     @DisplayName("엑세스토큰 없이 인증이 필요한 API에 접근할 시 401 UnAuthorized를 반환한다.")
@@ -194,7 +208,42 @@ public class AuthenticationIntegrationTest {
         assertThat(result.getMessage()).isEqualTo(UserExceptonMessages.LOGIN_FAILED.getMessage());
 
     }
+    
+    
+    @Test
+    @DisplayName("사용자는 카카오 로그인을 수행해 DB에 정보를 저장하고 엑세스토큰을 발급받을 수 있다.")
+    void given_kakaoOAuth2Info_when_KakaoLogin_thenReturnAccessToken() throws Exception{
+        //given
+        oAuth2MockServerUtils.setUpKakaoOAuth2MockServer();
 
+
+        //when
+        MvcResult attemptLoginResponse = mockMvc.perform(get("/oauth2/authorization/kakao"))
+                .andExpect(status().is3xxRedirection())
+                .andReturn();
+        String state = getState(attemptLoginResponse.getResponse().getRedirectedUrl());
+        MockHttpSession session = (MockHttpSession) attemptLoginResponse.getRequest().getSession();
+
+
+        // 카카오 로그인 완료시
+        MvcResult oAuth2Result = mockMvc.perform(get("/login/oauth2/code/kakao")
+                        .param("code", TestKakaoProperties.KAKAO_AUTH_CODE)
+                        .param("state", state)
+                        .session(session)
+                )
+                .andDo(print())
+                .andReturn();
+
+
+        //then
+        UserResponse.Login result = objectMapper.readValue(oAuth2Result.getResponse().getContentAsString(), UserResponse.Login.class);
+        assertAll("결과값엔 유효한 uid와 access token이 존재해야 한다.",
+                ()->assertThat(result.getUid()).isNotNull(),
+                ()->assertThat(isJwtToken(result.getAccessToken())).isTrue());
+
+        oAuth2MockServerUtils.close();
+    }
+    
 
 
     /**
@@ -205,5 +254,48 @@ public class AuthenticationIntegrationTest {
         String regex = "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$";
         return token.matches(regex);
     }
+
+    private String getState(String redirectedUrl) throws URISyntaxException {
+        URI uri = new URI(redirectedUrl);
+        String query = uri.getQuery();
+
+
+        Map<String, String> queryParams = new HashMap<>();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            String key = pair.substring(0, idx);
+            String value = pair.substring(idx + 1);
+            queryParams.put(key, value);
+        }
+        return queryParams.get("state");
+    }
+
+    @TestConfiguration
+    public static class TestConfig {
+
+        @Bean
+        public TestGoogleProperties testGoogleProperties() {
+            return new TestGoogleProperties();
+        }
+
+
+        @Bean
+        public TestKakaoProperties testKakaoProperties() {
+            return new TestKakaoProperties();
+        }
+
+        @Bean
+        public OAuth2MockServerUtils oAuth2MockServerUtils(
+                TestGoogleProperties testGoogleProperties,
+                TestKakaoProperties testKakaoProperties
+
+        ) {
+            return new OAuth2MockServerUtils(testGoogleProperties, testKakaoProperties);
+        }
+
+    }
+
+
 
 }

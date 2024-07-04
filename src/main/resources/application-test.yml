@@ -11,8 +11,28 @@ spring:
     hibernate:
       ddl-auto: create
   security:
-    password:
-
+    oauth2:
+      client:
+        provider:
+          kakao:
+            authorization-uri: http://localhost:1090/oauth/authorize
+            token-uri: http://localhost:1090/oauth/token
+            user-info-uri: http://localhost:1090/v2/user/me
+            user-name-attribute: id
+        registration:
+          google:
+            client-id: testClientId
+            client-secret: testClientPW
+            redirect-uri: http://localhost:8081/login/oauth2/code/kakao
+            scope: profile,email
+          kakao:
+            client-id: testClientId
+            client-secret: testClientPW
+            client-authentication-method: client_secret_post
+            redirect-uri: http://localhost:8081/login/oauth2/code/kakao
+            authorization-grant-type: authorization_code
+            client-name: kakao
+            scope: profile, account_email
 
 nanoId:
   size : 10
@@ -32,7 +52,7 @@ server:
     encoding:
       force-response: true
       charset: UTF-8
-
+  port: 8081
 jwt:
   secret: secretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKeysecretKey
   access-token-expire-time: 10800000 # 3H

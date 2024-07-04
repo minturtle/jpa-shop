@@ -36,12 +36,11 @@ public class ProductService {
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
     /**
-     * @description 물건 리스트 검색
+     * OFFSET 페이지네이션 기반 물건 리스트 검색
      * @author minseok kim
      * @param searchCondition 물품 검색 조건, 자세한 검색 조건은 요구사항에 맞춰 설정되어 있다.
-     * @throws
+     * @param pageable 페이지네이션 객체
     */
-
     public PaginationListDto<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Pageable pageable) {
         log.info("search product logic started");
         List<ProductDto.Preview> searchResult = productRepository.search(searchCondition, pageable);
@@ -54,16 +53,24 @@ public class ProductService {
                 .build();
     }
 
-    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional<String> cursorUid, int limit) {
+
+    /**
+     * CURSOR 페이지네이션 기반 물건 리스트 검색
+     * @author minseok kim
+     * @param searchCondition 물품 검색 조건, 자세한 검색 조건은 요구사항에 맞춰 설정되어 있다.
+     * @param cursor 페이지 네이션 커서 정보
+     * @param limit 가져오는 객체의 갯수
+     */
+    public List<ProductDto.Preview> search(ProductDto.SearchCondition searchCondition, Optional<String> cursor, int limit) {
         log.info("search product logic started");
-        List<ProductDto.Preview> searchResult = productRepository.search(searchCondition, cursorUid, limit);
+        List<ProductDto.Preview> searchResult = productRepository.search(searchCondition, cursor, limit);
         log.info("search product logic finished");
         return searchResult;
     }
 
     /**
+     * 상품의 고유식별자로 상품의 상세 정보를 조회하는 메서드
      * @author minseok kim
-     * @description 상품의 고유식별자로 상품의 상세 정보를 조회하는 메서드
      * @param givenUid 상품의 고유식별자
      * @return 상품의 상세정보
      * @exception CannotFindEntityException 고유식별자로 상품 조회에 실패한 경우

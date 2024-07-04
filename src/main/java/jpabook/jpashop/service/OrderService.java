@@ -53,7 +53,7 @@ public class OrderService {
     private final NanoIdProvider nanoIdProvider;
 
     /**
-     * @description 주문/결제 메서드
+     * 주문/결제 메서드
      * @author minseok kim
      * @param userUid 결제하고자 하는 사용자의 식별자
      * @param accountUid 결제하고자하는 계좌의 식별자
@@ -84,7 +84,7 @@ public class OrderService {
 
 
     /**
-     * @description 주문 취소 메서드
+     * 주문 취소 메서드
      * @author minseok kim
      * @param orderUid 주문 식별자
      * @throws CannotFindEntityException Order 정보를 UID로 조회하지 못한 경우
@@ -106,7 +106,7 @@ public class OrderService {
     }
 
     /**
-     * @description 주문 상세 조회 메서드
+     * 주문 상세 조회 메서드
      * @author minseok kim
      * @param orderUid 주문 데이터 식별자
      * @throws CannotFindEntityException UID 조회 실패시
@@ -123,12 +123,12 @@ public class OrderService {
 
 
     /**
-     * @description 사용자의 주문 리스트 조회 API
+     * 사용자의 주문 리스트 조회 API
      * @author minseok kim
-     * @param
-     * @throws
+     * @param userUid 사용자의 고유 식별자
+     * @param pageable 페이지네이션
     */
-    public PaginationListDto<OrderDto.Preview> findByUser(String userUid, Pageable pageable) throws EntityNotFoundException{
+    public PaginationListDto<OrderDto.Preview> findByUser(String userUid, Pageable pageable){
         log.info("find order by user logic started : user-{}", userUid);
 
         Integer count = orderRepository.countByUser(userUid);
@@ -142,7 +142,7 @@ public class OrderService {
 
 
     /**
-     * @description 결제 취소 메서드
+     * 결제 취소 메서드
      * @author minseok kim
      * @param payment 결제 정보
      * @throws InvalidBalanceValueException 계좌의 잔고가 최댓값을 초과한 경우
@@ -164,7 +164,7 @@ public class OrderService {
 
 
     /**
-     * @description 주문 취소로 인해 상품의 갯수를 늘리는 메서드
+     * 주문 취소로 인해 상품의 갯수를 늘리는 메서드
      * @author minseok kim
      * @param orderProducts 주문 상품 리스트
      * @throws InternalErrorException 상품 정보 조회 실패시
@@ -184,7 +184,7 @@ public class OrderService {
 
 
     /**
-     * @description 주문으로 인해 상품의 갯수를 줄이는 메서드
+     * 주문으로 인해 상품의 갯수를 줄이는 메서드
      * @author minseok kim
      * @param productDtoList 주문 상품 리스트
      * @throws CannotFindEntityException 상품 조회 실패시
@@ -203,7 +203,7 @@ public class OrderService {
     }
 
     /**
-     * @description 주문 정보 저장을 위한 주문 정보 엔티티 생성 메서드
+     * 주문 정보 저장을 위한 주문 정보 엔티티 생성 메서드
      * @author minseok kim
      * @param cashflowResult 결제 완료 정보
      * @param userUid 주문자
@@ -235,12 +235,6 @@ public class OrderService {
         return order;
     }
 
-    /**
-     * @param
-     * @throws
-     * @description 주문 결과정보를 생성하는 메서드
-     * @author minseok kim
-     */
     private OrderDto.Detail createOrderResult(Order order) {
         OrderDto.Detail result = OrderDto.Detail.builder()
                 .orderUid(order.getUid())

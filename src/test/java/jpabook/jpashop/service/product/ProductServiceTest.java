@@ -56,7 +56,7 @@ class ProductServiceTest {
         PaginationListDto<ProductDto.Preview> actual = productService.search(searchCondition, PageRequest.of(0, searchSize));
 
         // then
-        assertThat(actual.getCount()).isEqualTo(3L);
+        assertThat(actual.getCount()).isEqualTo(4L);
         assertThat(actual.getData()).extracting("uid", "name", "price", "thumbnailUrl")
                 .containsExactly(
                         tuple(givenAlbum.getUid(), givenAlbum.getName(), givenAlbum.getPrice(), givenAlbum.getThumbnailImageUrl()),
@@ -65,8 +65,8 @@ class ProductServiceTest {
     }
 
     @Test
-    @DisplayName("이미 저장된 상품을 CursorUid를 통해 다음 페이지의 결과를 Cursor 방식으로 받아올 수 있다.")
-    void given_cursorUid_when_Search_then_ReturnNextPage() throws Exception{
+    @DisplayName("이미 저장된 상품을 CursorValue를 통해 다음 페이지의 결과를 Cursor 방식으로 받아올 수 있다.")
+    void given_cursor_when_Search_then_ReturnNextPage() throws Exception{
         // given
         Album givenAlbum = album;
         Book givenBook = book;
@@ -88,7 +88,6 @@ class ProductServiceTest {
                 .containsExactly(
                         tuple(givenBook.getUid(), givenBook.getName(), givenBook.getPrice(), givenBook.getThumbnailImageUrl()),
                         tuple(givenMovie.getUid(), givenMovie.getName(), givenMovie.getPrice(), givenMovie.getThumbnailImageUrl()));
-
     }
 
 
