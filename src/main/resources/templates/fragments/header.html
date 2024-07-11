@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
-<header th:fragment="body-header">
-    <h1>JPA Shop</h1>
+<header th:fragment="body-header" class="header">
+    <h1 class="header-title">JPA Shop</h1>
+    <p class="header-back"  th:if="${not #strings.equals(pageType, 'home')}" onclick="history.back()">Back</p>
 </header>
 
 </html>

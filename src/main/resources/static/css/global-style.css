@@ -6,12 +6,28 @@ body {
     min-height: 100vh;
 }
 
-header {
-    background-color: #000000;
-    color: #ffffff;
-    padding: 20px;
-    font-size: 24px;
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: black;
+    color: white;
+    padding: 10px;
 }
+
+.header-title {
+    text-align: center;
+    flex-grow: 1;
+}
+
+.header-back {
+    position: absolute;
+    left: 10px;
+    margin: 0;
+    cursor: pointer;
+}
+
 
 footer {
     background-color: #e0e0e0;
