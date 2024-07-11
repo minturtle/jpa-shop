@@ -61,7 +61,8 @@ public class SecurityConfig {
                                     "/js/**",
                                     "/plugin/**",
                                     "/fonts/**",
-                                    "/product/**"
+                                    "/product/**",
+                                    "/user/**"
                             ).permitAll()
                             .anyRequest().authenticated();
                 })
