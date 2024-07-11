@@ -5,10 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JPA Shop</title>
     <link th:href="@{/css/global-style.css}" rel="stylesheet" />
+    <link th:href="@{/css/user/login-style.css}" rel="stylesheet" />
 </head>
 <body>
 <header th:replace="/fragments/header.html :: body-header"></header>
+<div class="login-container">
+    <h2>로그인</h2>
+    <form class="login-form" id="login-form">
+        <input type="text" name="username" placeholder="아이디" required>
+        <input type="password" name="password" placeholder="비밀번호" required>
+        <button type="submit" class="login-button">로그인</button>
+    </form>
+    <div class="register-button"><a th:href="@{/user/new}">회원이 아니신가요? 회원가입</a></div>
+    <div class="social-login">
+        <a href="/oauth2/authorization/kakao" class="social-button">
+            <img th:src="@{/images/kakao_login.png}" alt="카카오 로그인">
+        </a>
+        <a href="/auth/google" class="social-button">
+            <img th:src="@{/images/google_login.png}" alt="구글 로그인">
+        </a>
+    </div>
+</div>
+
 <footer th:replace="/fragments/footer.html :: body-footer">
 </footer>
+<script th:src="@{/js/user/login-script.js}"></script>
 </body>
 </html>

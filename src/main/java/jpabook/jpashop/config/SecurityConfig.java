@@ -61,6 +61,7 @@ public class SecurityConfig {
                                     "/js/**",
                                     "/plugin/**",
                                     "/fonts/**",
+                                    "/images/**",
                                     "/product/**",
                                     "/user/**"
                             ).permitAll()
