@@ -8,9 +8,7 @@
     <link th:href="@{/css/global-style.css}" rel="stylesheet" />
 </head>
 <body>
-<header>
-    <h1>JPA Shop</h1>
-</header>
+<header th:replace="/fragments/header.html :: body-header"></header>
 <main>
     <div class="menu-container">
         <a th:href="@{/product/list}">
@@ -21,8 +19,7 @@
         <div class="menu-item">주문 관리</div>
     </div>
 </main>
-<footer>
-    본 페이지는 실제 온라인 쇼핑몰이 아닌 개인 연습용 프로젝트입니다.
+<footer th:replace="/fragments/footer.html :: body-footer">
 </footer>
 </body>
 </html>

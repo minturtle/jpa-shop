@@ -8,9 +8,7 @@
     <link th:href="@{/css/global-style.css}" rel="stylesheet" />
 </head>
 <body>
-<header>
-    <h1>JPA Shop</h1>
-</header>
+<header th:replace="/fragments/header.html :: body-header"></header>
 <div class="search-bar">
     <div class="search-bar-inputs">
         <button class="category-button" onclick="toggleCategoryMenu()">카테고리</button>
@@ -57,8 +55,7 @@
     </div>
     <div id="loading">Loading...</div>
 </main>
-<footer>
-    본 페이지는 실제 온라인 쇼핑몰이 아닌 개인 연습용 프로젝트입니다.
+<footer th:replace="/fragments/footer.html :: body-footer">
 </footer>
 <script th:src="@{/js/product/list-scripts.js}"></script>
 </body>

@@ -9,9 +9,7 @@
     <link th:href="@{/css/product/product-detail-style.css}" rel="stylesheet" />
 </head>
 <body>
-    <header>
-        <h1>JPA Shop</h1>
-    </header>
+    <header th:replace="/fragments/header.html :: body-header"></header>
     <div class="container">
         <div class="product-image">
             <img th:src="${product.thumbnailUrl}" th:alt="${product.name}">
@@ -29,8 +27,7 @@
     </div>
 
 
-    <footer>
-        본 페이지는 실제 온라인 쇼핑몰이 아닌 개인 연습용 프로젝트입니다.
+    <footer th:replace="/fragments/footer.html :: body-footer">
     </footer>
     <div class="sticky-buttons">
         <button th:attr="onclick=|addToCart('${product.uid}')|">장바구니 추가</button>
