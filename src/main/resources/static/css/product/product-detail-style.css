@@ -1,0 +1,62 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+.prouduct-image {
+    width: 200px;
+    height: 200px;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #ccc;
+    margin: 20px;
+
+}
+.prouduct-details {
+    max-width: 500px;
+    padding: 20px;
+}
+.prouduct-details h2 {
+    margin: 0;
+}
+.prouduct-details p {
+    margin: 5px 0;
+}
+
+.description {
+    margin-top: 20px;
+    padding: 10px;
+    border-top: 1px solid #ccc;
+}
+
+.sticky-buttons {
+    display: flex;
+    justify-content: space-around;
+    background-color: #fff;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+}
+
+.sticky-buttons button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007BFF;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    width: 200px;
+}
+
+.sticky-buttons button:last-child {
+    background-color: #28A745;
+}
+
+.sticky-buttons button:hover {
+    opacity: 0.9;
+}

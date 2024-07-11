@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPA Shop</title>
+    <link th:href="@{/css/home-style.css}" rel="stylesheet" />
+    <link th:href="@{/css/global-style.css}" rel="stylesheet" />
+    <link th:href="@{/css/product/product-detail-style.css}" rel="stylesheet" />
+</head>
+<body>
+    <header>
+        <h1>JPA Shop</h1>
+    </header>
+    <div class="container">
+        <div class="product-image">
+            <img th:src="${product.thumbnailUrl}" th:alt="${product.name}">
+        </div>
+        <div class="product-details">
+            <h2 th:text="${product.name}">상품명</h2>
+            <p th:text="${#numbers.formatInteger(product.price, 0)} + '원'">가격</p>
+            <p>작가: 김땡땡</p>
+            <p>ISBN: 1231234214124</p>
+        </div>
+    </div>
+    <div class="description">
+        <h3>상품 설명</h3>
+        <p th:text="${product.description}"></p>
+    </div>
+
+
+    <footer>
+        본 페이지는 실제 온라인 쇼핑몰이 아닌 개인 연습용 프로젝트입니다.
+    </footer>
+    <div class="sticky-buttons">
+        <button th:attr="onclick=|addToCart('${product.uid}')|">장바구니 추가</button>
+        <button th:attr="onclick=|orderProduct('${product.uid}')|">주문</button>
+    </div>
+
+    <script th:src="@{/js/product/detail-scripts.js}"></script>
+</body>
+</html>
