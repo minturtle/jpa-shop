@@ -150,7 +150,14 @@ public class User extends BaseEntity {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public void setCartList(List<Cart> cartList) {
+        this.cartList = new ArrayList<>(cartList.size());
 
+        for(Cart cart :cartList){
+            addCart(cart);
+        }
+
+    }
 
     public void addAccount(Account account) {
         this.accountList.add(account);

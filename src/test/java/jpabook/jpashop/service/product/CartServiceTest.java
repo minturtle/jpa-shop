@@ -29,7 +29,7 @@ class CartServiceTest extends ServiceTest {
     @BeforeEach
     void setUp() {
         testDataFixture.saveProducts();
-        testDataFixture.saveUsers();
+        testDataFixture.saveCarts();
     }
 
     @Test

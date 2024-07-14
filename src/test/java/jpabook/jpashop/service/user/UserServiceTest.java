@@ -43,7 +43,6 @@ class UserServiceTest extends ServiceTest {
 
     @BeforeEach
     void setUp() {
-        testDataFixture.saveProducts();
         testDataFixture.saveUsers();
     }
 

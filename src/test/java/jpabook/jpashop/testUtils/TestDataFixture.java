@@ -200,8 +200,6 @@ public class TestDataFixture {
                 .quantity(2)
                 .build();
 
-        user1.addCart(cart1);
-        user1.addCart(cart2);
 
         user1.addAccount(account1);
         user1.addAccount(account2);
@@ -235,11 +233,18 @@ public class TestDataFixture {
 
 
     public void saveUsers(){
+        user1.setCartList(List.of());
+
         userRepository.saveAll(List.of(user1, user2, user3));
         accountRepository.saveAll(List.of(account1, account2));
     }
 
+    public void saveCarts(){
+        user1.setCartList(List.of(cart1, cart2));
 
+        userRepository.saveAll(List.of(user1, user2, user3));
+        accountRepository.saveAll(List.of(account1, account2));
+    }
 
     public void saveProducts(){
         categoryRepository.saveAll(List.of(albumCategory, bookCategory, movieCategory));

@@ -50,7 +50,7 @@ class ProductCartControllerTest extends ControllerTest {
     @BeforeEach
     void setUp() {
         testDataFixture.saveProducts();
-        testDataFixture.saveUsers();
+        testDataFixture.saveCarts();
     }
 
     @Test
