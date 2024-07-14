@@ -57,7 +57,6 @@ class OrderServiceTest {
     private ProductRepository productRepository;
 
 
-
     @Test
     @DisplayName("Account에 주문 금액 이상의 잔고를 가진 유저가 특정 상품들에 대해 주문을 수행하여 상품의 재고와 계좌의 잔고를 감소시키고, DB에 관련 정보를 저장할 수 있다.")
     void given_UserHasEnoughAccountBalanceAndProductHasEnoughQuantity_when_Order_then_SuccessAndReturnAndSaveOrderedInfo() throws Exception{
