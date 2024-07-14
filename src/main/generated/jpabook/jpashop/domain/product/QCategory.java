@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -22,6 +23,8 @@ public class QCategory extends EntityPathBase<Category> {
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath name = createString("name");
+
+    public final ListPath<ProductCategory, QProductCategory> productCategoryList = this.<ProductCategory, QProductCategory>createList("productCategoryList", ProductCategory.class, QProductCategory.class, PathInits.DIRECT2);
 
     public final EnumPath<jpabook.jpashop.enums.product.ProductType> productType = createEnum("productType", jpabook.jpashop.enums.product.ProductType.class);
 

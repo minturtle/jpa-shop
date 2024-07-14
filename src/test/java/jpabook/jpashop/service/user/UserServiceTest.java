@@ -32,8 +32,6 @@ import static org.mockito.Mockito.*;
 
 
 @Slf4j
-@Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class UserServiceTest extends ServiceTest {
 
     @Autowired
@@ -42,6 +40,17 @@ class UserServiceTest extends ServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+    }
+
+    @AfterEach
+    void tearDown() {
+        testDataFixture.deleteAll();
+    }
 
     @Test
     @DisplayName(
@@ -218,7 +227,8 @@ class UserServiceTest extends ServiceTest {
         String username = alreadyExistsUser.getUsernamePasswordAuthInfo().getUsername();
         String password = "abc1234!";
 
-
+        doReturn(true)
+                .when(passwordEncoder).matches(password, user1.getUsernamePasswordAuthInfo().getPassword());
 
         //when
         String actualUid = userService.login(username, password);
@@ -527,6 +537,8 @@ class UserServiceTest extends ServiceTest {
         String previousPassword = "abc1234!";
         String updatedPassword = "update123!";
 
+        doReturn(true)
+                .when(passwordEncoder).matches(previousPassword, user1.getUsernamePasswordAuthInfo().getPassword());
 
         // when
         userService.updatePassword(givenUser.getUid(), new UserDto.UpdatePassword(previousPassword, updatedPassword));
@@ -602,6 +614,10 @@ class UserServiceTest extends ServiceTest {
         User user = user1;
         String password = "abc1234!";
         String updatedPassword = "aa!";
+
+
+        doReturn(true)
+                .when(passwordEncoder).matches(password, user1.getUsernamePasswordAuthInfo().getPassword());
 
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =

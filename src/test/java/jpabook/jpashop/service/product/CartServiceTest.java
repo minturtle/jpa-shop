@@ -6,6 +6,7 @@ import jpabook.jpashop.dto.CartDto;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.service.CartService;
 import jpabook.jpashop.testUtils.ServiceTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,6 @@ import java.util.List;
 import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 
-@Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class CartServiceTest extends ServiceTest {
 
     @Autowired
@@ -26,6 +25,12 @@ class CartServiceTest extends ServiceTest {
 
     @Autowired
     private CartService cartService;
+
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+    }
 
     @Test
     @DisplayName("특정 유저가 상품의 식별자와 갯수를 입력해 해당 상품을 장바구니에 추가해 저장할 수 있다.")

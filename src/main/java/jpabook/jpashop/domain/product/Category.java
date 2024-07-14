@@ -8,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name="categories")
 @Getter
@@ -28,5 +31,7 @@ public class Category {
     @Enumerated(EnumType.STRING)
     private ProductType productType;
 
-
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ProductCategory> productCategoryList = new ArrayList<>();
 }

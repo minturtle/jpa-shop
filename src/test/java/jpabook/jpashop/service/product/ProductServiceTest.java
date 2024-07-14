@@ -12,6 +12,7 @@ import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.service.ProductService;
 import jpabook.jpashop.testUtils.ServiceTest;
 import org.assertj.core.groups.Tuple;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +26,15 @@ import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 
 
-@Sql(value = "classpath:init-product-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class ProductServiceTest extends ServiceTest {
 
     @Autowired
     private ProductService productService;
+
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+    }
 
     @Test
     @DisplayName("이미 저장된 상품의 특정 검색 조건 없이 리스트를 조회해, 조회된 물품의 정보와 갯수를 알 수 있다.")

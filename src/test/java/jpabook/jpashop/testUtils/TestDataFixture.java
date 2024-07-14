@@ -16,6 +16,7 @@ import jpabook.jpashop.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -121,9 +122,9 @@ public class TestDataFixture {
                 .version(1)
                 .build();
 
-        albumCategory = new Category(1L, "category-003", "hiphop", ProductType.ALBUM);
-        bookCategory = new Category(2L, "category-002", "self-development", ProductType.BOOK);
-        movieCategory = new Category(3L, "category-001", "romance", ProductType.MOVIE);
+        albumCategory = new Category(1L, "category-003", "hiphop", ProductType.ALBUM, new ArrayList<>());
+        bookCategory = new Category(2L, "category-002", "self-development", ProductType.BOOK, new ArrayList<>());
+        movieCategory = new Category(3L, "category-001", "romance", ProductType.MOVIE, new ArrayList<>());
 
         album = Album.builder()
                 .uid("album-001")
@@ -251,10 +252,10 @@ public class TestDataFixture {
     }
 
     public void deleteAll(){
+        orderRepository.deleteAll();
         accountRepository.deleteAll();
         userRepository.deleteAll();
         categoryRepository.deleteAll();
-        orderRepository.deleteAll();
         productRepository.deleteAll();
     }
 
