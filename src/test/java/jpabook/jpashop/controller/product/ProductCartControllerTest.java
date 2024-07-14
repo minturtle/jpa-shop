@@ -7,6 +7,7 @@ import jpabook.jpashop.controller.common.response.CartResponse;
 import jpabook.jpashop.domain.product.Cart;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,12 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest
-@Transactional
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+
 @Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class ProductCartControllerTest {
+class ProductCartControllerTest extends ControllerTest {
 
 
     @Autowired

@@ -9,6 +9,7 @@ import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.enums.user.account.CashFlowStatus;
 import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.repository.AccountRepository;
+import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.testUtils.TestDataUtils;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
@@ -35,12 +36,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest
-@Transactional
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
 @Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class UserAccountControllerTest {
+class UserAccountControllerTest extends ControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
