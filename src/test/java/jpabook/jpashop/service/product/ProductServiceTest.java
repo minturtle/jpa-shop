@@ -15,15 +15,13 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
 import java.util.Optional;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 
 

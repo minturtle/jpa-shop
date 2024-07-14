@@ -8,11 +8,19 @@ import jpabook.jpashop.domain.order.Payment;
 import jpabook.jpashop.domain.product.*;
 import jpabook.jpashop.domain.user.*;
 import jpabook.jpashop.enums.product.ProductType;
+import jpabook.jpashop.repository.AccountRepository;
+import jpabook.jpashop.repository.CategoryRepository;
+import jpabook.jpashop.repository.OrderRepository;
+import jpabook.jpashop.repository.UserRepository;
+import jpabook.jpashop.repository.product.ProductRepository;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class TestDataUtils {
+
+@RequiredArgsConstructor
+public class TestDataFixture {
 
     public static final User user1;
 
@@ -47,6 +55,12 @@ public class TestDataUtils {
 
     public static final OrderProduct orderProduct2;
 
+
+    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
+    private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
 
 
     static {
@@ -194,7 +208,6 @@ public class TestDataUtils {
                 .status(OrderStatus.ORDERED)
                 .createdAt(LocalDateTime.of(2021, 8, 1, 0, 0))
                 .modifiedAt(LocalDateTime.of(2021, 8, 1, 0, 0))
-                .orderProducts(List.of(orderProduct1))
                 .build();
 
         order2 = Order.builder()
@@ -205,10 +218,35 @@ public class TestDataUtils {
                 .status(OrderStatus.CANCELED)
                 .createdAt(LocalDateTime.of(2021, 8, 2, 0, 0))
                 .modifiedAt(LocalDateTime.of(2021, 8, 2, 0, 0))
-                .orderProducts(List.of(orderProduct2))
                 .build();
 
+        order1.addOrderProduct(orderProduct1);
+        order2.addOrderProduct(orderProduct2);
+    }
 
+
+    public void saveUsers(){
+        userRepository.saveAll(List.of(user1, user2, user3));
+        accountRepository.saveAll(List.of(account1, account2));
+    }
+
+
+
+    public void saveProducts(){
+        productRepository.saveAll(List.of(album, book, movie, movie2));
+        categoryRepository.saveAll(List.of(albumCategory, bookCategory, movieCategory));
+    }
+
+    public void saveOrders(){
+        orderRepository.saveAll(List.of(order1, order2));
+    }
+
+    public void deleteAll(){
+        accountRepository.deleteAll();
+        userRepository.deleteAll();
+        categoryRepository.deleteAll();
+        orderRepository.deleteAll();
+        productRepository.deleteAll();
     }
 
 }

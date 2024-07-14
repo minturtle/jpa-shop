@@ -9,14 +9,12 @@ import jpabook.jpashop.testUtils.ServiceTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 
 @Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

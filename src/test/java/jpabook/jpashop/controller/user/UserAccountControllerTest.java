@@ -10,26 +10,21 @@ import jpabook.jpashop.enums.user.account.CashFlowStatus;
 import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.testUtils.ControllerTest;
-import jpabook.jpashop.testUtils.TestDataUtils;
 import jpabook.jpashop.util.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;

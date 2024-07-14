@@ -18,22 +18,19 @@ import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,7 +39,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 
-@Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql", "classpath:init-order-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class OrderControllerTest extends ControllerTest {
 
 
@@ -67,6 +63,13 @@ class OrderControllerTest extends ControllerTest {
     @Autowired
     private OrderRepository orderRepository;
 
+
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+        testDataFixture.saveOrders();
+    }
 
     @Test
     @DisplayName("사용자는 장바구니가 아닌 상품을 선택해 주문하면 Account의 잔액과 상품의 재고가 감소하고, 주문이 생성된다.")
@@ -321,8 +324,13 @@ class OrderControllerTest extends ControllerTest {
         String givenUserUid = user1.getUid();
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
         String givenOrderUid = order1.getUid();
+
         Account givenAccount = order1.getPayment().getAccount();
+        Long expectedAccountBalance = order1.getPayment().getAccount().getBalance() + order1.getPayment().getAmount();
         Product givenProduct = orderProduct1.getProduct();
+        int expectedStockQuantity = givenProduct.getStockQuantity()+ orderProduct1.getCount();
+
+
 
         //when
         mockMvc.perform(post("/api/order/{orderId}/cancel", givenOrderUid)
@@ -339,10 +347,10 @@ class OrderControllerTest extends ControllerTest {
                 .isEqualTo(OrderStatus.CANCELED);
 
         assertThat(actualAccount).extracting("balance")
-                .isEqualTo(givenAccount.getBalance() + order1.getPayment().getAmount());
+                .isEqualTo(expectedAccountBalance);
 
         assertThat(actualProduct.getStockQuantity())
-                .isEqualTo(givenProduct.getStockQuantity() + orderProduct1.getCount());
+                .isEqualTo(expectedStockQuantity );
     }
 
 
