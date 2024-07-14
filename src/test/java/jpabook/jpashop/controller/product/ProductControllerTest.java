@@ -10,6 +10,7 @@ import jpabook.jpashop.dto.PaginationListDto;
 import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.testUtils.ControllerTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Sql(value = "classpath:init-product-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ProductControllerTest extends ControllerTest {
 
     @Autowired
@@ -34,6 +34,11 @@ class ProductControllerTest extends ControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+    }
 
     @Test
     @DisplayName("사용자는 DB에 등록된 상품을 검색 조건 없이 검색할 시 DB에서 조회해 상품 정보를 최신순으로 정렬된 채 조회한다.")

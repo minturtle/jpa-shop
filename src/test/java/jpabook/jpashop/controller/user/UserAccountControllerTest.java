@@ -11,6 +11,7 @@ import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserAccountControllerTest extends ControllerTest {
 
     @Autowired
@@ -47,6 +47,11 @@ class UserAccountControllerTest extends ControllerTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+    }
 
     @Test
     @DisplayName("회원 인증이 완료된 유저가 새로운 계좌를 추가해 잔고가 0원인 채로 DB에 저장할 수 있다.")

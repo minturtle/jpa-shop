@@ -9,6 +9,7 @@ import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,7 +31,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 
-@Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ProductCartControllerTest extends ControllerTest {
 
 
@@ -46,6 +46,12 @@ class ProductCartControllerTest extends ControllerTest {
 
     @Autowired
     private JwtTokenProvider tokenProvider;
+
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+    }
 
     @Test
     @DisplayName("사용자는 특정 상품의 갯수를 선택해 장바구니에 담을 수 있다.")

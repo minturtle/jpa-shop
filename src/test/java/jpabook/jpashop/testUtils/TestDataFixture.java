@@ -110,7 +110,6 @@ public class TestDataFixture {
                 .uid("account-001")
                 .name("내 계좌")
                 .balance(100000L)
-                .user(user1)
                 .version(1)
                 .build();
 
@@ -119,7 +118,6 @@ public class TestDataFixture {
                 .uid("account-002")
                 .name("내 계좌2")
                 .balance(500L)
-                .user(user1)
                 .version(1)
                 .build();
 
@@ -153,6 +151,7 @@ public class TestDataFixture {
                 .isbn("ISBN1234567890")
                 .build();
 
+
         movie = Movie.builder()
                 .uid("movie-001")
                 .name("Movie Name")
@@ -166,7 +165,6 @@ public class TestDataFixture {
                 .actor("Actor Name")
                 .build();
 
-
         movie2 = Movie.builder()
                 .uid("movie-002")
                 .name("Movie Name2")
@@ -179,6 +177,13 @@ public class TestDataFixture {
                 .director("Director Name2")
                 .actor("Actor Name2")
                 .build();
+
+
+        album.addCategory(albumCategory);
+        book.addCategory(bookCategory);
+        movie.addCategory(movieCategory);
+        movie2.addCategory(movieCategory);
+
 
         cart1 = Cart.builder()
                 .id(1L)
@@ -196,6 +201,9 @@ public class TestDataFixture {
 
         user1.addCart(cart1);
         user1.addCart(cart2);
+
+        user1.addAccount(account1);
+        user1.addAccount(account2);
 
         orderProduct1 = new OrderProduct(album, 2, 500);
         orderProduct2 = new OrderProduct(book, 2, 1000);
@@ -233,8 +241,9 @@ public class TestDataFixture {
 
 
     public void saveProducts(){
-        productRepository.saveAll(List.of(album, book, movie, movie2));
         categoryRepository.saveAll(List.of(albumCategory, bookCategory, movieCategory));
+        productRepository.saveAll(List.of(album, book, movie, movie2));
+
     }
 
     public void saveOrders(){

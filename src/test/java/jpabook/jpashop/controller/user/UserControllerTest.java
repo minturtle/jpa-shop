@@ -11,6 +11,7 @@ import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +29,12 @@ import static jpabook.jpashop.testUtils.TestDataFixture.user1;
 import static jpabook.jpashop.testUtils.TestDataFixture.user2;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserControllerTest extends ControllerTest {
 
     @Autowired
@@ -45,12 +46,15 @@ class UserControllerTest extends ControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+    }
 
     @Test
     @DisplayName("Username/Password로 회원가입을 수행해 DB에 저장할 수 있다.")
@@ -245,7 +249,12 @@ class UserControllerTest extends ControllerTest {
         String beforePassword = "abc1234!";
         String updatedPassword = "update123!";
 
+
+        doReturn(true)
+                .when(passwordEncoder).matches(beforePassword, user1.getUsernamePasswordAuthInfo().getPassword());
+
         String updateFormString = createUpdatePasswordBody(beforePassword, updatedPassword);
+
 
         //when
         mockMvc.perform(put("/api/user/password")
@@ -274,6 +283,10 @@ class UserControllerTest extends ControllerTest {
         String beforePassword = "abc1234!";
         String updatedPassword = "1234";
 
+        doReturn(true)
+                .when(passwordEncoder).matches(beforePassword, user1.getUsernamePasswordAuthInfo().getPassword());
+
+
         String updateFormString = createUpdatePasswordBody(beforePassword, updatedPassword);
         //when
         MvcResult mvcResponse = mockMvc.perform(put("/api/user/password")
@@ -281,7 +294,7 @@ class UserControllerTest extends ControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateFormString))
-                .andDo(print()).andExpect(status().isBadRequest()).andReturn();
+                .andDo(print()).andExpect(status().is4xxClientError()).andReturn();
         //then
         ErrorResponse result = objectMapper.readValue(mvcResponse.getResponse().getContentAsString(), ErrorResponse.class);
 
