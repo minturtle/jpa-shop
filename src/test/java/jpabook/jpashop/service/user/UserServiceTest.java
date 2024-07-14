@@ -6,6 +6,7 @@ import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.service.UserService;
+import jpabook.jpashop.testUtils.ServiceTest;
 import jpabook.jpashop.util.NanoIdProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.ThrowableAssert;
@@ -38,26 +39,16 @@ import static org.mockito.Mockito.*;
 
 
 
-@ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
-@SpringBootTest
 @Slf4j
 @Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class UserServiceTest {
+class UserServiceTest extends ServiceTest {
 
     @Autowired
     private UserService userService;
 
     @Autowired
     private UserRepository userRepository;
-
-    @SpyBean
-    private PasswordEncoder passwordEncoder;
-
-
-    @SpyBean
-    private NanoIdProvider nanoIdProvider;
 
 
     @Test

@@ -10,6 +10,7 @@ import jpabook.jpashop.dto.ProductDto;
 import jpabook.jpashop.enums.product.ProductType;
 import jpabook.jpashop.enums.product.SortOption;
 import jpabook.jpashop.service.ProductService;
+import jpabook.jpashop.testUtils.ServiceTest;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,11 +27,9 @@ import static jpabook.jpashop.testUtils.TestDataUtils.*;
 import static org.assertj.core.api.Assertions.*;
 
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Sql(value = "classpath:init-product-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class ProductServiceTest {
+class ProductServiceTest extends ServiceTest {
 
     @Autowired
     private ProductService productService;

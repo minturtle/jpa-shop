@@ -19,6 +19,7 @@ import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import jpabook.jpashop.service.OrderService;
+import jpabook.jpashop.testUtils.ServiceTest;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,11 +39,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.assertj.core.api.Assertions.*;
 
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql", "classpath:init-order-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class OrderServiceTest {
+class OrderServiceTest extends ServiceTest {
 
     @Autowired
     private OrderService orderService;

@@ -10,6 +10,7 @@ import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.service.AccountService;
+import jpabook.jpashop.testUtils.ServiceTest;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.Assertions;
@@ -33,11 +34,9 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class AccountServiceTest {
+class AccountServiceTest extends ServiceTest {
 
     @Autowired
     private AccountService accountService;
