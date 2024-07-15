@@ -1,6 +1,7 @@
 package jpabook.jpashop.testUtils;
 
 import jpabook.jpashop.util.NanoIdProvider;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -30,4 +31,9 @@ public abstract class ServiceTest {
     @Autowired
     protected TestDataFixture testDataFixture;
 
+
+    @AfterEach
+    void tearDown() {
+        testDataFixture.deleteAll();
+    }
 }

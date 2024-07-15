@@ -83,6 +83,8 @@ class OrderControllerTest extends ControllerTest {
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
 
         int givenOrderQuantity = 2;
+        int expectedProductQuantity = givenProduct.getStockQuantity() - givenOrderQuantity;
+        long expectedAccountBalance = givenAccount.getBalance() - givenProduct.getPrice() * givenOrderQuantity;
 
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
@@ -117,8 +119,8 @@ class OrderControllerTest extends ControllerTest {
                         .containsExactly(tuple(givenProduct.getUid(), givenProduct.getPrice(), givenOrderQuantity, givenProduct.getPrice() * givenOrderQuantity))
         );
 
-        assertThat(product.getStockQuantity()).isEqualTo(givenProduct.getStockQuantity() - givenOrderQuantity);
-        assertThat(account.getBalance()).isEqualTo(givenAccount.getBalance() - givenProduct.getPrice() * givenOrderQuantity);
+        assertThat(product.getStockQuantity()).isEqualTo(expectedProductQuantity);
+        assertThat(account.getBalance()).isEqualTo(expectedAccountBalance);
 
     }
     @Test
@@ -132,6 +134,12 @@ class OrderControllerTest extends ControllerTest {
         Cart givenCart2 = cart2;
 
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
+
+
+        int expectedStockQuantity1 = givenCart1.getProduct().getStockQuantity() - givenCart1.getQuantity();
+        int expectedStockQuantity2 = givenCart2.getProduct().getStockQuantity() - givenCart2.getQuantity();
+        long expectedBalance = givenAccount.getBalance() - (givenCart1.getProduct().getPrice() * givenCart1.getQuantity() + givenCart2.getProduct().getPrice() * givenCart2.getQuantity());
+
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
                 givenAccount.getUid(),
@@ -152,10 +160,6 @@ class OrderControllerTest extends ControllerTest {
         Product actualProduct1 = productRepository.findByUid(givenCart1.getProduct().getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Product actualProduct2 = productRepository.findByUid(givenCart2.getProduct().getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Account actualAccount = accountRepository.findByUid(givenAccount.getUid()).orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
-
-        int expectedStockQuantity1 = givenCart1.getProduct().getStockQuantity() - givenCart1.getQuantity();
-        int expectedStockQuantity2 = givenCart2.getProduct().getStockQuantity() - givenCart2.getQuantity();
-        long expectedBalance = givenAccount.getBalance() - (givenCart1.getProduct().getPrice() * givenCart1.getQuantity() + givenCart2.getProduct().getPrice() * givenCart2.getQuantity());
 
 
         assertThat(actualUser.getCartList()).isEmpty();

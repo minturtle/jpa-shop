@@ -23,38 +23,38 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestDataFixture {
 
-    public static final User user1;
+    public static User user1;
 
-    public static final User user2;
+    public static User user2;
 
-    public static final User user3;
+    public static User user3;
 
-    public static final Account account1;
+    public static Account account1;
 
-    public static final Account account2;
+    public static Account account2;
 
-    public static final Category albumCategory;
-    public static final Category bookCategory;
-    public static final Category movieCategory;
+    public static Category albumCategory;
+    public static Category bookCategory;
+    public static Category movieCategory;
 
-    public static final Album album;
-    public static final Book book;
-    public static final Movie movie;
+    public static Album album;
+    public static Book book;
+    public static Movie movie;
 
-    public static final Movie movie2;
+    public static Movie movie2;
 
-    public static final Cart cart1;
+    public static Cart cart1;
 
-    public static final Cart cart2;
+    public static Cart cart2;
 
-    public static final Order order1;
+    public static Order order1;
 
-    public static final Order order2;
+    public static Order order2;
 
 
-    public static final OrderProduct orderProduct1;
+    public static OrderProduct orderProduct1;
 
-    public static final OrderProduct orderProduct2;
+    public static OrderProduct orderProduct2;
 
 
     private final UserRepository userRepository;
@@ -65,62 +65,38 @@ public class TestDataFixture {
 
 
     static {
-        user1 = User.builder()
-                .id(1L)
-                .uid("user-001")
-                .email("user@example.com")
-                .name("홍길동")
-                .profileImageUrl("http://example.com/profiles/hong.png")
-                .addressInfo(new AddressInfo("서울시 강남구", "역삼동 123-45"))
-                .createdAt(LocalDateTime.parse("2024-03-31T12:00:00"))
-                .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00"))
-                .version(1)
-                .usernamePasswordAuthInfo(new UsernamePasswordAuthInfo("honggildong", "Jf2rTvFrXb8QTZfoz3szoVM0jZIS2xrXmVdBL05IL5t77TYgFT/4b/DAqqxd2+6lK/jdxkjWF3sc0Nm5VwRgSulvUEuuR774o2C5z08FjVdgvBgUWrmI6tPdPK7YMAWOPjRXet/qL5rjgjYGo16fOpDZAEStdsK9G9dhg3iJ5Jtoh2Cngq3uo6t2Souc0jt5i2D1qolHVG+bTQmIbgWSgKFBq+5yWm0bHGaCeFJMpAaN8izjjlIl6cVYkeKKlEdI"))
+        setUpUsers();
+        setUpProducts();
+        setUpOrders();
+    }
+
+    private static void setUpOrders() {
+        orderProduct1 = new OrderProduct(album, 2, 500);
+        orderProduct2 = new OrderProduct(book, 2, 1000);
+
+        order1 = Order.builder()
+                .uid("order-001")
+                .user(user1)
+                .deliveryInfo(new AddressInfo("123 Main St", "Apt 101"))
+                .payment(new Payment(account1, 1000))
+                .status(OrderStatus.ORDERED)
+                .createdAt(LocalDateTime.of(2021, 8, 1, 0, 0))
+                .modifiedAt(LocalDateTime.of(2021, 8, 1, 0, 0))
                 .build();
 
-        // Building the second user instance
-        user2 = User.builder()
-                .id(2L)
-                .uid("user-002")
-                .email("user2@email.com")
-                .name("김철수")
-                .profileImageUrl("http://example.com/profiles/kim.png")
-                .addressInfo(new AddressInfo("경상북도 구미시", "대학로 1"))
-                .createdAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
-                .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
-                .version(1)
-                .kakaoOAuth2AuthInfo(new KakaoOAuth2AuthInfo("123214214"))
+        order2 = Order.builder()
+                .uid("order-002")
+                .user(user1)
+                .deliveryInfo(new AddressInfo("123 Main St", "Apt 101"))
+                .payment(new Payment(account1, 2000))
+                .status(OrderStatus.CANCELED)
+                .createdAt(LocalDateTime.of(2021, 8, 2, 0, 0))
+                .modifiedAt(LocalDateTime.of(2021, 8, 2, 0, 0))
                 .build();
 
-        user3 = User.builder()
-                .id(3L)
-                .uid("user-003")
-                .email("user3@email.com")
-                .name("김영희")
-                .profileImageUrl("http://example.com/profiles/young.png")
-                .addressInfo(new AddressInfo("대구광역시", "달서구 123"))
-                .createdAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
-                .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
-                .version(1)
-                .googleOAuth2AuthInfo(new GoogleOAuth2AuthInfo("123214214"))
-                .build();
+    }
 
-
-         account1 = Account.builder()
-                .id(1L)
-                .uid("account-001")
-                .name("내 계좌")
-                .balance(100000L)
-                .version(1)
-                .build();
-
-        account2 = Account.builder()
-                .id(2L)
-                .uid("account-002")
-                .name("내 계좌2")
-                .balance(500L)
-                .version(1)
-                .build();
+    private static void setUpProducts() {
 
         albumCategory = new Category(1L, "category-003", "hiphop", ProductType.ALBUM, new ArrayList<>());
         bookCategory = new Category(2L, "category-002", "self-development", ProductType.BOOK, new ArrayList<>());
@@ -185,7 +161,77 @@ public class TestDataFixture {
         movie.addCategory(movieCategory);
         movie2.addCategory(movieCategory);
 
+    }
 
+
+
+
+    private static void setUpUsers() {
+        user1 = User.builder()
+                .id(1L)
+                .uid("user-001")
+                .email("user@example.com")
+                .name("홍길동")
+                .profileImageUrl("http://example.com/profiles/hong.png")
+                .addressInfo(new AddressInfo("서울시 강남구", "역삼동 123-45"))
+                .createdAt(LocalDateTime.parse("2024-03-31T12:00:00"))
+                .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00"))
+                .version(1)
+                .usernamePasswordAuthInfo(new UsernamePasswordAuthInfo("honggildong", "Jf2rTvFrXb8QTZfoz3szoVM0jZIS2xrXmVdBL05IL5t77TYgFT/4b/DAqqxd2+6lK/jdxkjWF3sc0Nm5VwRgSulvUEuuR774o2C5z08FjVdgvBgUWrmI6tPdPK7YMAWOPjRXet/qL5rjgjYGo16fOpDZAEStdsK9G9dhg3iJ5Jtoh2Cngq3uo6t2Souc0jt5i2D1qolHVG+bTQmIbgWSgKFBq+5yWm0bHGaCeFJMpAaN8izjjlIl6cVYkeKKlEdI"))
+                .build();
+
+        // Building the second user instance
+        user2 = User.builder()
+                .id(2L)
+                .uid("user-002")
+                .email("user2@email.com")
+                .name("김철수")
+                .profileImageUrl("http://example.com/profiles/kim.png")
+                .addressInfo(new AddressInfo("경상북도 구미시", "대학로 1"))
+                .createdAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
+                .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
+                .version(1)
+                .kakaoOAuth2AuthInfo(new KakaoOAuth2AuthInfo("123214214"))
+                .build();
+
+        user3 = User.builder()
+                .id(3L)
+                .uid("user-003")
+                .email("user3@email.com")
+                .name("김영희")
+                .profileImageUrl("http://example.com/profiles/young.png")
+                .addressInfo(new AddressInfo("대구광역시", "달서구 123"))
+                .createdAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
+                .modifiedAt(LocalDateTime.parse("2024-03-31T12:00:00.000000"))
+                .version(1)
+                .googleOAuth2AuthInfo(new GoogleOAuth2AuthInfo("123214214"))
+                .build();
+
+        account1 = Account.builder()
+                .id(1L)
+                .uid("account-001")
+                .name("내 계좌")
+                .balance(100000L)
+                .version(1)
+                .build();
+
+        account2 = Account.builder()
+                .id(2L)
+                .uid("account-002")
+                .name("내 계좌2")
+                .balance(500L)
+                .version(1)
+                .build();
+
+
+        user1.addAccount(account1);
+        user1.addAccount(account2);
+
+
+        setUpCarts();
+    }
+
+    private static void setUpCarts() {
         cart1 = Cart.builder()
                 .id(1L)
                 .user(user1)
@@ -199,40 +245,12 @@ public class TestDataFixture {
                 .product(book)
                 .quantity(2)
                 .build();
-
-
-        user1.addAccount(account1);
-        user1.addAccount(account2);
-
-        orderProduct1 = new OrderProduct(album, 2, 500);
-        orderProduct2 = new OrderProduct(book, 2, 1000);
-
-        order1 = Order.builder()
-                .uid("order-001")
-                .user(user1)
-                .deliveryInfo(new AddressInfo("123 Main St", "Apt 101"))
-                .payment(new Payment(account1, 1000))
-                .status(OrderStatus.ORDERED)
-                .createdAt(LocalDateTime.of(2021, 8, 1, 0, 0))
-                .modifiedAt(LocalDateTime.of(2021, 8, 1, 0, 0))
-                .build();
-
-        order2 = Order.builder()
-                .uid("order-002")
-                .user(user1)
-                .deliveryInfo(new AddressInfo("123 Main St", "Apt 101"))
-                .payment(new Payment(account1, 2000))
-                .status(OrderStatus.CANCELED)
-                .createdAt(LocalDateTime.of(2021, 8, 2, 0, 0))
-                .modifiedAt(LocalDateTime.of(2021, 8, 2, 0, 0))
-                .build();
-
-        order1.addOrderProduct(orderProduct1);
-        order2.addOrderProduct(orderProduct2);
     }
 
 
     public void saveUsers(){
+        setUpUsers();
+
         user1.setCartList(List.of());
 
         userRepository.saveAll(List.of(user1, user2, user3));
@@ -240,6 +258,8 @@ public class TestDataFixture {
     }
 
     public void saveCarts(){
+        setUpUsers();
+
         user1.setCartList(List.of(cart1, cart2));
 
         userRepository.saveAll(List.of(user1, user2, user3));
@@ -247,12 +267,18 @@ public class TestDataFixture {
     }
 
     public void saveProducts(){
+        setUpProducts();
+
         categoryRepository.saveAll(List.of(albumCategory, bookCategory, movieCategory));
         productRepository.saveAll(List.of(album, book, movie, movie2));
 
     }
 
     public void saveOrders(){
+        setUpOrders();
+        order1.addOrderProduct(orderProduct1);
+        order2.addOrderProduct(orderProduct2);
+
         orderRepository.saveAll(List.of(order1, order2));
     }
 
