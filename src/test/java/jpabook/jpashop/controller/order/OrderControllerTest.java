@@ -16,23 +16,21 @@ import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
+import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -40,12 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest
-@Transactional
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql", "classpath:init-order-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class OrderControllerTest {
+
+class OrderControllerTest extends ControllerTest {
 
 
     @Autowired
@@ -70,6 +64,13 @@ class OrderControllerTest {
     private OrderRepository orderRepository;
 
 
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+        testDataFixture.saveOrders();
+    }
+
     @Test
     @DisplayName("사용자는 장바구니가 아닌 상품을 선택해 주문하면 Account의 잔액과 상품의 재고가 감소하고, 주문이 생성된다.")
     public void given_AuthenticatedUserAccountProduct_when_Order_then_Success() throws Exception{
@@ -82,6 +83,8 @@ class OrderControllerTest {
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
 
         int givenOrderQuantity = 2;
+        int expectedProductQuantity = givenProduct.getStockQuantity() - givenOrderQuantity;
+        long expectedAccountBalance = givenAccount.getBalance() - givenProduct.getPrice() * givenOrderQuantity;
 
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
@@ -116,8 +119,8 @@ class OrderControllerTest {
                         .containsExactly(tuple(givenProduct.getUid(), givenProduct.getPrice(), givenOrderQuantity, givenProduct.getPrice() * givenOrderQuantity))
         );
 
-        assertThat(product.getStockQuantity()).isEqualTo(givenProduct.getStockQuantity() - givenOrderQuantity);
-        assertThat(account.getBalance()).isEqualTo(givenAccount.getBalance() - givenProduct.getPrice() * givenOrderQuantity);
+        assertThat(product.getStockQuantity()).isEqualTo(expectedProductQuantity);
+        assertThat(account.getBalance()).isEqualTo(expectedAccountBalance);
 
     }
     @Test
@@ -131,6 +134,12 @@ class OrderControllerTest {
         Cart givenCart2 = cart2;
 
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
+
+
+        int expectedStockQuantity1 = givenCart1.getProduct().getStockQuantity() - givenCart1.getQuantity();
+        int expectedStockQuantity2 = givenCart2.getProduct().getStockQuantity() - givenCart2.getQuantity();
+        long expectedBalance = givenAccount.getBalance() - (givenCart1.getProduct().getPrice() * givenCart1.getQuantity() + givenCart2.getProduct().getPrice() * givenCart2.getQuantity());
+
 
         OrderRequest.Create orderRequest = new OrderRequest.Create(
                 givenAccount.getUid(),
@@ -151,10 +160,6 @@ class OrderControllerTest {
         Product actualProduct1 = productRepository.findByUid(givenCart1.getProduct().getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Product actualProduct2 = productRepository.findByUid(givenCart2.getProduct().getUid()).orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
         Account actualAccount = accountRepository.findByUid(givenAccount.getUid()).orElseThrow(() -> new IllegalArgumentException("계좌가 존재하지 않습니다."));
-
-        int expectedStockQuantity1 = givenCart1.getProduct().getStockQuantity() - givenCart1.getQuantity();
-        int expectedStockQuantity2 = givenCart2.getProduct().getStockQuantity() - givenCart2.getQuantity();
-        long expectedBalance = givenAccount.getBalance() - (givenCart1.getProduct().getPrice() * givenCart1.getQuantity() + givenCart2.getProduct().getPrice() * givenCart2.getQuantity());
 
 
         assertThat(actualUser.getCartList()).isEmpty();
@@ -323,8 +328,13 @@ class OrderControllerTest {
         String givenUserUid = user1.getUid();
         String accessToken = tokenProvider.sign(givenUserUid, new Date());
         String givenOrderUid = order1.getUid();
+
         Account givenAccount = order1.getPayment().getAccount();
+        Long expectedAccountBalance = order1.getPayment().getAccount().getBalance() + order1.getPayment().getAmount();
         Product givenProduct = orderProduct1.getProduct();
+        int expectedStockQuantity = givenProduct.getStockQuantity()+ orderProduct1.getCount();
+
+
 
         //when
         mockMvc.perform(post("/api/order/{orderId}/cancel", givenOrderUid)
@@ -341,10 +351,10 @@ class OrderControllerTest {
                 .isEqualTo(OrderStatus.CANCELED);
 
         assertThat(actualAccount).extracting("balance")
-                .isEqualTo(givenAccount.getBalance() + order1.getPayment().getAmount());
+                .isEqualTo(expectedAccountBalance);
 
         assertThat(actualProduct.getStockQuantity())
-                .isEqualTo(givenProduct.getStockQuantity() + orderProduct1.getCount());
+                .isEqualTo(expectedStockQuantity );
     }
 
 

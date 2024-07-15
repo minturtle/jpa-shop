@@ -19,13 +19,14 @@ import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.product.ProductRepository;
 import jpabook.jpashop.service.OrderService;
+import jpabook.jpashop.testUtils.ServiceTest;
 import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
@@ -33,16 +34,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.assertj.core.api.Assertions.*;
 
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(scripts = {"classpath:init-product-test-data.sql", "classpath:init-user-test-data.sql", "classpath:init-cart-test-data.sql", "classpath:init-order-test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class OrderServiceTest {
+class OrderServiceTest extends ServiceTest {
 
     @Autowired
     private OrderService orderService;
@@ -57,6 +54,17 @@ class OrderServiceTest {
     private ProductRepository productRepository;
 
 
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+        testDataFixture.saveOrders();
+    }
+
+    @AfterEach
+    void tearDown() {
+        testDataFixture.deleteAll();
+    }
 
     @Test
     @DisplayName("Account에 주문 금액 이상의 잔고를 가진 유저가 특정 상품들에 대해 주문을 수행하여 상품의 재고와 계좌의 잔고를 감소시키고, DB에 관련 정보를 저장할 수 있다.")

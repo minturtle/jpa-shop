@@ -8,7 +8,7 @@ import jpabook.jpashop.controller.common.response.UserResponse;
 import jpabook.jpashop.domain.user.User;
 import jpabook.jpashop.exception.user.UserExceptonMessages;
 import jpabook.jpashop.testUtils.OAuth2MockServerUtils;
-import jpabook.jpashop.testUtils.TestDataUtils;
+import jpabook.jpashop.testUtils.TestDataFixture;
 import jpabook.jpashop.testUtils.TestGoogleProperties;
 import jpabook.jpashop.testUtils.TestKakaoProperties;
 import jpabook.jpashop.util.JwtTokenProvider;
@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.user1;
+import static jpabook.jpashop.testUtils.TestDataFixture.user1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -85,7 +85,7 @@ public class AuthenticationIntegrationTest {
     @DisplayName("엑세스토큰이 존재하는 경우 API에 접근할 시 200 OK를 반환한다.")
     public void given_validAccessToken_when_RequestNeedAuthAPI_then_Return200() throws Exception{
         //given
-        User givenUser = TestDataUtils.user1;
+        User givenUser = TestDataFixture.user1;
 
         String givenAccessToken = jwtTokenProvider.sign(givenUser.getUid(), new Date());
 
@@ -103,7 +103,7 @@ public class AuthenticationIntegrationTest {
     @DisplayName("액세스 토큰이 만료된 경우 401 UnAuthorized를 반환한다.")
     public void given_ExpiredAccessToken_when_RequestNeedAuthAPI_then_Return401() throws Exception{
         //given
-        User givenUser = TestDataUtils.user1;
+        User givenUser = TestDataFixture.user1;
 
         String givenAccessToken = jwtTokenProvider.sign(givenUser.getUid(), new Date(1L));
         //when

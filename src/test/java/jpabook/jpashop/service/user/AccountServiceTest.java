@@ -10,16 +10,13 @@ import jpabook.jpashop.exception.user.account.InvalidBalanceValueException;
 import jpabook.jpashop.repository.AccountRepository;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.service.AccountService;
+import jpabook.jpashop.testUtils.ServiceTest;
 import org.assertj.core.api.ThrowableAssert;
 import org.assertj.core.groups.Tuple;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.List;
@@ -28,16 +25,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class AccountServiceTest {
+class AccountServiceTest extends ServiceTest {
 
     @Autowired
     private AccountService accountService;
@@ -48,6 +41,17 @@ class AccountServiceTest {
     @Autowired
     private AccountRepository accountRepository;
 
+
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveProducts();
+        testDataFixture.saveUsers();
+    }
+
+    @AfterEach
+    void tearDown() {
+        testDataFixture.deleteAll();
+    }
 
     @Test
     @DisplayName("유저의 Account를 추가할 수 있다.")

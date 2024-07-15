@@ -9,38 +9,30 @@ import jpabook.jpashop.domain.user.Account;
 import jpabook.jpashop.enums.user.account.CashFlowStatus;
 import jpabook.jpashop.enums.user.account.CashFlowType;
 import jpabook.jpashop.repository.AccountRepository;
-import jpabook.jpashop.testUtils.TestDataUtils;
+import jpabook.jpashop.testUtils.ControllerTest;
 import jpabook.jpashop.util.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest
-@Transactional
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class UserAccountControllerTest {
+class UserAccountControllerTest extends ControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -55,6 +47,10 @@ class UserAccountControllerTest {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveUsers();
+    }
 
     @Test
     @DisplayName("회원 인증이 완료된 유저가 새로운 계좌를 추가해 잔고가 0원인 채로 DB에 저장할 수 있다.")

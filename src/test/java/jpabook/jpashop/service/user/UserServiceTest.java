@@ -6,31 +6,24 @@ import jpabook.jpashop.exception.common.CannotFindEntityException;
 import jpabook.jpashop.exception.user.*;
 import jpabook.jpashop.repository.UserRepository;
 import jpabook.jpashop.service.UserService;
-import jpabook.jpashop.util.NanoIdProvider;
+import jpabook.jpashop.testUtils.ServiceTest;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 
-import java.util.Base64;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static jpabook.jpashop.testUtils.TestDataUtils.*;
+import static jpabook.jpashop.testUtils.TestDataFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -38,13 +31,8 @@ import static org.mockito.Mockito.*;
 
 
 
-@ExtendWith(MockitoExtension.class)
-@ActiveProfiles("test")
-@SpringBootTest
 @Slf4j
-@Sql(value = "classpath:init-user-test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-@Sql(scripts = {"classpath:clean-up.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-class UserServiceTest {
+class UserServiceTest extends ServiceTest {
 
     @Autowired
     private UserService userService;
@@ -52,13 +40,16 @@ class UserServiceTest {
     @Autowired
     private UserRepository userRepository;
 
-    @SpyBean
-    private PasswordEncoder passwordEncoder;
 
+    @BeforeEach
+    void setUp() {
+        testDataFixture.saveUsers();
+    }
 
-    @SpyBean
-    private NanoIdProvider nanoIdProvider;
-
+    @AfterEach
+    void tearDown() {
+        testDataFixture.deleteAll();
+    }
 
     @Test
     @DisplayName(
@@ -235,7 +226,8 @@ class UserServiceTest {
         String username = alreadyExistsUser.getUsernamePasswordAuthInfo().getUsername();
         String password = "abc1234!";
 
-
+        doReturn(true)
+                .when(passwordEncoder).matches(password, user1.getUsernamePasswordAuthInfo().getPassword());
 
         //when
         String actualUid = userService.login(username, password);
@@ -544,6 +536,8 @@ class UserServiceTest {
         String previousPassword = "abc1234!";
         String updatedPassword = "update123!";
 
+        doReturn(true)
+                .when(passwordEncoder).matches(previousPassword, user1.getUsernamePasswordAuthInfo().getPassword());
 
         // when
         userService.updatePassword(givenUser.getUid(), new UserDto.UpdatePassword(previousPassword, updatedPassword));
@@ -619,6 +613,10 @@ class UserServiceTest {
         User user = user1;
         String password = "abc1234!";
         String updatedPassword = "aa!";
+
+
+        doReturn(true)
+                .when(passwordEncoder).matches(password, user1.getUsernamePasswordAuthInfo().getPassword());
 
         // when
         ThrowableAssert.ThrowingCallable throwingCallable =
